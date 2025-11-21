@@ -1,0 +1,36 @@
+name: Ombre
+version: '1.0.0'
+main: dev.twme.ombre.Ombre
+api-version: '1.21'
+authors: [ TWME-TW ]
+description: 允許玩家通過互動式 GUI 建立彩色漸層方塊效果
+website: https://github.com/TWME-TW/Ombre
+
+commands:
+  ombre:
+    description: 打開漸層製作 GUI 或執行其他子指令
+    usage: |-
+      /ombre - 打開漸層製作 GUI
+      /ombre library - 打開共享庫
+      /ombre favorites - 打開我的最愛
+      /ombre stats - 查看統計數據
+      /ombre admin - 管理員指令
+      /ombre reload - 重新載入配置
+      /ombre help - 查看幫助
+    aliases: [om]
+    permission: ombre.use
+    permission-message: 你沒有權限使用此指令
+
+permissions:
+  ombre.use:
+    description: 基本使用權限（製作、儲存、收藏）
+    default: true
+  ombre.library:
+    description: 瀏覽共享庫權限
+    default: true
+  ombre.publish:
+    description: 發布配置到共享庫權限
+    default: true
+  ombre.admin:
+    description: 管理員權限（刪除任意配置、重新載入）
+    default: op

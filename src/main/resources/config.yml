@@ -1,0 +1,33 @@
+# Ombre 插件配置檔案
+
+# 插件設定
+settings:
+  # 玩家可創建的漸層數量上限 (-1 為無限)
+  max-gradients-per-player: -1
+  
+  # 漸層計算設定
+  gradient:
+    # 最少需要的方塊數量
+    min-blocks: 2
+    # 是否忽略透明方塊
+    ignore-transparent: false
+    # 是否忽略相同顏色方塊
+    ignore-same-color: true
+    # 方塊選擇模式
+    # all: 使用所有可用方塊（最豐富的顏色）
+    # colorful: 僅使用彩色方塊（羊毛、混凝土、陶土、玻璃）
+    # natural: 僅使用自然方塊（石頭、木頭、泥土等）
+    block-selection-mode: all
+  
+  # 背包滿時是否阻止取出方塊
+  prevent-pickup-when-full: true
+  
+  # 語言設定
+  language: zh_TW
+
+# 錯誤處理
+error-handling:
+  # colors.yml 生成失敗時重試次數
+  color-generation-retry: 3
+  # 配置檔案損壞時是否重新生成
+  regenerate-on-corruption: true
