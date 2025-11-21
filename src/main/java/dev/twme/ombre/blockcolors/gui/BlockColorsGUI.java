@@ -266,6 +266,7 @@ public class BlockColorsGUI implements InventoryHolder {
                      match.getBlock().getGreen() + ", " + match.getBlock().getBlue() + ")");
             lore.add("");
             lore.add("§a左鍵 §7加入調色盤");
+            lore.add("§e右鍵 §7拿取方塊");
             
             ItemStack item = GuiUtils.createItem(material, "§b" + match.getBlock().getDisplayName(), lore);
             inventory.setItem(BLOCKS_START + (i - startIndex), item);
@@ -320,8 +321,13 @@ public class BlockColorsGUI implements InventoryHolder {
             return;
         }
         
-        // 其他 GUI 槽位都取消事件
-        event.setCancelled(true);
+        // 檢查是否是方塊區域的右鍵點擊
+        boolean isBlockRightClick = (slot >= BLOCKS_START && slot <= BLOCKS_END) && event.isRightClick();
+        
+        // 方塊區域右鍵不取消事件,允許拿取
+        if (!isBlockRightClick) {
+            event.setCancelled(true);
+        }
         
         if (slot < 0) return;
         
@@ -435,7 +441,7 @@ public class BlockColorsGUI implements InventoryHolder {
             return;
         }
         
-        // 方塊點擊 - 加入調色盤
+        // 方塊點擊
         if (slot >= BLOCKS_START && slot <= BLOCKS_END) {
             int index = currentPage * BLOCKS_PER_PAGE + (slot - BLOCKS_START);
             if (index < currentMatches.size()) {
@@ -443,13 +449,39 @@ public class BlockColorsGUI implements InventoryHolder {
                 Material material = match.getBlock().getMaterial();
                 
                 if (material != null) {
-                    PlayerPalette palette = feature.getPlayerPalette(player.getUniqueId());
-                    if (palette.addBlock(material)) {
-                        player.sendMessage("§a✓ 已加入 " + match.getBlock().getDisplayName() + " 到調色盤");
-                    } else if (palette.isFull()) {
-                        player.sendMessage("§c調色盤已滿！");
+                    if (event.isRightClick()) {
+                        // 右鍵 - 允許拿取方塊(事件已不取消)
+                        player.sendMessage("§a✓ 已獲得 " + match.getBlock().getDisplayName());
+                        
+                        // 延遲補上相同方塊
+                        final int targetSlot = slot;
+                        plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
+                            List<String> lore = new ArrayList<>();
+                            lore.add("§7" + match.getBlock().getDisplayName());
+                            lore.add("");
+                            lore.add("§e相似度: §f" + match.getSimilarityPercentage());
+                            lore.add(match.getSimilarityLevel());
+                            lore.add("");
+                            lore.add("§7HEX: §f" + match.getBlock().getHexColor());
+                            lore.add("§7RGB: §f(" + match.getBlock().getRed() + ", " + 
+                                     match.getBlock().getGreen() + ", " + match.getBlock().getBlue() + ")");
+                            lore.add("");
+                            lore.add("§a左鍵 §7加入調色盤");
+                            lore.add("§e右鍵 §7拿取方塊");
+                            
+                            ItemStack item = GuiUtils.createItem(material, "§b" + match.getBlock().getDisplayName(), lore);
+                            inventory.setItem(targetSlot, item);
+                        }, 1L);
                     } else {
-                        player.sendMessage("§c此方塊已在調色盤中");
+                        // 左鍵 - 加入調色盤
+                        PlayerPalette palette = feature.getPlayerPalette(player.getUniqueId());
+                        if (palette.addBlock(material)) {
+                            player.sendMessage("§a✓ 已加入 " + match.getBlock().getDisplayName() + " 到調色盤");
+                        } else if (palette.isFull()) {
+                            player.sendMessage("§c調色盤已滿!");
+                        } else {
+                            player.sendMessage("§c此方塊已在調色盤中");
+                        }
                     }
                 }
             }

@@ -120,7 +120,8 @@ public class PaletteGUI implements InventoryHolder {
                          blockData.getGreen() + ", " + blockData.getBlue() + ")");
             }
             lore.add("");
-            lore.add("§c點擊移除");
+            lore.add("§c左鍵 §7移除");
+            lore.add("§e右鍵 §7拿取方塊");
             
             String displayName = blockData != null ? 
                 "§b" + blockData.getDisplayName() : 
@@ -144,9 +145,16 @@ public class PaletteGUI implements InventoryHolder {
      * 處理點擊事件
      */
     public void handleClick(InventoryClickEvent event) {
-        event.setCancelled(true);
-        
         int slot = event.getRawSlot();
+        
+        // 檢查是否是調色盤方塊的右鍵點擊
+        boolean isPaletteRightClick = (slot >= PALETTE_START && slot <= PALETTE_END) && event.isRightClick();
+        
+        // 調色盤方塊右鍵不取消事件,允許拿取
+        if (!isPaletteRightClick) {
+            event.setCancelled(true);
+        }
+        
         if (slot < 0 || slot >= SIZE) return;
         
         ItemStack clicked = event.getCurrentItem();
@@ -187,24 +195,51 @@ public class PaletteGUI implements InventoryHolder {
             return;
         }
         
-        // 調色盤方塊點擊 - 移除
+        // 調色盤方塊點擊
         if (slot >= PALETTE_START && slot <= PALETTE_END) {
             int index = slot - PALETTE_START;
             List<Material> blocks = palette.getBlocks();
             
             if (index < blocks.size()) {
                 Material material = blocks.get(index);
+                BlockColorData blockData = feature.getCache().getBlockByMaterial(material);
+                String displayName = blockData != null ? 
+                    blockData.getDisplayName() : material.name();
                 
-                if (palette.removeBlock(material)) {
-                    updatePaletteDisplay();
+                if (event.isRightClick()) {
+                    // 右鍵 - 允許拿取方塊(事件已不取消)
+                    player.sendMessage("§a✓ 已獲得 " + displayName);
                     
-                    BlockColorData blockData = feature.getCache().getBlockByMaterial(material);
-                    String displayName = blockData != null ? 
-                        blockData.getDisplayName() : material.name();
-                    
-                    player.sendMessage("§a✓ 已移除 " + displayName);
+                    // 延遲補上相同方塊
+                    final int targetSlot = slot;
+                    final Material blockMaterial = material;
+                    Bukkit.getScheduler().runTaskLater(feature.getPlugin(), () -> {
+                        BlockColorData data = feature.getCache().getBlockByMaterial(blockMaterial);
+                        
+                        List<String> lore = new ArrayList<>();
+                        if (data != null) {
+                            lore.add("§7" + data.getDisplayName());
+                            lore.add("");
+                            lore.add("§7HEX: §f" + data.getHexColor());
+                            lore.add("§7RGB: §f(" + data.getRed() + ", " + 
+                                     data.getGreen() + ", " + data.getBlue() + ")");
+                        }
+                        lore.add("");
+                        lore.add("§c左鍵 §7移除");
+                        lore.add("§e右鍵 §7拿取方塊");
+                        
+                        String name = data != null ? "§b" + data.getDisplayName() : "§b" + blockMaterial.name();
+                        ItemStack item = GuiUtils.createItem(blockMaterial, name, lore);
+                        inventory.setItem(targetSlot, item);
+                    }, 1L);
                 } else {
-                    player.sendMessage("§c移除失敗");
+                    // 左鍵 - 移除
+                    if (palette.removeBlock(material)) {
+                        updatePaletteDisplay();
+                        player.sendMessage("§a✓ 已移除 " + displayName);
+                    } else {
+                        player.sendMessage("§c移除失敗");
+                    }
                 }
             }
         }
