@@ -1,285 +1,307 @@
 package dev.twme.ombre.blockpalettes.gui;
 
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
-import org.bukkit.Bukkit;
-import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.plugin.Plugin;
 
 import dev.twme.ombre.blockpalettes.cache.TermsAcceptanceData;
+import io.papermc.paper.event.player.AsyncChatEvent;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 
 /**
  * 條款同意介面
- * 首次使用 Block Palettes 時顯示
+ * 首次使用 Block Palettes 時透過聊天欄文字互動顯示
  */
 public class TermsAcceptanceGUI implements Listener {
     
+    private final Plugin plugin;
     private final Player player;
-    private final Inventory inventory;
     private final Runnable onAccept;
     private final Runnable onDecline;
+    private static final Map<UUID, TermsAcceptanceGUI> awaitingResponse = new HashMap<>();
     
-    public TermsAcceptanceGUI(Player player, Runnable onAccept, Runnable onDecline) {
+    public TermsAcceptanceGUI(Plugin plugin, Player player, Runnable onAccept, Runnable onDecline) {
+        this.plugin = plugin;
         this.player = player;
         this.onAccept = onAccept;
         this.onDecline = onDecline;
+    }
+    
+    /**
+     * 顯示條款同意訊息
+     */
+    public void show() {
+        // 記錄正在等待回應的玩家
+        awaitingResponse.put(player.getUniqueId(), this);
         
-        // 建立 27 格箱子 (3x9)
-        this.inventory = Bukkit.createInventory(null, 27, 
-            Component.text("使用條款與隱私政策")
+        // 顯示標題
+        player.sendMessage(Component.empty());
+        player.sendMessage(Component.text("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━").color(NamedTextColor.GOLD));
+        player.sendMessage(
+            Component.text("Block Palettes 使用條款與隱私政策")
                 .color(NamedTextColor.GOLD)
                 .decoration(TextDecoration.BOLD, true)
         );
+        player.sendMessage(Component.text("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━").color(NamedTextColor.GOLD));
+        player.sendMessage(Component.empty());
         
-        setupItems();
-    }
-    
-    /**
-     * 設定介面物品
-     */
-    private void setupItems() {
-        // 資訊說明 (格子 11)
-        ItemStack infoItem = createItem(Material.BOOK,
-            Component.text("Block Palettes 使用須知")
+        // 功能說明
+        player.sendMessage(
+            Component.text("本功能使用 Block Palettes 網站提供的公開 API")
+                .color(NamedTextColor.GRAY)
+        );
+        player.sendMessage(
+            Component.text("來瀏覽社群創作的方塊配色方案。")
+                .color(NamedTextColor.GRAY)
+        );
+        player.sendMessage(Component.empty());
+        
+        // 條款說明
+        player.sendMessage(
+            Component.text("在使用前，您需要同意以下條款:")
                 .color(NamedTextColor.YELLOW)
-                .decoration(TextDecoration.BOLD, true),
-            List.of(
-                Component.text("本功能使用 Block Palettes 網站").color(NamedTextColor.GRAY),
-                Component.text("提供的公開 API 來瀏覽社群創作").color(NamedTextColor.GRAY),
-                Component.text("的方塊配色方案。").color(NamedTextColor.GRAY),
-                Component.empty(),
-                Component.text("在使用前，您需要同意以下條款:").color(NamedTextColor.GRAY),
-                Component.empty(),
-                Component.text("1. Block Palettes 使用條款").color(NamedTextColor.WHITE),
-                Component.text("2. Block Palettes 隱私政策").color(NamedTextColor.WHITE),
-                Component.empty(),
-                Component.text("這些條款由 Block Palettes 網站").color(NamedTextColor.GRAY),
-                Component.text("制定，與本伺服器無關。").color(NamedTextColor.GRAY)
-            )
         );
-        inventory.setItem(11, infoItem);
+        player.sendMessage(Component.empty());
         
-        // 使用條款 (格子 13)
-        ItemStack termsItem = createItem(Material.PAPER,
-            Component.text("使用條款 (Terms of Service)")
-                .color(NamedTextColor.AQUA)
-                .decoration(TextDecoration.BOLD, true),
-            List.of(
-                Component.text("點擊此處在聊天欄顯示條款連結").color(NamedTextColor.GRAY),
-                Component.empty(),
-                Component.text("▸ 左鍵複製連結到聊天欄").color(NamedTextColor.YELLOW),
-                Component.text("▸ 右鍵在瀏覽器開啟").color(NamedTextColor.YELLOW),
-                Component.empty(),
-                Component.text("連結: ").color(NamedTextColor.GRAY)
-                    .append(Component.text(TermsAcceptanceData.TERMS_URL).color(NamedTextColor.WHITE)),
-                Component.empty(),
-                Component.text("請仔細閱讀使用條款後再同意").color(NamedTextColor.GRAY)
-            )
+        // 使用條款連結
+        player.sendMessage(
+            Component.text("1. ")
+                .color(NamedTextColor.WHITE)
+                .append(Component.text("Block Palettes 使用條款")
+                    .color(NamedTextColor.AQUA)
+                    .decoration(TextDecoration.BOLD, true))
         );
-        inventory.setItem(13, termsItem);
-        
-        // 隱私政策 (格子 15)
-        ItemStack privacyItem = createItem(Material.SHIELD,
-            Component.text("隱私政策 (Privacy Policy)")
-                .color(NamedTextColor.LIGHT_PURPLE)
-                .decoration(TextDecoration.BOLD, true),
-            List.of(
-                Component.text("點擊此處在聊天欄顯示隱私政策連結").color(NamedTextColor.GRAY),
-                Component.empty(),
-                Component.text("▸ 左鍵複製連結到聊天欄").color(NamedTextColor.YELLOW),
-                Component.text("▸ 右鍵在瀏覽器開啟").color(NamedTextColor.YELLOW),
-                Component.empty(),
-                Component.text("連結: ").color(NamedTextColor.GRAY)
-                    .append(Component.text(TermsAcceptanceData.PRIVACY_URL).color(NamedTextColor.WHITE)),
-                Component.empty(),
-                Component.text("請仔細閱讀隱私政策後再同意").color(NamedTextColor.GRAY)
-            )
+        player.sendMessage(
+            Component.text("   ")
+                .append(Component.text("[點擊開啟使用條款]")
+                    .color(NamedTextColor.AQUA)
+                    .decoration(TextDecoration.UNDERLINED, true)
+                    .clickEvent(net.kyori.adventure.text.event.ClickEvent.openUrl(TermsAcceptanceData.TERMS_URL)))
         );
-        inventory.setItem(15, privacyItem);
+        player.sendMessage(
+            Component.text("   " + TermsAcceptanceData.TERMS_URL)
+                .color(NamedTextColor.DARK_GRAY)
+        );
+        player.sendMessage(Component.empty());
         
-        // 我同意 (格子 21)
-        ItemStack agreeItem = createItem(Material.GREEN_WOOL,
-            Component.text("✓ 我同意")
+        // 隱私政策連結
+        player.sendMessage(
+            Component.text("2. ")
+                .color(NamedTextColor.WHITE)
+                .append(Component.text("Block Palettes 隱私政策")
+                    .color(NamedTextColor.LIGHT_PURPLE)
+                    .decoration(TextDecoration.BOLD, true))
+        );
+        player.sendMessage(
+            Component.text("   ")
+                .append(Component.text("[點擊開啟隱私政策]")
+                    .color(NamedTextColor.LIGHT_PURPLE)
+                    .decoration(TextDecoration.UNDERLINED, true)
+                    .clickEvent(net.kyori.adventure.text.event.ClickEvent.openUrl(TermsAcceptanceData.PRIVACY_URL)))
+        );
+        player.sendMessage(
+            Component.text("   " + TermsAcceptanceData.PRIVACY_URL)
+                .color(NamedTextColor.DARK_GRAY)
+        );
+        player.sendMessage(Component.empty());
+        
+        // 免責聲明
+        player.sendMessage(
+            Component.text("這些條款由 Block Palettes 網站制定，與本伺服器無關。")
+                .color(NamedTextColor.GRAY)
+                .decoration(TextDecoration.ITALIC, true)
+        );
+        player.sendMessage(Component.empty());
+        
+        // 選項說明
+        player.sendMessage(Component.text("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━").color(NamedTextColor.GRAY));
+        player.sendMessage(
+            Component.text("請在聊天欄輸入您的選擇:")
+                .color(NamedTextColor.YELLOW)
+                .decoration(TextDecoration.BOLD, true)
+        );
+        player.sendMessage(Component.empty());
+        player.sendMessage(
+            Component.text("  ✓ ")
                 .color(NamedTextColor.GREEN)
-                .decoration(TextDecoration.BOLD, true),
-            List.of(
-                Component.text("點擊表示您已閱讀並同意:").color(NamedTextColor.GRAY),
-                Component.empty(),
-                Component.text("• Block Palettes 使用條款").color(NamedTextColor.WHITE),
-                Component.text("• Block Palettes 隱私政策").color(NamedTextColor.WHITE),
-                Component.empty(),
-                Component.text("同意後將記錄您的選擇").color(NamedTextColor.GRAY),
-                Component.text("並開啟 Block Palettes 功能").color(NamedTextColor.GRAY),
-                Component.empty(),
-                Component.text("▸ 點擊同意並繼續").color(NamedTextColor.YELLOW)
-            )
+                .decoration(TextDecoration.BOLD, true)
+                .append(Component.text("輸入 ")
+                    .color(NamedTextColor.WHITE)
+                    .decoration(TextDecoration.BOLD, false))
+                .append(Component.text("agree")
+                    .color(NamedTextColor.GREEN)
+                    .decoration(TextDecoration.BOLD, true))
+                .append(Component.text(" 或 ")
+                    .color(NamedTextColor.WHITE)
+                    .decoration(TextDecoration.BOLD, false))
+                .append(Component.text("同意")
+                    .color(NamedTextColor.GREEN)
+                    .decoration(TextDecoration.BOLD, true))
+                .append(Component.text(" - 同意條款並繼續")
+                    .color(NamedTextColor.GRAY)
+                    .decoration(TextDecoration.BOLD, false))
         );
-        inventory.setItem(21, agreeItem);
-        
-        // 我不同意 (格子 23)
-        ItemStack declineItem = createItem(Material.RED_WOOL,
-            Component.text("✗ 我不同意")
+        player.sendMessage(Component.empty());
+        player.sendMessage(
+            Component.text("  ✗ ")
                 .color(NamedTextColor.RED)
-                .decoration(TextDecoration.BOLD, true),
-            List.of(
-                Component.text("如果不同意條款，將無法使用").color(NamedTextColor.GRAY),
-                Component.text("Block Palettes 瀏覽功能。").color(NamedTextColor.GRAY),
-                Component.empty(),
-                Component.text("您仍然可以使用伺服器的其他功能。").color(NamedTextColor.GRAY),
-                Component.empty(),
-                Component.text("▸ 點擊關閉並退出").color(NamedTextColor.YELLOW)
-            )
+                .decoration(TextDecoration.BOLD, true)
+                .append(Component.text("輸入 ")
+                    .color(NamedTextColor.WHITE)
+                    .decoration(TextDecoration.BOLD, false))
+                .append(Component.text("decline")
+                    .color(NamedTextColor.RED)
+                    .decoration(TextDecoration.BOLD, true))
+                .append(Component.text(" 或 ")
+                    .color(NamedTextColor.WHITE)
+                    .decoration(TextDecoration.BOLD, false))
+                .append(Component.text("不同意")
+                    .color(NamedTextColor.RED)
+                    .decoration(TextDecoration.BOLD, true))
+                .append(Component.text(" - 拒絕條款並關閉")
+                    .color(NamedTextColor.GRAY)
+                    .decoration(TextDecoration.BOLD, false))
         );
-        inventory.setItem(23, declineItem);
+        player.sendMessage(Component.empty());
+        player.sendMessage(Component.text("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━").color(NamedTextColor.GRAY));
+        player.sendMessage(Component.empty());
     }
     
     /**
-     * 建立物品
+     * 處理聊天事件
      */
-    private ItemStack createItem(Material material, Component name, List<Component> lore) {
-        ItemStack item = new ItemStack(material);
-        ItemMeta meta = item.getItemMeta();
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onPlayerChat(AsyncChatEvent event) {
+        Player eventPlayer = event.getPlayer();
+        UUID playerId = eventPlayer.getUniqueId();
         
-        if (meta != null) {
-            meta.displayName(name);
-            meta.lore(lore);
-            item.setItemMeta(meta);
-        }
-        
-        return item;
-    }
-    
-    /**
-     * 開啟介面
-     */
-    public void open() {
-        player.openInventory(inventory);
-    }
-    
-    /**
-     * 處理點擊事件
-     */
-    @EventHandler
-    public void onInventoryClick(InventoryClickEvent event) {
-        if (!event.getInventory().equals(inventory)) {
+        // 檢查是否是等待回應的玩家
+        if (!awaitingResponse.containsKey(playerId)) {
             return;
         }
         
+        // 取消聊天事件,避免訊息被廣播
         event.setCancelled(true);
         
-        if (!(event.getWhoClicked() instanceof Player clicker)) {
-            return;
-        }
+        TermsAcceptanceGUI gui = awaitingResponse.get(playerId);
         
-        if (!clicker.equals(player)) {
-            return;
-        }
+        // 將 Component 訊息轉換為純文字
+        String message = PlainTextComponentSerializer.plainText().serialize(event.message()).trim().toLowerCase();
         
-        // 檢查是否點擊的是 GUI 而不是玩家背包
-        if (event.getClickedInventory() == null || !event.getClickedInventory().equals(inventory)) {
-            return;
-        }
+        // 在主執行緒處理回應
+        plugin.getServer().getScheduler().runTask(plugin, () -> {
+            handleResponse(eventPlayer, gui, message);
+        });
+    }
+    
+    /**
+     * 處理玩家回應 (必須在主執行緒執行)
+     */
+    private void handleResponse(Player player, TermsAcceptanceGUI gui, String message) {
+        UUID playerId = player.getUniqueId();
         
-        int slot = event.getSlot();
-        
-        // 使用條款連結 (格子 13)
-        if (slot == 13) {
-            showTermsLink(clicker);
-            return;
-        }
-        
-        // 隱私政策連結 (格子 15)
-        if (slot == 15) {
-            showPrivacyLink(clicker);
-            return;
-        }
-        
-        // 我同意 (格子 21)
-        if (slot == 21) {
-            clicker.closeInventory();
-            clicker.sendMessage(
+        // 處理回應
+        if (message.equals("agree") || message.equals("同意") || message.equals("yes") || message.equals("是")) {
+            // 同意條款
+            awaitingResponse.remove(playerId);
+            
+            player.sendMessage(Component.empty());
+            player.sendMessage(
                 Component.text("✓ 已同意 Block Palettes 使用條款與隱私政策")
                     .color(NamedTextColor.GREEN)
+                    .decoration(TextDecoration.BOLD, true)
             );
-            clicker.playSound(clicker.getLocation(), org.bukkit.Sound.ENTITY_PLAYER_LEVELUP, 1.0f, 1.0f);
+            player.sendMessage(
+                Component.text("感謝您的同意,現在可以使用 Block Palettes 功能了!")
+                    .color(NamedTextColor.GRAY)
+            );
+            player.sendMessage(Component.empty());
+            player.playSound(player.getLocation(), org.bukkit.Sound.ENTITY_PLAYER_LEVELUP, 1.0f, 1.0f);
             
-            if (onAccept != null) {
-                onAccept.run();
+            if (gui.onAccept != null) {
+                gui.onAccept.run();
             }
-            return;
-        }
-        
-        // 我不同意 (格子 23)
-        if (slot == 23) {
-            clicker.closeInventory();
-            clicker.sendMessage(
-                Component.text("您需要同意 Block Palettes 條款才能使用此功能")
+            
+        } else if (message.equals("decline") || message.equals("不同意") || message.equals("no") || message.equals("否")) {
+            // 不同意條款
+            awaitingResponse.remove(playerId);
+            
+            player.sendMessage(Component.empty());
+            player.sendMessage(
+                Component.text("✗ 您已拒絕 Block Palettes 使用條款")
                     .color(NamedTextColor.RED)
+                    .decoration(TextDecoration.BOLD, true)
             );
-            clicker.playSound(clicker.getLocation(), org.bukkit.Sound.BLOCK_NOTE_BLOCK_BASS, 1.0f, 1.0f);
+            player.sendMessage(
+                Component.text("您需要同意條款才能使用 Block Palettes 瀏覽功能")
+                    .color(NamedTextColor.GRAY)
+            );
+            player.sendMessage(
+                Component.text("不過您仍然可以使用伺服器的其他功能")
+                    .color(NamedTextColor.GRAY)
+            );
+            player.sendMessage(Component.empty());
+            player.playSound(player.getLocation(), org.bukkit.Sound.BLOCK_NOTE_BLOCK_BASS, 1.0f, 1.0f);
             
-            if (onDecline != null) {
-                onDecline.run();
+            if (gui.onDecline != null) {
+                gui.onDecline.run();
             }
+            
+        } else {
+            // 無效輸入
+            player.sendMessage(Component.empty());
+            player.sendMessage(
+                Component.text("⚠ 無效的輸入")
+                    .color(NamedTextColor.RED)
+                    .decoration(TextDecoration.BOLD, true)
+            );
+            player.sendMessage(
+                Component.text("請輸入 ")
+                    .color(NamedTextColor.GRAY)
+                    .append(Component.text("agree")
+                        .color(NamedTextColor.GREEN)
+                        .decoration(TextDecoration.BOLD, true))
+                    .append(Component.text("/")
+                        .color(NamedTextColor.GRAY))
+                    .append(Component.text("同意")
+                        .color(NamedTextColor.GREEN)
+                        .decoration(TextDecoration.BOLD, true))
+                    .append(Component.text(" 或 ")
+                        .color(NamedTextColor.GRAY))
+                    .append(Component.text("decline")
+                        .color(NamedTextColor.RED)
+                        .decoration(TextDecoration.BOLD, true))
+                    .append(Component.text("/")
+                        .color(NamedTextColor.GRAY))
+                    .append(Component.text("不同意")
+                        .color(NamedTextColor.RED)
+                        .decoration(TextDecoration.BOLD, true))
+            );
+            player.sendMessage(Component.empty());
+            player.playSound(player.getLocation(), org.bukkit.Sound.ENTITY_VILLAGER_NO, 1.0f, 1.0f);
         }
     }
     
     /**
-     * 在聊天欄顯示使用條款連結
+     * 清除等待回應的玩家記錄
      */
-    private void showTermsLink(Player player) {
-        player.sendMessage(Component.text("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━").color(NamedTextColor.GRAY));
-        player.sendMessage(
-            Component.text("Block Palettes 使用條款")
-                .color(NamedTextColor.YELLOW)
-                .decoration(TextDecoration.BOLD, true)
-        );
-        player.sendMessage(Component.empty());
-        player.sendMessage(
-            Component.text("[點擊開啟] ")
-                .color(NamedTextColor.AQUA)
-                .decoration(TextDecoration.UNDERLINED, true)
-                .append(Component.text(TermsAcceptanceData.TERMS_URL)
-                    .color(NamedTextColor.AQUA)
-                    .decoration(TextDecoration.UNDERLINED, true))
-                .clickEvent(net.kyori.adventure.text.event.ClickEvent.openUrl(TermsAcceptanceData.TERMS_URL))
-        );
-        player.sendMessage(Component.empty());
-        player.sendMessage(Component.text("請在瀏覽器中閱讀完整條款內容").color(NamedTextColor.GRAY));
-        player.sendMessage(Component.text("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━").color(NamedTextColor.GRAY));
+    public static void clearAwaitingResponse(UUID playerId) {
+        awaitingResponse.remove(playerId);
     }
     
     /**
-     * 在聊天欄顯示隱私政策連結
+     * 檢查玩家是否正在等待回應
      */
-    private void showPrivacyLink(Player player) {
-        player.sendMessage(Component.text("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━").color(NamedTextColor.GRAY));
-        player.sendMessage(
-            Component.text("Block Palettes 隱私政策")
-                .color(NamedTextColor.YELLOW)
-                .decoration(TextDecoration.BOLD, true)
-        );
-        player.sendMessage(Component.empty());
-        player.sendMessage(
-            Component.text("[點擊開啟] ")
-                .color(NamedTextColor.LIGHT_PURPLE)
-                .decoration(TextDecoration.UNDERLINED, true)
-                .append(Component.text(TermsAcceptanceData.PRIVACY_URL)
-                    .color(NamedTextColor.LIGHT_PURPLE)
-                    .decoration(TextDecoration.UNDERLINED, true))
-                .clickEvent(net.kyori.adventure.text.event.ClickEvent.openUrl(TermsAcceptanceData.PRIVACY_URL))
-        );
-        player.sendMessage(Component.empty());
-        player.sendMessage(Component.text("請在瀏覽器中閱讀完整隱私政策內容").color(NamedTextColor.GRAY));
-        player.sendMessage(Component.text("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━").color(NamedTextColor.GRAY));
+    public static boolean isAwaitingResponse(UUID playerId) {
+        return awaitingResponse.containsKey(playerId);
     }
 }

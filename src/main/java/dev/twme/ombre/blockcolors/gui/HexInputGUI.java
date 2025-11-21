@@ -17,6 +17,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import dev.twme.ombre.blockcolors.BlockColorsFeature;
 import dev.twme.ombre.blockcolors.util.ColorConverter;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 
 /**
  * HEX 色碼輸入 GUI
@@ -91,7 +92,11 @@ public class HexInputGUI implements Listener {
         ItemMeta meta = result.getItemMeta();
         if (meta == null) return;
         
-        String input = meta.displayName().toString();
+        Component displayName = meta.displayName();
+        if (displayName == null) return;
+        
+        // 使用 PlainTextComponentSerializer 正確提取純文字
+        String input = PlainTextComponentSerializer.plainText().serialize(displayName);
         
         // 移除可能的格式化代碼
         input = input.replaceAll("§[0-9a-fk-or]", "");

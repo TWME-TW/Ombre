@@ -78,6 +78,7 @@ public class BlockPalettesCommand implements CommandExecutor, TabCompleter {
         if (!feature.getTermsTracker().hasAgreed(player.getUniqueId())) {
             // 開啟條款同意介面
             TermsAcceptanceGUI termsGUI = new TermsAcceptanceGUI(
+                plugin,
                 player,
                 () -> {
                     // 同意後的回調
@@ -97,7 +98,7 @@ public class BlockPalettesCommand implements CommandExecutor, TabCompleter {
             );
             
             Bukkit.getPluginManager().registerEvents(termsGUI, plugin);
-            termsGUI.open();
+            termsGUI.show();
             return;
         }
         
