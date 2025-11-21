@@ -2,6 +2,7 @@ package dev.twme.ombre;
 
 import org.bukkit.plugin.java.JavaPlugin;
 
+import dev.twme.ombre.blockcolors.BlockColorsFeature;
 import dev.twme.ombre.color.ColorDataGenerator;
 import dev.twme.ombre.color.ColorService;
 import dev.twme.ombre.command.CommandHandler;
@@ -17,6 +18,7 @@ public final class Ombre extends JavaPlugin {
     private BlockFilterManager blockFilterManager;
     private GUIManager guiManager;
     private CommandHandler commandHandler;
+    private BlockColorsFeature blockColorsFeature;
 
     @Override
     public void onEnable() {
@@ -70,11 +72,30 @@ public final class Ombre extends JavaPlugin {
         getCommand("ombre").setExecutor(commandHandler);
         getCommand("ombre").setTabCompleter(commandHandler);
         
+        // 初始化 BlockColors 功能
+        blockColorsFeature = new BlockColorsFeature(this);
+        blockColorsFeature.initialize().thenAccept(success -> {
+            if (success) {
+                getLogger().info("BlockColors 功能已啟用");
+                
+                // 註冊 BlockColors 指令
+                getCommand("blockcolorsapp").setExecutor(blockColorsFeature.getCommandHandler());
+                getCommand("blockcolorsapp").setTabCompleter(blockColorsFeature.getCommandHandler());
+            } else {
+                getLogger().warning("BlockColors 功能初始化失敗");
+            }
+        });
+        
         getLogger().info("Ombre 插件已啟用！");
     }
 
     @Override
     public void onDisable() {
+        // 關閉 BlockColors 功能
+        if (blockColorsFeature != null) {
+            blockColorsFeature.shutdown();
+        }
+        
         // 清理 GUI
         if (guiManager != null) {
             guiManager.cleanup();
@@ -106,5 +127,9 @@ public final class Ombre extends JavaPlugin {
     
     public BlockFilterManager getBlockFilterManager() {
         return blockFilterManager;
+    }
+    
+    public BlockColorsFeature getBlockColorsFeature() {
+        return blockColorsFeature;
     }
 }

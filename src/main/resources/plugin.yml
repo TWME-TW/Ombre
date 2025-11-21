@@ -20,6 +20,16 @@ commands:
     aliases: [om]
     permission: ombre.use
     permission-message: 你沒有權限使用此指令
+  blockcolorsapp:
+    description: 開啟 BlockColors.app 風格的顏色匹配 GUI
+    usage: |-
+      /blockcolorsapp - 開啟主介面
+      /blockcolorsapp reload - 重新載入快取
+      /blockcolorsapp cache - 查看快取狀態
+      /blockcolorsapp clear-cache - 清除快取
+    aliases: [bca]
+    permission: ombre.blockcolorsapp.use
+    permission-message: 你沒有權限使用此指令
 
 permissions:
   ombre.use:
@@ -33,4 +43,13 @@ permissions:
     default: true
   ombre.admin:
     description: 管理員權限（刪除任意配置、重新載入）
+    default: op
+  ombre.blockcolorsapp.use:
+    description: 使用 BlockColors.app 功能
+    default: true
+  ombre.blockcolorsapp.reload:
+    description: 重新載入 BlockColors 快取
+    default: op
+  ombre.blockcolorsapp.admin:
+    description: BlockColors 管理員權限
     default: op
