@@ -30,6 +30,18 @@ commands:
     aliases: [bca]
     permission: ombre.blockcolorsapp.use
     permission-message: 你沒有權限使用此指令
+  blockpalettes:
+    description: 瀏覽 Block Palettes 社群調色板
+    usage: |-
+      /blockpalettes - 開啟主介面
+      /blockpalettes favorites - 查看收藏
+      /blockpalettes reload - 重新載入快取
+      /blockpalettes cache - 查看快取狀態
+      /blockpalettes terms - 查看條款資訊
+      /blockpalettes help - 查看幫助
+    aliases: [bp]
+    permission: ombre.blockpalettes.use
+    permission-message: 你沒有權限使用此指令
 
 permissions:
   ombre.use:
@@ -52,4 +64,13 @@ permissions:
     default: op
   ombre.blockcolorsapp.admin:
     description: BlockColors 管理員權限
+    default: op
+  ombre.blockpalettes.use:
+    description: 使用 Block Palettes 瀏覽功能
+    default: true
+  ombre.blockpalettes.reload:
+    description: 重新載入 Block Palettes 設定
+    default: op
+  ombre.blockpalettes.terms.manage:
+    description: 管理條款同意狀態
     default: op

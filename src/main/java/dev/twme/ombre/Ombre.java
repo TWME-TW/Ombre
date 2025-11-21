@@ -3,6 +3,7 @@ package dev.twme.ombre;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import dev.twme.ombre.blockcolors.BlockColorsFeature;
+import dev.twme.ombre.blockpalettes.BlockPalettesFeature;
 import dev.twme.ombre.color.ColorDataGenerator;
 import dev.twme.ombre.color.ColorService;
 import dev.twme.ombre.command.CommandHandler;
@@ -19,6 +20,7 @@ public final class Ombre extends JavaPlugin {
     private GUIManager guiManager;
     private CommandHandler commandHandler;
     private BlockColorsFeature blockColorsFeature;
+    private BlockPalettesFeature blockPalettesFeature;
 
     @Override
     public void onEnable() {
@@ -86,6 +88,20 @@ public final class Ombre extends JavaPlugin {
             }
         });
         
+        // 初始化 BlockPalettes 功能
+        blockPalettesFeature = new BlockPalettesFeature(this);
+        blockPalettesFeature.initialize().thenAccept(success -> {
+            if (success) {
+                getLogger().info("Block Palettes 功能已啟用");
+                
+                // 註冊 Block Palettes 指令
+                getCommand("blockpalettes").setExecutor(blockPalettesFeature.getCommandHandler());
+                getCommand("blockpalettes").setTabCompleter(blockPalettesFeature.getCommandHandler());
+            } else {
+                getLogger().warning("Block Palettes 功能初始化失敗");
+            }
+        });
+        
         getLogger().info("Ombre 插件已啟用！");
     }
 
@@ -94,6 +110,11 @@ public final class Ombre extends JavaPlugin {
         // 關閉 BlockColors 功能
         if (blockColorsFeature != null) {
             blockColorsFeature.shutdown();
+        }
+        
+        // 關閉 BlockPalettes 功能
+        if (blockPalettesFeature != null) {
+            blockPalettesFeature.shutdown();
         }
         
         // 清理 GUI
@@ -131,5 +152,9 @@ public final class Ombre extends JavaPlugin {
     
     public BlockColorsFeature getBlockColorsFeature() {
         return blockColorsFeature;
+    }
+    
+    public BlockPalettesFeature getBlockPalettesFeature() {
+        return blockPalettesFeature;
     }
 }
