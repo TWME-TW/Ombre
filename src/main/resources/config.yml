@@ -31,3 +31,83 @@ error-handling:
   color-generation-retry: 3
   # 配置檔案損壞時是否重新生成
   regenerate-on-corruption: true
+
+# BlockColors 功能設定
+blockcolors:
+  # 快取設定
+  cache:
+    # 快取過期時間（毫秒）預設 7 天
+    expiry-time: 604800000
+    
+    # 啟動時自動更新快取
+    auto-update-on-startup: true
+    
+    # 快取損壞時自動重建
+    auto-rebuild-on-corruption: true
+  
+  # API 設定
+  api:
+    # API 端點 URL
+    url: "https://blockcolors.app/assets/color_data.json"
+    
+    # 請求超時時間（秒）
+    timeout: 15
+    
+    # 重試次數
+    retry-count: 3
+    
+    # 重試間隔（毫秒）
+    retry-delay: 2000
+    
+    # API 下載失敗時使用內建備份
+    use-fallback-on-failure: true
+  
+  # 顏色匹配設定
+  matching:
+    # 預設顯示結果數量
+    default-results: 18
+    
+    # 最小相似度閾值（0-100）
+    min-similarity: 30
+    
+    # 使用 Delta E 2000 演算法
+    use-delta-e-2000: true
+    
+    # 過濾無法映射到 Material 的方塊
+    filter-unmapped-materials: true
+    
+    # 記錄無法映射的 texture_name
+    log-unmapped-textures: true
+  
+  # GUI 設定
+  gui:
+    # RGB 調整步進值
+    rgb-step: 5
+    
+    # 每頁顯示方塊數
+    blocks-per-page: 18
+    
+    # 調色盤最大容量
+    max-palette-size: 18
+    
+    # 方塊取色功能
+    enable-block-color-picker: true
+    
+    # 取色後是否自動移除方塊
+    remove-block-after-pick: false
+  
+  # 條款設定
+  terms:
+    # 條款版本（更新此版本會要求所有玩家重新接受）
+    version: "1.0"
+    
+    # 條款顯示語言
+    language: "zh_TW"
+    
+    # 回應超時時間（秒）
+    response-timeout: 60
+  
+  # 功能開關
+  features:
+    # 啟用調色盤功能
+    enable-palette: true
