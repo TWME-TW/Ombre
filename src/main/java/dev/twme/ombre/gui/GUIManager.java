@@ -25,6 +25,7 @@ public class GUIManager implements Listener {
     private final Map<UUID, LibraryGUI> activeLibraryGUIs;
     private final Map<UUID, FavoritesGUI> activeFavoritesGUIs;
     private final Map<UUID, MyGradientsGUI> activeMyGradientsGUIs;
+    private final NameInputListener nameInputListener;
     
     public GUIManager(Ombre plugin) {
         this.plugin = plugin;
@@ -32,9 +33,11 @@ public class GUIManager implements Listener {
         this.activeLibraryGUIs = new HashMap<>();
         this.activeFavoritesGUIs = new HashMap<>();
         this.activeMyGradientsGUIs = new HashMap<>();
+        this.nameInputListener = new NameInputListener(plugin, this);
         
         // 註冊事件監聽器
         plugin.getServer().getPluginManager().registerEvents(this, plugin);
+        plugin.getServer().getPluginManager().registerEvents(nameInputListener, plugin);
     }
     
     /**
@@ -96,6 +99,13 @@ public class GUIManager implements Listener {
      */
     public OmbreGUI getOmbreGUI(Player player) {
         return activeOmbreGUIs.get(player.getUniqueId());
+    }
+    
+    /**
+     * 獲取名稱輸入監聽器
+     */
+    public NameInputListener getNameInputListener() {
+        return nameInputListener;
     }
     
     /**

@@ -36,7 +36,8 @@ public class OmbreGUI implements InventoryHolder {
     // 輸入區域的方塊（前4行）
     private final Map<Integer, String> inputBlocks; // slot -> blockDataString
     private GradientConfig currentConfig;
-    private String previousGUI; // "library" 或 "favorites"
+    private String previousGUI; // "library" 或 "favorites" 或 "my"
+    private String gradientName; // 當前漸層的自訂名稱
     
     // GUI 布局常量
     private static final int ROWS = 6;
@@ -73,6 +74,7 @@ public class OmbreGUI implements InventoryHolder {
         this.inputBlocks = new HashMap<>();
         this.currentConfig = config;
         this.previousGUI = previousGUI;
+        this.gradientName = (config != null) ? config.getName() : null;
         
         // 設定當前玩家以便算法使用玩家的色表設定
         this.algorithm.setCurrentPlayer(player.getUniqueId());
@@ -104,8 +106,7 @@ public class OmbreGUI implements InventoryHolder {
      */
     private void setupButtons() {
         // 命名按鈕
-        inventory.setItem(BUTTON_NAME, createItem(Material.NAME_TAG, "§e命名", 
-            "§7為你的漸層配置命名"));
+        updateNameButton();
         
         // 儲存按鈕
         inventory.setItem(BUTTON_SAVE, createItem(Material.BOOK, "§a儲存", 
@@ -296,8 +297,18 @@ public class OmbreGUI implements InventoryHolder {
      */
     private void handleNameButton() {
         player.closeInventory();
+        
+        // 如果已有名稱，顯示當前名稱
+        if (gradientName != null && !gradientName.isEmpty()) {
+            player.sendMessage(Component.text("目前名稱: ").color(NamedTextColor.GRAY)
+                .append(Component.text(gradientName).color(NamedTextColor.YELLOW)));
+        }
+        
         player.sendMessage(Component.text("請在聊天欄輸入漸層名稱（最多32字元）").color(NamedTextColor.YELLOW));
-        // TODO: 實作聊天輸入監聽器
+        player.sendMessage(Component.text("輸入 'cancel' 取消命名").color(NamedTextColor.GRAY));
+        
+        // 註冊到名稱輸入監聽器
+        plugin.getGuiManager().getNameInputListener().startWaitingForInput(player, this);
     }
     
     /**
@@ -312,6 +323,11 @@ public class OmbreGUI implements InventoryHolder {
         // 創建新配置
         int configNumber = configManager.getPlayerGradientCount(player.getUniqueId()) + 1;
         GradientConfig config = new GradientConfig(player.getUniqueId(), player.getName(), configNumber);
+        
+        // 設定自訂名稱（如果有）
+        if (gradientName != null && !gradientName.isEmpty()) {
+            config.setName(gradientName);
+        }
         
         // 設置方塊配置
         Map<GradientConfig.Position, String> positionMap = new HashMap<>();
@@ -499,5 +515,38 @@ public class OmbreGUI implements InventoryHolder {
     @Override
     public Inventory getInventory() {
         return inventory;
+    }
+    
+    /**
+     * 打開 GUI
+     */
+    public void open(Player player) {
+        player.openInventory(inventory);
+    }
+    
+    /**
+     * 設定漸層名稱
+     */
+    public void setGradientName(String name) {
+        this.gradientName = name;
+        // 更新按鈕顯示
+        updateNameButton();
+    }
+    
+    /**
+     * 更新命名按鈕的顯示
+     */
+    private void updateNameButton() {
+        ItemStack nameButton;
+        if (gradientName != null && !gradientName.isEmpty()) {
+            nameButton = createItem(Material.NAME_TAG, "§6命名",
+                "§7目前名稱: §e" + gradientName,
+                "§7點擊修改名稱");
+        } else {
+            nameButton = createItem(Material.NAME_TAG, "§6命名",
+                "§7為漸層設定自訂名稱",
+                "§7未設定時將使用預設格式");
+        }
+        inventory.setItem(BUTTON_NAME, nameButton);
     }
 }
