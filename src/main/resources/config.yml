@@ -111,3 +111,33 @@ blockcolors:
   features:
     # 啟用調色盤功能
     enable-palette: true
+
+# Block Palettes 功能設定
+block-palettes:
+  # 是否啟用 Block Palettes 功能
+  enabled: true
+  
+  # 快取設定
+  cache-duration: 300  # 秒（列表快取 5 分鐘）
+  
+  # 每頁顯示的調色板數量
+  palettes-per-page: 20
+  
+  # API 設定
+  api-timeout: 10000  # 毫秒（API 請求超時時間）
+  
+  # 預設排序方式（recent, popular, oldest, trending）
+  default-sort: "recent"
+  
+  # 收藏功能
+  enable-favorites: true
+  max-favorites: 100  # 每位玩家最多收藏數量
+  
+  # 條款同意設定
+  terms:
+    enabled: true  # 是否啟用條款檢查
+    version: "1.0"  # 當前條款版本
+    terms-url: "https://www.blockpalettes.com/terms"
+    privacy-url: "https://www.blockpalettes.com/privacy"
+    record-ip: false  # 是否記錄 IP 地址
+    force-reaccept-on-version-change: true  # 版本更新時強制重新同意
