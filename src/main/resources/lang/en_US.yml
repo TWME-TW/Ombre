@@ -458,6 +458,8 @@ blockcolors:
       - "<gray>Current: <hex></gray>"
     reset: "<white>Reset</white>"
     reset-lore: "<gray>Reset to white (255, 255, 255)</gray>"
+    random: "<light_purple>Random Color</light_purple>"
+    random-lore: "<gray>Generate a random color</gray>"
     current-color: "<yellow>Current Color</yellow>"
     current-color-lore:
       - "<gray>HEX: <hex></gray>"
@@ -499,6 +501,7 @@ blockcolors:
       right-click: "<yellow>Right Click</yellow> <gray>Add to palette</gray>"
     messages:
       reset: "<green>✓ Reset to white</green>"
+      randomized: "<green>✓ Randomized color: <hex></green>"
       obtained: "<green>✓ Obtained <block></green>"
       added-palette: "<green>✓ Added <block> to palette</green>"
       palette-full: "<red>Palette is full!</red>"

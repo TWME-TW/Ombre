@@ -48,6 +48,7 @@ public class BlockColorsGUI implements InventoryHolder {
     
     // 當前顏色與篩選（第3行）
     private static final int SLOT_CURRENT_COLOR = 18;
+    private static final int SLOT_RANDOM = 19;
     private static final int SLOT_FILTER_ALL = 20;
     private static final int SLOT_FILTER_BUILDING = 21;
     private static final int SLOT_FILTER_DECORATION = 22;
@@ -120,6 +121,7 @@ public class BlockColorsGUI implements InventoryHolder {
         
         // 第3行：當前顏色與篩選
         updateCurrentColorDisplay();
+        updateRandomButton();
         updateCategoryFilters();
         
         // 填充空格
@@ -200,6 +202,17 @@ public class BlockColorsGUI implements InventoryHolder {
             msg.getComponent("blockcolors.gui.reset-lore", player)
         ));
     }
+    
+    /**
+     * 更新隨機顏色按鈕
+     */
+    private void updateRandomButton() {
+        inventory.setItem(SLOT_RANDOM, GuiUtils.createItem(
+            Material.FIREWORK_STAR,
+            msg.getComponent("blockcolors.gui.random", player),
+            msg.getComponent("blockcolors.gui.random-lore", player)
+        ));
+    }
 
     /**
      * 更新當前顏色顯示
@@ -213,7 +226,7 @@ public class BlockColorsGUI implements InventoryHolder {
         placeholders.put("hex", hex);
         placeholders.put("rgb", rgbStr);
         
-        inventory.setItem(SLOT_CURRENT_COLOR, GuiUtils.createColoredPane(
+        inventory.setItem(SLOT_CURRENT_COLOR, GuiUtils.createColoredLeather(
             rgb,
             msg.getComponent("blockcolors.gui.current-color", player),
             msg.getComponentList("blockcolors.gui.current-color-lore", player, placeholders)
@@ -424,6 +437,11 @@ public class BlockColorsGUI implements InventoryHolder {
             return;
         }
         
+        if (slot == SLOT_RANDOM) {
+            randomizeColor();
+            return;
+        }
+        
         if (slot == SLOT_HEX_INPUT) {
             player.closeInventory();
             new HexInputGUI(feature, player, this).open();
@@ -622,6 +640,23 @@ public class BlockColorsGUI implements InventoryHolder {
         player.openInventory(inventory);
     }
 
+    /**
+     * 隨機產生顏色
+     */
+    private void randomizeColor() {
+        java.util.Random random = new java.util.Random();
+        currentRed = random.nextInt(256);
+        currentGreen = random.nextInt(256);
+        currentBlue = random.nextInt(256);
+        
+        updateColorControls();
+        updateCurrentColorDisplay();
+        updateMatches();
+        
+        String hex = ColorConverter.rgbToHex(currentRed, currentGreen, currentBlue);
+        msg.sendMessage(player, "blockcolors.gui.messages.randomized", java.util.Map.of("hex", hex));
+    }
+    
     /**
      * Get similarity level key for message lookup
      */

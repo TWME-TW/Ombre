@@ -1,143 +1,142 @@
-# Ombre 插件配置檔案
+# Ombre Plugin Configuration File
 
-# 插件設定
+# Plugin Settings
 settings:
-  # 玩家可創建的漸層數量上限 (-1 為無限)
+  # Maximum number of gradients a player can create (-1 for unlimited)
   max-gradients-per-player: -1
   
-  # 漸層計算設定
+  # Gradient calculation settings
   gradient:
-    # 最少需要的方塊數量
+    # Minimum number of blocks required
     min-blocks: 2
-    # 是否忽略透明方塊
+    # Whether to ignore transparent blocks
     ignore-transparent: false
-    # 是否忽略相同顏色方塊
+    # Whether to ignore blocks with the same color
     ignore-same-color: true
-    # 方塊選擇模式
-    # all: 使用所有可用方塊（最豐富的顏色）
-    # colorful: 僅使用彩色方塊（羊毛、混凝土、陶土、玻璃）
-    # natural: 僅使用自然方塊（石頭、木頭、泥土等）
+    # Block selection mode
+    # all: Use all available blocks (richest colors)
+    # colorful: Only use colorful blocks (wool, concrete, terracotta, glass)
+    # natural: Only use natural blocks (stone, wood, dirt, etc.)
     block-selection-mode: all
   
-  # 背包滿時是否阻止取出方塊
+  # Prevent block pickup when inventory is full
   prevent-pickup-when-full: true
   
   # Language setting (en_US or zh_TW)
   language: en_US
 
-# 錯誤處理
+# Error Handling
 error-handling:
-  # colors.yml 生成失敗時重試次數
+  # Number of retries when colors.yml generation fails
   color-generation-retry: 3
-  # 配置檔案損壞時是否重新生成
+  # Whether to regenerate on configuration file corruption
   regenerate-on-corruption: true
 
-# BlockColors 功能設定
+# BlockColors Feature Settings
 blockcolors:
-  # 快取設定
+  # Cache settings
   cache:
-    # 快取過期時間（毫秒）預設 7 天
+    # Cache expiry time (milliseconds) - default 7 days
     expiry-time: 604800000
     
-    # 啟動時自動更新快取
+    # Auto-update cache on startup
     auto-update-on-startup: true
     
-    # 快取損壞時自動重建
+    # Auto-rebuild cache on corruption
     auto-rebuild-on-corruption: true
   
-  # API 設定
+  # API settings
   api:
-    # API 端點 URL
+    # API endpoint URL
     url: "https://blockcolors.app/assets/color_data.json"
     
-    # 請求超時時間（秒）
+    # Request timeout (seconds)
     timeout: 15
     
-    # 重試次數
+    # Number of retries
     retry-count: 3
     
-    # 重試間隔（毫秒）
+    # Retry delay (milliseconds)
     retry-delay: 2000
     
-    # API 下載失敗時使用內建備份
+    # Use built-in fallback on API download failure
     use-fallback-on-failure: true
   
-  # 顏色匹配設定
+  # Color matching settings
   matching:
-    # 預設顯示結果數量
+    # Default number of results to display
     default-results: 18
     
-    # 最小相似度閾值（0-100）
+    # Minimum similarity threshold (0-100)
     min-similarity: 30
     
-    # 使用 Delta E 2000 演算法
+    # Use Delta E 2000 algorithm
     use-delta-e-2000: true
     
-    # 過濾無法映射到 Material 的方塊
+    # Filter blocks that cannot be mapped to Material
     filter-unmapped-materials: true
     
-    # 記錄無法映射的 texture_name
+    # Log unmapped texture_name
     log-unmapped-textures: true
   
-  # GUI 設定
+  # GUI settings
   gui:
-    # RGB 調整步進值
-    rgb-step: 5
+    # RGB adjustment step value
+    rgb-step: 10
     
-    # 每頁顯示方塊數
+    # Number of blocks per page
     blocks-per-page: 18
     
-    # 調色盤最大容量
+    # Maximum palette size
     max-palette-size: 18
     
-    # 方塊取色功能
+    # Block color picker feature
     enable-block-color-picker: true
     
-    # 取色後是否自動移除方塊
+    # Auto-remove block after color picking
     remove-block-after-pick: false
   
-  # 條款設定
+  # Terms settings
   terms:
-    # 條款版本（更新此版本會要求所有玩家重新接受）
+    # Terms version (updating this version will require all players to re-accept)
     version: "1.0"
     
-    # 條款顯示語言
-    language: "zh_TW"
+    # Terms display language
+    language: "en_US"
     
-    # 回應超時時間（秒）
+    # Response timeout (seconds)
     response-timeout: 60
   
-  # 功能開關
+  # Feature toggles
   features:
-    # 啟用調色盤功能
+    # Enable palette feature
     enable-palette: true
 
-# Block Palettes 功能設定
+# Block Palettes Feature Settings
 block-palettes:
-  # 是否啟用 Block Palettes 功能
+  # Whether to enable Block Palettes feature
   enabled: true
   
-  # 快取設定
-  cache-duration: 300  # 秒（列表快取 5 分鐘）
+  # Cache settings
+  cache-duration: 300  # seconds (list cache 5 minutes)
   
-  # 每頁顯示的調色板數量
+  # Number of palettes per page
   palettes-per-page: 20
   
-  # API 設定
-  api-timeout: 10000  # 毫秒（API 請求超時時間）
+  # API settings
+  api-timeout: 10000  # milliseconds (API request timeout)
   
-  # 預設排序方式（recent, popular, oldest, trending）
+  # Default sort method (recent, popular, oldest, trending)
   default-sort: "recent"
   
-  # 收藏功能
+  # Favorites feature
   enable-favorites: true
-  max-favorites: 100  # 每位玩家最多收藏數量
+  max-favorites: 100  # Maximum number of favorites per player
   
-  # 條款同意設定
+  # Terms agreement settings
   terms:
-    enabled: true  # 是否啟用條款檢查
-    version: "1.0"  # 當前條款版本
+    version: "1.0"  # Current terms version 3/22/25
     terms-url: "https://www.blockpalettes.com/terms"
     privacy-url: "https://www.blockpalettes.com/privacy"
-    record-ip: false  # 是否記錄 IP 地址
-    force-reaccept-on-version-change: true  # 版本更新時強制重新同意
+    record-ip: false  # Whether to record IP address
+    force-reaccept-on-version-change: true  # Force re-acceptance on version update
