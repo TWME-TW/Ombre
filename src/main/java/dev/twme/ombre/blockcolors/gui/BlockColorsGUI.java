@@ -148,7 +148,7 @@ public class BlockColorsGUI implements InventoryHolder {
             inventory.setItem(SLOT_COLOR_PICKER, GuiUtils.createItem(
                 Material.GLASS, 
                 msg.getComponent("blockcolors.gui.color-picker", player),
-                msg.getComponentList("blockcolors.gui.color-picker-lore")
+                msg.getComponentList("blockcolors.gui.color-picker-lore", player, null)
             ));
         }
         
@@ -600,7 +600,7 @@ public class BlockColorsGUI implements InventoryHolder {
                     inventory.setItem(SLOT_COLOR_PICKER, GuiUtils.createItem(
                         Material.GLASS, 
                         msg.getComponent("blockcolors.gui.color-picker", player),
-                        msg.getComponentList("blockcolors.gui.color-picker-lore")
+                        msg.getComponentList("blockcolors.gui.color-picker-lore", player, null)
                     ));
                 }
             }, 1L);
