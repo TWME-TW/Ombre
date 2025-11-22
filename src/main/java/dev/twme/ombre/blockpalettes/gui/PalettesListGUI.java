@@ -19,6 +19,7 @@ import dev.twme.ombre.blockpalettes.BlockPalettesFeature;
 import dev.twme.ombre.blockpalettes.api.APIResponse;
 import dev.twme.ombre.blockpalettes.api.PaletteData;
 import dev.twme.ombre.blockpalettes.api.PaletteFilter;
+import dev.twme.ombre.blockpalettes.util.MaterialValidator;
 import dev.twme.ombre.i18n.MessageManager;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -210,6 +211,9 @@ public class PalettesListGUI implements Listener {
      * 顯示調色板
      */
     private void displayPalettes(List<PaletteData> palettes) {
+        // 過濾掉包含無效物品的調色板（靜默失敗，不記錄 log）
+        List<PaletteData> validPalettes = MaterialValidator.filterValidPalettes(palettes);
+        
         // 清除調色板區域 (格子 9-44)
         for (int i = 9; i <= 44; i++) {
             inventory.setItem(i, null);
@@ -236,8 +240,8 @@ public class PalettesListGUI implements Listener {
         // 收藏按鈕格子（每個調色板右側下方）
         int[] favoriteSlots = {21, 26, 39, 44};
         
-        for (int i = 0; i < Math.min(palettes.size(), 4); i++) {
-            PaletteData palette = palettes.get(i);
+        for (int i = 0; i < Math.min(validPalettes.size(), 4); i++) {
+            PaletteData palette = validPalettes.get(i);
             List<Material> materials = palette.getMaterials();
             
             // 顯示 6 個方塊（可拿取）
@@ -256,7 +260,7 @@ public class PalettesListGUI implements Listener {
         }
         
         // 如果沒有結果
-        if (palettes.isEmpty()) {
+        if (validPalettes.isEmpty()) {
             ItemStack noResults = createItem(Material.BARRIER,
                 messageManager.getComponent("blockpalettes.gui.list.no-results.title", player),
                 List.of(
@@ -449,8 +453,9 @@ public class PalettesListGUI implements Listener {
         }
         
         // 如果點擊方塊格子，允許拿取並補充
-        if (isBlockSlot && currentResponse != null && paletteIndex < currentResponse.getPalettes().size()) {
-            PaletteData palette = currentResponse.getPalettes().get(paletteIndex);
+        List<PaletteData> displayedPalettes = MaterialValidator.filterValidPalettes(currentResponse != null ? currentResponse.getPalettes() : List.of());
+        if (isBlockSlot && !displayedPalettes.isEmpty() && paletteIndex < displayedPalettes.size()) {
+            PaletteData palette = displayedPalettes.get(paletteIndex);
             Material blockMaterial = palette.getMaterials().get(blockIndex);
             
             // 延遲補充方塊
@@ -511,23 +516,24 @@ public class PalettesListGUI implements Listener {
         }
         
         // 調色板資訊和收藏按鈕
-        if (currentResponse != null && !currentResponse.getPalettes().isEmpty()) {
+        List<PaletteData> displayedPalettes2 = MaterialValidator.filterValidPalettes(currentResponse != null ? currentResponse.getPalettes() : List.of());
+        if (!displayedPalettes2.isEmpty()) {
             int[] infoSlots = {12, 17, 30, 35};  // 資訊按鈕
             int[] favoriteSlots = {21, 26, 39, 44};  // 收藏按鈕
             
             // 資訊按鈕 - 複製方塊清單
-            for (int i = 0; i < infoSlots.length && i < currentResponse.getPalettes().size(); i++) {
+            for (int i = 0; i < infoSlots.length && i < displayedPalettes2.size(); i++) {
                 if (slot == infoSlots[i]) {
-                    PaletteData palette = currentResponse.getPalettes().get(i);
+                    PaletteData palette = displayedPalettes2.get(i);
                     copyBlockList(clicker, palette);
                     return;
                 }
             }
             
             // 收藏按鈕 - 切換收藏狀態
-            for (int i = 0; i < favoriteSlots.length && i < currentResponse.getPalettes().size(); i++) {
+            for (int i = 0; i < favoriteSlots.length && i < displayedPalettes2.size(); i++) {
                 if (slot == favoriteSlots[i]) {
-                    PaletteData palette = currentResponse.getPalettes().get(i);
+                    PaletteData palette = displayedPalettes2.get(i);
                     toggleFavorite(clicker, palette);
                     return;
                 }
@@ -629,6 +635,7 @@ public class PalettesListGUI implements Listener {
         }
         
         // 重新載入以更新收藏按鈕
-        displayPalettes(currentResponse.getPalettes());
+        List<PaletteData> refreshPalettes = MaterialValidator.filterValidPalettes(currentResponse.getPalettes());
+        displayPalettes(refreshPalettes);
     }
 }

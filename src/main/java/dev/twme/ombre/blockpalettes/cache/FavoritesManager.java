@@ -17,6 +17,7 @@ import com.google.gson.reflect.TypeToken;
 
 import dev.twme.ombre.Ombre;
 import dev.twme.ombre.blockpalettes.api.PaletteData;
+import dev.twme.ombre.blockpalettes.util.MaterialValidator;
 
 /**
  * 收藏管理器
@@ -49,6 +50,11 @@ public class FavoritesManager {
      * 新增收藏（包含完整資料）
      */
     public boolean addFavorite(UUID player, PaletteData paletteData) {
+        // 驗證調色板是否包含有效的物品（靜默失敗，不記錄 log）
+        if (!MaterialValidator.isValidPalette(paletteData)) {
+            return false; // 調色板包含無效物品，拒絕加入收藏
+        }
+        
         Map<Integer, PaletteData> favorites = playerFavorites.computeIfAbsent(player, k -> new HashMap<>());
         
         if (favorites.size() >= maxFavorites) {
@@ -84,7 +90,8 @@ public class FavoritesManager {
         if (favorites == null) {
             return new ArrayList<>();
         }
-        return new ArrayList<>(favorites.values());
+        // 過濾掉包含無效物品的調色板（靜默失敗，不記錄 log）
+        return MaterialValidator.filterValidPalettes(new ArrayList<>(favorites.values()));
     }
     
     /**

@@ -17,6 +17,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import dev.twme.ombre.Ombre;
 import dev.twme.ombre.blockpalettes.BlockPalettesFeature;
 import dev.twme.ombre.blockpalettes.api.PaletteData;
+import dev.twme.ombre.blockpalettes.util.MaterialValidator;
 import dev.twme.ombre.i18n.MessageManager;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -106,13 +107,16 @@ public class FavoritesGUI implements Listener {
     private void loadFavorites() {
         List<PaletteData> cachedFavorites = feature.getFavoritesManager().getFavorites(player.getUniqueId());
         
-        if (cachedFavorites.isEmpty()) {
+        // 過濾掉包含無效物品的調色板（靜默失敗，不記錄 log）
+        List<PaletteData> validFavorites = MaterialValidator.filterValidPalettes(cachedFavorites);
+        
+        if (validFavorites.isEmpty()) {
             showEmptyState();
             return;
         }
         
         // 直接從快取載入，不需要 API 請求
-        favorites = new ArrayList<>(cachedFavorites);
+        favorites = new ArrayList<>(validFavorites);
         sortFavorites();
         displayFavorites();
         updatePageButtons();

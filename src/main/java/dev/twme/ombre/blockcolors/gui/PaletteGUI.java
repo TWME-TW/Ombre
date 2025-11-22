@@ -83,12 +83,12 @@ public class PaletteGUI implements InventoryHolder {
         // 底部功能
         inventory.setItem(SLOT_CLEAR, GuiUtils.createItem(
             Material.LAVA_BUCKET, msg.getComponent("blockcolors.gui.palette.clear", player),
-            msg.getComponentList("blockcolors.gui.palette.clear-lore")
+            msg.getComponentList("blockcolors.gui.palette.clear-lore", player, null)
         ));
         
         inventory.setItem(SLOT_HELP, GuiUtils.createItem(
             Material.BOOK, msg.getComponent("blockcolors.gui.palette.help", player),
-            msg.getComponentList("blockcolors.gui.palette.help-lore")
+            msg.getComponentList("blockcolors.gui.palette.help-lore", player, null)
         ));
         
         // 填充其他空格
