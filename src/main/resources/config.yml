@@ -22,8 +22,8 @@ settings:
   # 背包滿時是否阻止取出方塊
   prevent-pickup-when-full: true
   
-  # 語言設定
-  language: zh_TW
+  # Language setting (en_US or zh_TW)
+  language: en_US
 
 # 錯誤處理
 error-handling:

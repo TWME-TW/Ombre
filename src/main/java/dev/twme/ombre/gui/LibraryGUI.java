@@ -5,7 +5,6 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -26,9 +25,9 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 import dev.twme.ombre.Ombre;
 import dev.twme.ombre.data.GradientConfig;
+import dev.twme.ombre.i18n.MessageManager;
 import dev.twme.ombre.manager.ConfigManager;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 
 /**
@@ -60,6 +59,7 @@ public class LibraryGUI implements InventoryHolder {
     private final Player player;
     private final ConfigManager configManager;
     private final GUIManager guiManager;
+    private final MessageManager messageManager;
     private final Inventory inventory;
     
     private List<GradientConfig> allConfigs;
@@ -70,36 +70,16 @@ public class LibraryGUI implements InventoryHolder {
     private Set<UUID> favorites;
     
     public enum SortMode {
-        TIME("時間"),
-        POPULAR("熱度"),
-        CREATOR("建立者");
-        
-        private final String displayName;
-        
-        SortMode(String displayName) {
-            this.displayName = displayName;
-        }
-        
-        public String getDisplayName() {
-            return displayName;
-        }
+        TIME,
+        POPULAR,
+        CREATOR
     }
     
     public enum FilterMode {
-        ALL("全部"),
-        FAVORITES("我的最愛"),
-        MY_CREATIONS("我的創作"),
-        WEEKLY_HOT("本週熱門");
-        
-        private final String displayName;
-        
-        FilterMode(String displayName) {
-            this.displayName = displayName;
-        }
-        
-        public String getDisplayName() {
-            return displayName;
-        }
+        ALL,
+        FAVORITES,
+        MY_CREATIONS,
+        WEEKLY_HOT
     }
     
     public LibraryGUI(Ombre plugin, Player player) {
@@ -107,8 +87,9 @@ public class LibraryGUI implements InventoryHolder {
         this.player = player;
         this.configManager = plugin.getConfigManager();
         this.guiManager = plugin.getGuiManager();
+        this.messageManager = plugin.getMessageManager();
         this.inventory = Bukkit.createInventory(this, ROWS * COLS,
-            Component.text("共享庫").color(NamedTextColor.GOLD));
+            messageManager.getComponent("gui.library.title"));
         this.currentPage = 0;
         this.sortMode = SortMode.TIME;
         this.filterMode = FilterMode.ALL;
@@ -194,23 +175,36 @@ public class LibraryGUI implements InventoryHolder {
         int totalPages = getTotalPages();
         
         // 頁碼顯示（第 1 行中間）
+        Map<String, Object> pageInfoPlaceholders = new HashMap<>();
+        pageInfoPlaceholders.put("count", displayConfigs.size());
+        pageInfoPlaceholders.put("page", currentPage + 1);
+        pageInfoPlaceholders.put("total", Math.max(1, totalPages));
+        
+        List<Component> pageInfoLore = messageManager.getComponentList(
+            "gui.library.page-info.lore", player, pageInfoPlaceholders);
+        
         inventory.setItem(BUTTON_PAGE_INFO, createItem(Material.BOOK,
-            "§6共享庫",
-            Arrays.asList(
-                "§7共 " + displayConfigs.size() + " 個配置",
-                "§7第 " + (currentPage + 1) + " / " + Math.max(1, totalPages) + " 頁"
-            )));
+            messageManager.getComponent("gui.library.page-info.title", player),
+            pageInfoLore));
         
         // 上一頁按鈕（第 6 行）
         if (currentPage > 0) {
+            Map<String, Object> prevPagePlaceholders = new HashMap<>();
+            prevPagePlaceholders.put("page", currentPage);
             inventory.setItem(BUTTON_PREV_PAGE, createItem(Material.ARROW,
-                "§a上一頁", Arrays.asList("§7第 " + currentPage + " 頁")));
+                messageManager.getComponent("gui.library.buttons.prev-page", player),
+                Collections.singletonList(messageManager.getComponent(
+                    "gui.library.buttons.prev-page-lore", player, prevPagePlaceholders))));
         }
         
         // 下一頁按鈕（第 6 行）
         if (currentPage < totalPages - 1) {
+            Map<String, Object> nextPagePlaceholders = new HashMap<>();
+            nextPagePlaceholders.put("page", currentPage + 2);
             inventory.setItem(BUTTON_NEXT_PAGE, createItem(Material.ARROW,
-                "§a下一頁", Arrays.asList("§7第 " + (currentPage + 2) + " 頁")));
+                messageManager.getComponent("gui.library.buttons.next-page", player),
+                Collections.singletonList(messageManager.getComponent(
+                    "gui.library.buttons.next-page-lore", player, nextPagePlaceholders))));
         }
     }
     
@@ -220,36 +214,39 @@ public class LibraryGUI implements InventoryHolder {
     private void setupControlButtons() {
         // 返回按鈕
         inventory.setItem(BUTTON_BACK, createItem(Material.BARRIER,
-            "關閉", Collections.emptyList()));
+            messageManager.getComponent("gui.library.buttons.back", player),
+            Collections.emptyList()));
         
         // 排序按鈕
+        String sortTimeLoreKey = sortMode == SortMode.TIME ? 
+            "gui.library.buttons.sort-time-lore.0" : "gui.library.buttons.sort-time-lore.1";
         inventory.setItem(BUTTON_SORT_TIME, createItem(Material.CLOCK,
-            "按時間排序", Arrays.asList(
-                sortMode == SortMode.TIME ? "§a✓ 當前排序" : "§7點擊切換"
-            )));
+            messageManager.getComponent("gui.library.buttons.sort-time", player),
+            Collections.singletonList(messageManager.getComponent(sortTimeLoreKey, player))));
         
+        String sortPopularLoreKey = sortMode == SortMode.POPULAR ? 
+            "gui.library.buttons.sort-popular-lore.0" : "gui.library.buttons.sort-popular-lore.1";
         inventory.setItem(BUTTON_SORT_POPULAR, createItem(Material.BLAZE_POWDER,
-            "按熱度排序", Arrays.asList(
-                sortMode == SortMode.POPULAR ? "§a✓ 當前排序" : "§7點擊切換"
-            )));
+            messageManager.getComponent("gui.library.buttons.sort-popular", player),
+            Collections.singletonList(messageManager.getComponent(sortPopularLoreKey, player))));
         
+        String sortCreatorLoreKey = sortMode == SortMode.CREATOR ? 
+            "gui.library.buttons.sort-creator-lore.0" : "gui.library.buttons.sort-creator-lore.1";
         inventory.setItem(BUTTON_SORT_CREATOR, createItem(Material.PLAYER_HEAD,
-            "按建立者排序", Arrays.asList(
-                sortMode == SortMode.CREATOR ? "§a✓ 當前排序" : "§7點擊切換"
-            )));
+            messageManager.getComponent("gui.library.buttons.sort-creator", player),
+            Collections.singletonList(messageManager.getComponent(sortCreatorLoreKey, player))));
         
         // 篩選按鈕
-        List<String> filterLore = new ArrayList<>();
-        filterLore.add("§e當前: §f" + filterMode.getDisplayName());
-        filterLore.add("");
-        filterLore.add("§7點擊切換篩選模式:");
-        filterLore.add("§8• 全部配置");
-        filterLore.add("§8• 我的最愛");
-        filterLore.add("§8• 我的創作");
-        filterLore.add("§8• 本週熱門");
+        String filterModeKey = "gui.library.filter." + filterMode.name().toLowerCase().replace("_", "-");
+        Map<String, Object> filterPlaceholders = new HashMap<>();
+        filterPlaceholders.put("filter", messageManager.getMessage(filterModeKey, player));
+        
+        List<Component> filterLore = messageManager.getComponentList(
+            "gui.library.buttons.filter-lore", filterPlaceholders);
         
         inventory.setItem(BUTTON_FILTER, createItem(Material.HOPPER,
-            "篩選", filterLore));
+            messageManager.getComponent("gui.library.buttons.filter", player),
+            filterLore));
     }
     
     /**
@@ -300,15 +297,17 @@ public class LibraryGUI implements InventoryHolder {
         // 設置名稱
         String displayName = config.getName() != null ? config.getName() :
             config.getCreatorName() + "#" + config.getConfigNumber();
-        meta.displayName(Component.text(displayName)
-            .color(NamedTextColor.AQUA)
-            .decoration(TextDecoration.ITALIC, false));
+        Map<String, Object> nameParams = new HashMap<>();
+        nameParams.put("name", displayName);
+        meta.displayName(messageManager.getComponent("gui.library.config.display-name", player, nameParams));
         
         // 設置 Lore
         List<Component> lore = new ArrayList<>();
-        lore.add(Component.text("建立者: " + config.getCreatorName())
-            .color(NamedTextColor.GRAY)
-            .decoration(TextDecoration.ITALIC, false));
+        
+        Map<String, Object> placeholders = new HashMap<>();
+        placeholders.put("creator", config.getCreatorName());
+        
+        lore.add(messageManager.getComponent("gui.library.config.creator", player, placeholders));
         
         // 格式化時間
         LocalDateTime dateTime = LocalDateTime.ofInstant(
@@ -316,28 +315,30 @@ public class LibraryGUI implements InventoryHolder {
             ZoneId.systemDefault()
         );
         String formattedTime = dateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
-        lore.add(Component.text("建立時間: " + formattedTime)
-            .color(NamedTextColor.GRAY)
-            .decoration(TextDecoration.ITALIC, false));
+        placeholders.put("time", formattedTime);
+        lore.add(messageManager.getComponent("gui.library.config.time", player, placeholders));
         
         // 收藏狀態
         boolean isFavorite = favorites.contains(config.getId());
         String favoriteIcon = isFavorite ? "⭐" : "☆";
-        lore.add(Component.text(favoriteIcon + " 收藏數: " + config.getFavoriteCount())
-            .color(isFavorite ? NamedTextColor.YELLOW : NamedTextColor.GRAY)
-            .decoration(TextDecoration.ITALIC, false));
+        placeholders.put("favorite_icon", favoriteIcon);
+        placeholders.put("count", config.getFavoriteCount());
         
-        lore.add(Component.text("載入次數: " + config.getLoadCount())
-            .color(NamedTextColor.GRAY)
-            .decoration(TextDecoration.ITALIC, false));
+        String favoriteKey = isFavorite ? 
+            "gui.library.config.favorite-count-favorited" : 
+            "gui.library.config.favorite-count-not-favorited";
+        lore.add(messageManager.getComponent(favoriteKey, player, placeholders));
+        
+        placeholders.put("count", config.getLoadCount());
+        lore.add(messageManager.getComponent("gui.library.config.load-count", player, placeholders));
         
         lore.add(Component.empty());
-        lore.add(Component.text("左鍵: 載入配置")
-            .color(NamedTextColor.GREEN)
-            .decoration(TextDecoration.ITALIC, false));
-        lore.add(Component.text("右鍵: " + (isFavorite ? "取消收藏" : "加入收藏"))
-            .color(NamedTextColor.YELLOW)
-            .decoration(TextDecoration.ITALIC, false));
+        lore.add(messageManager.getComponent("gui.library.config.action.left-click", player));
+        
+        String rightClickKey = isFavorite ? 
+            "gui.library.config.action.right-click-unfavorite" : 
+            "gui.library.config.action.right-click-favorite";
+        lore.add(messageManager.getComponent(rightClickKey, player));
         
         meta.lore(lore);
         item.setItemMeta(meta);
@@ -375,19 +376,17 @@ public class LibraryGUI implements InventoryHolder {
     /**
      * 創建物品
      */
-    private ItemStack createItem(Material material, String name, List<String> loreStrings) {
+    private ItemStack createItem(Material material, Component name, List<Component> lore) {
         ItemStack item = new ItemStack(material);
         ItemMeta meta = item.getItemMeta();
         
-        meta.displayName(Component.text(name)
-            .decoration(TextDecoration.ITALIC, false));
+        meta.displayName(name.decoration(TextDecoration.ITALIC, false));
         
-        if (!loreStrings.isEmpty()) {
-            List<Component> lore = loreStrings.stream()
-                .map(s -> Component.text(s)
-                    .decoration(TextDecoration.ITALIC, false))
+        if (lore != null && !lore.isEmpty()) {
+            List<Component> processedLore = lore.stream()
+                .map(c -> c.decoration(TextDecoration.ITALIC, false))
                 .collect(Collectors.toList());
-            meta.lore(lore);
+            meta.lore(processedLore);
         }
         
         item.setItemMeta(meta);
@@ -519,16 +518,18 @@ public class LibraryGUI implements InventoryHolder {
     private void loadConfiguration(GradientConfig config) {
         player.closeInventory();
         
-        // 增加載入次數
+        // Increment load count
         configManager.incrementLoadCount(config.getId());
         
-        // 打開漸層製作 GUI 並載入配置（帶返回按鈕）
+        // Open gradient GUI and load configuration (with back button)
         guiManager.openOmbreGUI(player, config, "library");
         
-        player.sendMessage(Component.text("已載入配置: " + 
-            (config.getName() != null ? config.getName() : 
-                config.getCreatorName() + "#" + config.getConfigNumber()))
-            .color(NamedTextColor.GREEN));
+        String configName = config.getName() != null ? config.getName() : 
+            config.getCreatorName() + "#" + config.getConfigNumber();
+        Map<String, Object> placeholders = new HashMap<>();
+        placeholders.put("name", configName);
+        
+        messageManager.sendMessage(player, "gui.library.messages.loaded", placeholders);
     }
     
     /**
@@ -539,17 +540,15 @@ public class LibraryGUI implements InventoryHolder {
             favorites.remove(config.getId());
             configManager.removeFavorite(player.getUniqueId(), config.getId());
             configManager.decrementFavoriteCount(config.getId());
-            player.sendMessage(Component.text("已取消收藏")
-                .color(NamedTextColor.YELLOW));
+            messageManager.sendMessage(player, "gui.library.messages.unfavorited");
         } else {
             favorites.add(config.getId());
             configManager.addFavorite(player.getUniqueId(), config.getId());
             configManager.incrementFavoriteCount(config.getId());
-            player.sendMessage(Component.text("已加入收藏")
-                .color(NamedTextColor.GREEN));
+            messageManager.sendMessage(player, "gui.library.messages.favorited");
         }
         
-        // 重新載入配置以更新收藏數
+        // Reload configurations to update favorite count
         loadConfigs();
         setupGUI();
     }

@@ -136,7 +136,7 @@ public class GradientAlgorithm {
                     points.add(new ColorPoint(pos.getRow(), pos.getCol(), color, blockDataString));
                 }
             } catch (Exception e) {
-                plugin.getLogger().warning("處理方塊數據時發生錯誤: " + blockDataString);
+                plugin.getLogger().warning("Error processing block data: " + blockDataString);
             }
         }
         

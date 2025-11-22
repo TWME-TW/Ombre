@@ -10,6 +10,9 @@ import java.util.logging.Level;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import dev.twme.ombre.Ombre;
+import dev.twme.ombre.i18n.MessageManager;
+
 /**
  * 使用條款追蹤器
  * 追蹤並記錄玩家是否已接受使用條款
@@ -39,7 +42,7 @@ public class TermsTracker {
             try {
                 termsFile.createNewFile();
             } catch (IOException e) {
-                plugin.getLogger().log(Level.SEVERE, "無法建立條款檔案", e);
+                plugin.getLogger().log(Level.SEVERE, "Unable to create terms file", e);
                 return;
             }
         }
@@ -52,12 +55,12 @@ public class TermsTracker {
                 try {
                     acceptedPlayers.add(UUID.fromString(uuidString));
                 } catch (IllegalArgumentException e) {
-                    plugin.getLogger().warning("無效的 UUID: " + uuidString);
+                    plugin.getLogger().warning("Invalid UUID: " + uuidString);
                 }
             }
         }
         
-        plugin.getLogger().info("已載入 " + acceptedPlayers.size() + " 位玩家的條款接受記錄");
+        plugin.getLogger().info("Loaded terms acceptance records for " + acceptedPlayers.size() + " players");
     }
 
     /**
@@ -78,7 +81,7 @@ public class TermsTracker {
     public void acceptTerms(UUID playerId) {
         acceptedPlayers.add(playerId);
         saveTermsData();
-        plugin.getLogger().info("玩家 " + playerId + " 已接受 BlockColors 使用條款");
+        plugin.getLogger().info("Player " + playerId + " has accepted BlockColors terms of service");
     }
 
     /**
@@ -98,33 +101,36 @@ public class TermsTracker {
             
             config.save(termsFile);
         } catch (IOException e) {
-            plugin.getLogger().log(Level.SEVERE, "儲存條款檔案失敗", e);
+            plugin.getLogger().log(Level.SEVERE, "Failed to save terms file", e);
         }
     }
 
     /**
      * 取得條款文字內容
      * 
+     * @param plugin Ombre plugin instance for MessageManager
      * @return 條款內容字串陣列
      */
-    public static String[] getTermsText() {
+    public static String[] getTermsText(Ombre plugin) {
+        MessageManager msg = plugin.getMessageManager();
+        
         return new String[] {
-            "§6§l===========================================",
-            "§6§l  BlockColors.app 功能使用條款",
-            "§6§l===========================================",
+            msg.getMessage("terms.blockcolors.title"),
+            msg.getMessage("terms.blockcolors.subtitle"),
+            msg.getMessage("terms.blockcolors.separator"),
             "",
-            "§e本功能基於 BlockColors.app 網站的資料。",
+            msg.getMessage("terms.blockcolors.line1"),
             "",
-            "§e在使用此功能前，請先查看並同意以下網站的使用條款：",
-            "§b§nhttps://blockcolors.app/",
+            msg.getMessage("terms.blockcolors.line2"),
+            msg.getMessage("terms.blockcolors.website"),
             "",
-            "§e資料來源: §b§nhttps://blockcolors.app/",
-            "§e網站作者: §fmcndt §7(§b§nhttps://mcndt.dev/§7)",
+            msg.getMessage("terms.blockcolors.data-source"),
+            msg.getMessage("terms.blockcolors.author"),
             "",
-            "§a輸入 §f'accept' §a表示您已查看並同意使用條款",
-            "§c輸入 §f'decline' §c拒絕並關閉",
+            msg.getMessage("terms.blockcolors.accept"),
+            msg.getMessage("terms.blockcolors.decline"),
             "",
-            "§7(60秒內未回應將自動關閉)"
+            msg.getMessage("terms.blockcolors.timeout")
         };
     }
 

@@ -10,12 +10,12 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
 
 import dev.twme.ombre.Ombre;
 import dev.twme.ombre.gui.GUIManager;
+import dev.twme.ombre.i18n.MessageManager;
 import dev.twme.ombre.manager.ConfigManager;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 
 /**
  * 指令處理器
@@ -26,17 +26,23 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
     private final Ombre plugin;
     private final GUIManager guiManager;
     private final ConfigManager configManager;
+    private final MessageManager messageManager;
     
     public CommandHandler(Ombre plugin, GUIManager guiManager, ConfigManager configManager) {
         this.plugin = plugin;
         this.guiManager = guiManager;
         this.configManager = configManager;
+        MessageManager resolvedManager = plugin.getMessageManager();
+        if (resolvedManager == null) {
+            throw new IllegalStateException("MessageManager must be initialized before CommandHandler");
+        }
+        this.messageManager = resolvedManager;
     }
     
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
         if (!(sender instanceof Player player)) {
-            sender.sendMessage(Component.text("此指令只能由玩家執行").color(NamedTextColor.RED));
+            sender.sendMessage(messageManager.getComponent("general.player-only"));
             return true;
         }
         
@@ -58,8 +64,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
             case "reload" -> handleReloadCommand(player);
             case "help" -> handleHelpCommand(player);
             default -> {
-                player.sendMessage(Component.text("未知的子指令。使用 /ombre help 查看幫助")
-                    .color(NamedTextColor.RED));
+                messageManager.sendMessage(player, "commands.ombre.unknown-subcommand");
                 yield true;
             }
         };
@@ -70,7 +75,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
      */
     private boolean handleOmbreCommand(Player player) {
         if (!player.hasPermission("ombre.use")) {
-            player.sendMessage(Component.text("你沒有權限使用此指令").color(NamedTextColor.RED));
+            messageManager.sendMessage(player, "general.no-permission");
             return true;
         }
         
@@ -83,7 +88,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
      */
     private boolean handleLibraryCommand(Player player) {
         if (!player.hasPermission("ombre.library")) {
-            player.sendMessage(Component.text("你沒有權限訪問共享庫").color(NamedTextColor.RED));
+            messageManager.sendMessage(player, "general.no-permission");
             return true;
         }
         
@@ -96,7 +101,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
      */
     private boolean handleFavoritesCommand(Player player) {
         if (!player.hasPermission("ombre.use")) {
-            player.sendMessage(Component.text("你沒有權限使用此指令").color(NamedTextColor.RED));
+            messageManager.sendMessage(player, "general.no-permission");
             return true;
         }
         
@@ -109,7 +114,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
      */
     private boolean handleMyGradientsCommand(Player player) {
         if (!player.hasPermission("ombre.use")) {
-            player.sendMessage(Component.text("你沒有權限使用此指令").color(NamedTextColor.RED));
+            messageManager.sendMessage(player, "general.no-permission");
             return true;
         }
         
@@ -122,7 +127,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
      */
     private boolean handlePaletteCommand(Player player, String[] args) {
         if (!player.hasPermission("ombre.use")) {
-            player.sendMessage(Component.text("你沒有權限使用此指令").color(NamedTextColor.RED));
+            messageManager.sendMessage(player, "general.no-permission");
             return true;
         }
         
@@ -130,79 +135,64 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         
         // /ombre palette - 列出所有色表
         if (args.length == 1) {
-            player.sendMessage(Component.text("=== 可用的色表 ===").color(NamedTextColor.GOLD));
+            messageManager.sendMessage(player, "messages.palette.list-title");
             
             var palettes = blockFilterManager.getColorPalettes();
             var playerPalettes = blockFilterManager.getPlayerPalettes(player.getUniqueId());
             
             if (palettes.isEmpty()) {
-                player.sendMessage(Component.text("沒有可用的色表").color(NamedTextColor.GRAY));
+                messageManager.sendMessage(player, "messages.palette.none");
             } else {
                 for (var palette : palettes.values()) {
                     boolean enabled = playerPalettes.contains(palette.getId());
-                    NamedTextColor color = enabled ? NamedTextColor.GREEN : NamedTextColor.GRAY;
-                    String status = enabled ? "[✓] " : "[  ] ";
-                    
-                    player.sendMessage(Component.text(status + palette.getName() + " - " + palette.getDescription())
-                        .color(color));
+                    String messageKey = enabled ? "messages.palette.entry-enabled" : "messages.palette.entry-disabled";
+                    messageManager.sendMessage(player, messageKey,
+                        "name", palette.getName(),
+                        "description", palette.getDescription());
                 }
             }
             
-            player.sendMessage(Component.text("使用 /ombre palette enable/disable <id> 來啟用/停用色表")
-                .color(NamedTextColor.YELLOW));
-            player.sendMessage(Component.text("使用 /ombre palette reset 來重置色表設定")
-                .color(NamedTextColor.YELLOW));
+            messageManager.sendMessage(player, "messages.palette.usage");
+            messageManager.sendMessage(player, "messages.palette.usage-reset");
             return true;
         }
         
         String action = args[1].toLowerCase();
-        
-        // /ombre palette enable <id>
-        if ("enable".equals(action)) {
-            if (args.length < 3) {
-                player.sendMessage(Component.text("用法: /ombre palette enable <id>")
-                    .color(NamedTextColor.RED));
+        switch (action) {
+            case "enable" -> {
+                if (args.length < 3) {
+                    messageManager.sendMessage(player, "messages.palette.usage");
+                    return true;
+                }
+                String paletteId = args[2];
+                if (blockFilterManager.getColorPalettes().containsKey(paletteId)) {
+                    blockFilterManager.enablePaletteForPlayer(player.getUniqueId(), paletteId);
+                    messageManager.sendMessage(player, "messages.palette.enabled", "palette", paletteId);
+                } else {
+                    messageManager.sendMessage(player, "messages.palette.not-found", "palette", paletteId);
+                }
                 return true;
             }
-            
-            String paletteId = args[2];
-            if (blockFilterManager.getColorPalettes().containsKey(paletteId)) {
-                blockFilterManager.enablePaletteForPlayer(player.getUniqueId(), paletteId);
-                player.sendMessage(Component.text("已啟用色表: " + paletteId)
-                    .color(NamedTextColor.GREEN));
-            } else {
-                player.sendMessage(Component.text("找不到色表: " + paletteId)
-                    .color(NamedTextColor.RED));
-            }
-            return true;
-        }
-        
-        // /ombre palette disable <id>
-        if ("disable".equals(action)) {
-            if (args.length < 3) {
-                player.sendMessage(Component.text("用法: /ombre palette disable <id>")
-                    .color(NamedTextColor.RED));
+            case "disable" -> {
+                if (args.length < 3) {
+                    messageManager.sendMessage(player, "messages.palette.usage");
+                    return true;
+                }
+                String paletteId = args[2];
+                blockFilterManager.disablePaletteForPlayer(player.getUniqueId(), paletteId);
+                messageManager.sendMessage(player, "messages.palette.disabled", "palette", paletteId);
                 return true;
             }
-            
-            String paletteId = args[2];
-            blockFilterManager.disablePaletteForPlayer(player.getUniqueId(), paletteId);
-            player.sendMessage(Component.text("已停用色表: " + paletteId)
-                .color(NamedTextColor.GREEN));
-            return true;
+            case "reset" -> {
+                blockFilterManager.resetPalettesForPlayer(player.getUniqueId());
+                messageManager.sendMessage(player, "messages.palette.reset");
+                return true;
+            }
+            default -> {
+                messageManager.sendMessage(player, "messages.palette.usage");
+                return true;
+            }
         }
-        
-        // /ombre palette reset
-        if ("reset".equals(action)) {
-            blockFilterManager.resetPalettesForPlayer(player.getUniqueId());
-            player.sendMessage(Component.text("已重置色表設定（將使用所有方塊）")
-                .color(NamedTextColor.GREEN));
-            return true;
-        }
-        
-        player.sendMessage(Component.text("用法: /ombre palette [enable|disable|reset] <id>")
-            .color(NamedTextColor.RED));
-        return true;
     }
     
     /**
@@ -210,7 +200,7 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
      */
     private boolean handleExclusionCommand(Player player, String[] args) {
         if (!player.hasPermission("ombre.use")) {
-            player.sendMessage(Component.text("你沒有權限使用此指令").color(NamedTextColor.RED));
+            messageManager.sendMessage(player, "general.no-permission");
             return true;
         }
         
@@ -218,69 +208,58 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
         
         // /ombre exclusion - 列出所有排除列表
         if (args.length == 1) {
-            player.sendMessage(Component.text("=== 方塊排除列表 ===").color(NamedTextColor.GOLD));
+            messageManager.sendMessage(player, "messages.exclusion.list-title");
             
             var exclusions = blockFilterManager.getExclusionLists();
             var playerExclusions = blockFilterManager.getPlayerExclusions(player.getUniqueId());
             
             if (exclusions.isEmpty()) {
-                player.sendMessage(Component.text("沒有可用的排除列表").color(NamedTextColor.GRAY));
+                messageManager.sendMessage(player, "messages.exclusion.none");
             } else {
                 for (var exclusion : exclusions.values()) {
                     boolean enabled = playerExclusions.contains(exclusion.getId());
-                    NamedTextColor color = enabled ? NamedTextColor.GREEN : NamedTextColor.GRAY;
-                    String status = enabled ? "[✓] " : "[  ] ";
-                    
-                    player.sendMessage(Component.text(status + exclusion.getName() + " - " + exclusion.getDescription())
-                        .color(color));
+                    String messageKey = enabled ? "messages.exclusion.entry-enabled" : "messages.exclusion.entry-disabled";
+                    messageManager.sendMessage(player, messageKey,
+                        "name", exclusion.getName(),
+                        "description", exclusion.getDescription());
                 }
             }
             
-            player.sendMessage(Component.text("使用 /ombre exclusion enable/disable <id> 來啟用/停用排除列表")
-                .color(NamedTextColor.YELLOW));
+            messageManager.sendMessage(player, "messages.exclusion.usage");
             return true;
         }
         
         String action = args[1].toLowerCase();
-        
-        // /ombre exclusion enable <id>
-        if ("enable".equals(action)) {
-            if (args.length < 3) {
-                player.sendMessage(Component.text("用法: /ombre exclusion enable <id>")
-                    .color(NamedTextColor.RED));
+        switch (action) {
+            case "enable" -> {
+                if (args.length < 3) {
+                    messageManager.sendMessage(player, "messages.exclusion.usage");
+                    return true;
+                }
+                String exclusionId = args[2];
+                if (blockFilterManager.getExclusionLists().containsKey(exclusionId)) {
+                    blockFilterManager.enableExclusionForPlayer(player.getUniqueId(), exclusionId);
+                    messageManager.sendMessage(player, "messages.exclusion.enabled", "exclusion", exclusionId);
+                } else {
+                    messageManager.sendMessage(player, "messages.exclusion.not-found", "exclusion", exclusionId);
+                }
                 return true;
             }
-            
-            String exclusionId = args[2];
-            if (blockFilterManager.getExclusionLists().containsKey(exclusionId)) {
-                blockFilterManager.enableExclusionForPlayer(player.getUniqueId(), exclusionId);
-                player.sendMessage(Component.text("已啟用排除列表: " + exclusionId)
-                    .color(NamedTextColor.GREEN));
-            } else {
-                player.sendMessage(Component.text("找不到排除列表: " + exclusionId)
-                    .color(NamedTextColor.RED));
-            }
-            return true;
-        }
-        
-        // /ombre exclusion disable <id>
-        if ("disable".equals(action)) {
-            if (args.length < 3) {
-                player.sendMessage(Component.text("用法: /ombre exclusion disable <id>")
-                    .color(NamedTextColor.RED));
+            case "disable" -> {
+                if (args.length < 3) {
+                    messageManager.sendMessage(player, "messages.exclusion.usage");
+                    return true;
+                }
+                String exclusionId = args[2];
+                blockFilterManager.disableExclusionForPlayer(player.getUniqueId(), exclusionId);
+                messageManager.sendMessage(player, "messages.exclusion.disabled", "exclusion", exclusionId);
                 return true;
             }
-            
-            String exclusionId = args[2];
-            blockFilterManager.disableExclusionForPlayer(player.getUniqueId(), exclusionId);
-            player.sendMessage(Component.text("已停用排除列表: " + exclusionId)
-                .color(NamedTextColor.GREEN));
-            return true;
+            default -> {
+                messageManager.sendMessage(player, "messages.exclusion.usage");
+                return true;
+            }
         }
-        
-        player.sendMessage(Component.text("用法: /ombre exclusion [enable|disable] <id>")
-            .color(NamedTextColor.RED));
-        return true;
     }
     
     /**
@@ -288,14 +267,14 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
      */
     private boolean handleStatsCommand(Player player) {
         if (!player.hasPermission("ombre.use")) {
-            player.sendMessage(Component.text("你沒有權限使用此指令").color(NamedTextColor.RED));
+            messageManager.sendMessage(player, "general.no-permission");
             return true;
         }
         
         int gradientCount = configManager.getPlayerGradientCount(player.getUniqueId());
         
-        player.sendMessage(Component.text("=== 你的統計數據 ===").color(NamedTextColor.GOLD));
-        player.sendMessage(Component.text("創建數量: " + gradientCount).color(NamedTextColor.YELLOW));
+        messageManager.sendMessage(player, "messages.stats.title");
+        messageManager.sendMessage(player, "messages.stats.gradient-count", "count", gradientCount);
         // TODO: 添加更多統計數據
         
         return true;
@@ -306,13 +285,12 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
      */
     private boolean handleAdminCommand(Player player, String[] args) {
         if (!player.hasPermission("ombre.admin")) {
-            player.sendMessage(Component.text("你沒有管理員權限").color(NamedTextColor.RED));
+            messageManager.sendMessage(player, "commands.ombre.admin.no-permission");
             return true;
         }
         
         if (args.length < 2) {
-            player.sendMessage(Component.text("用法: /ombre admin <delete> <玩家名稱|配置ID>")
-                .color(NamedTextColor.RED));
+            messageManager.sendMessage(player, "commands.ombre.admin.usage");
             return true;
         }
         
@@ -324,24 +302,31 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
             // 嘗試解析為 UUID（配置ID）
             try {
                 UUID configId = UUID.fromString(target);
-                player.sendMessage(Component.text("刪除配置功能尚未完全實作").color(NamedTextColor.YELLOW));
+                if (configManager.deleteGradientById(configId)) {
+                    messageManager.sendMessage(player, "commands.ombre.admin.delete-config-success",
+                        "configId", target);
+                } else {
+                    messageManager.sendMessage(player, "commands.ombre.admin.config-not-found",
+                        "configId", target);
+                }
                 return true;
             } catch (IllegalArgumentException e) {
                 // 不是 UUID，當作玩家名稱處理
                 Player targetPlayer = plugin.getServer().getPlayer(target);
                 if (targetPlayer != null) {
                     int deletedCount = configManager.deletePlayerGradients(targetPlayer.getUniqueId());
-                    player.sendMessage(Component.text("已刪除玩家 " + target + " 的 " + deletedCount + " 個配置")
-                        .color(NamedTextColor.GREEN));
+                    messageManager.sendMessage(player, "commands.ombre.admin.delete-success",
+                        "player", target,
+                        "count", deletedCount);
                 } else {
-                    player.sendMessage(Component.text("找不到玩家: " + target).color(NamedTextColor.RED));
+                    messageManager.sendMessage(player, "commands.ombre.admin.player-not-found",
+                        "player", target);
                 }
                 return true;
             }
         }
         
-        player.sendMessage(Component.text("用法: /ombre admin delete <玩家名稱|配置ID>")
-            .color(NamedTextColor.RED));
+        messageManager.sendMessage(player, "commands.ombre.admin.usage");
         return true;
     }
     
@@ -350,13 +335,13 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
      */
     private boolean handleReloadCommand(Player player) {
         if (!player.hasPermission("ombre.admin")) {
-            player.sendMessage(Component.text("你沒有管理員權限").color(NamedTextColor.RED));
+            messageManager.sendMessage(player, "commands.ombre.admin.no-permission");
             return true;
         }
         
         plugin.reloadConfig();
         plugin.getColorService().reload();
-        player.sendMessage(Component.text("配置已重新載入").color(NamedTextColor.GREEN));
+        messageManager.sendMessage(player, "general.reload-success");
         return true;
     }
     
@@ -364,68 +349,70 @@ public class CommandHandler implements CommandExecutor, TabCompleter {
      * 處理 /ombre help 指令
      */
     private boolean handleHelpCommand(Player player) {
-        player.sendMessage(Component.text("=== Ombre 指令幫助 ===").color(NamedTextColor.GOLD));
-        player.sendMessage(Component.text("/ombre - 打開漸層製作 GUI").color(NamedTextColor.YELLOW));
-        player.sendMessage(Component.text("/ombre library - 打開共享庫").color(NamedTextColor.YELLOW));
-        player.sendMessage(Component.text("/ombre favorites - 打開我的最愛").color(NamedTextColor.YELLOW));
-        player.sendMessage(Component.text("/ombre my - 查看我的漸層配置").color(NamedTextColor.YELLOW));
-        player.sendMessage(Component.text("/ombre palette - 管理色表").color(NamedTextColor.YELLOW));
-        player.sendMessage(Component.text("/ombre exclusion - 管理方塊排除").color(NamedTextColor.YELLOW));
-        player.sendMessage(Component.text("/ombre stats - 查看統計數據").color(NamedTextColor.YELLOW));
+        String[] baseHelpKeys = {
+            "commands.ombre.help.title",
+            "commands.ombre.help.main",
+            "commands.ombre.help.library",
+            "commands.ombre.help.favorites",
+            "commands.ombre.help.my",
+            "commands.ombre.help.palette",
+            "commands.ombre.help.exclusion",
+            "commands.ombre.help.stats"
+        };
+        for (String key : baseHelpKeys) {
+            player.sendMessage(messageManager.getComponent(key));
+        }
         
         if (player.hasPermission("ombre.admin")) {
-            player.sendMessage(Component.text("/ombre admin delete <玩家> - 刪除玩家配置")
-                .color(NamedTextColor.RED));
-            player.sendMessage(Component.text("/ombre reload - 重新載入配置").color(NamedTextColor.RED));
+            player.sendMessage(messageManager.getComponent("commands.ombre.help.admin"));
+            player.sendMessage(messageManager.getComponent("commands.ombre.help.reload"));
         }
         
         return true;
     }
     
     @Override
-    public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
+    public @NotNull List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias, @NotNull String[] args) {
         List<String> completions = new ArrayList<>();
-        
-        if (args.length == 1) {
-            List<String> subCommands = Arrays.asList("library", "lib", "favorites", "fav", 
-                "my", "list", "palette", "exclusion", "exclude", "stats", "help");
-            
-            if (sender.hasPermission("ombre.admin")) {
-                subCommands = new ArrayList<>(subCommands);
-                subCommands.addAll(Arrays.asList("admin", "reload"));
-            }
-            
-            String input = args[0].toLowerCase();
-            for (String sub : subCommands) {
-                if (sub.startsWith(input)) {
-                    completions.add(sub);
+        switch (args.length) {
+            case 1 -> {
+                List<String> subCommands = new ArrayList<>(Arrays.asList("library", "lib", "favorites", "fav",
+                    "my", "list", "palette", "exclusion", "exclude", "stats", "help"));
+                if (sender.hasPermission("ombre.admin")) {
+                    subCommands.addAll(Arrays.asList("admin", "reload"));
+                }
+                String input = args[0].toLowerCase();
+                for (String sub : subCommands) {
+                    if (sub.startsWith(input)) {
+                        completions.add(sub);
+                    }
                 }
             }
-        } else if (args.length == 2) {
-            String subCommand = args[0].toLowerCase();
-            
-            if ("admin".equalsIgnoreCase(subCommand) && sender.hasPermission("ombre.admin")) {
-                completions.add("delete");
-            } else if ("palette".equalsIgnoreCase(subCommand)) {
-                completions.addAll(Arrays.asList("enable", "disable", "reset"));
-            } else if ("exclusion".equalsIgnoreCase(subCommand) || "exclude".equalsIgnoreCase(subCommand)) {
-                completions.addAll(Arrays.asList("enable", "disable"));
+            case 2 -> {
+                String subCommand = args[0].toLowerCase();
+                if ("admin".equalsIgnoreCase(subCommand) && sender.hasPermission("ombre.admin")) {
+                    completions.add("delete");
+                } else if ("palette".equalsIgnoreCase(subCommand)) {
+                    completions.addAll(Arrays.asList("enable", "disable", "reset"));
+                } else if ("exclusion".equalsIgnoreCase(subCommand) || "exclude".equalsIgnoreCase(subCommand)) {
+                    completions.addAll(Arrays.asList("enable", "disable"));
+                }
             }
-        } else if (args.length == 3) {
-            String subCommand = args[0].toLowerCase();
-            String action = args[1].toLowerCase();
-            
-            if ("palette".equalsIgnoreCase(subCommand) && 
-                ("enable".equalsIgnoreCase(action) || "disable".equalsIgnoreCase(action))) {
+            case 3 -> {
+                String subCommand = args[0].toLowerCase();
+                String action = args[1].toLowerCase();
                 var blockFilterManager = plugin.getBlockFilterManager();
-                completions.addAll(blockFilterManager.getColorPalettes().keySet());
-            } else if (("exclusion".equalsIgnoreCase(subCommand) || "exclude".equalsIgnoreCase(subCommand)) && 
-                ("enable".equalsIgnoreCase(action) || "disable".equalsIgnoreCase(action))) {
-                var blockFilterManager = plugin.getBlockFilterManager();
-                completions.addAll(blockFilterManager.getExclusionLists().keySet());
+                if ("palette".equalsIgnoreCase(subCommand) &&
+                    ("enable".equalsIgnoreCase(action) || "disable".equalsIgnoreCase(action))) {
+                    completions.addAll(blockFilterManager.getColorPalettes().keySet());
+                } else if (("exclusion".equalsIgnoreCase(subCommand) || "exclude".equalsIgnoreCase(subCommand)) &&
+                    ("enable".equalsIgnoreCase(action) || "disable".equalsIgnoreCase(action))) {
+                    completions.addAll(blockFilterManager.getExclusionLists().keySet());
+                }
+            }
+            default -> {
             }
         }
-        
         return completions;
     }
 }

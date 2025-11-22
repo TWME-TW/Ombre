@@ -7,6 +7,7 @@ import java.util.concurrent.CompletableFuture;
 
 import org.bukkit.plugin.java.JavaPlugin;
 
+import dev.twme.ombre.Ombre;
 import dev.twme.ombre.blockcolors.command.BlockColorsCommand;
 import dev.twme.ombre.blockcolors.gui.BlockColorsGUIListener;
 import dev.twme.ombre.blockcolors.gui.TermsAcceptanceListener;
@@ -41,14 +42,14 @@ public class BlockColorsFeature {
     public CompletableFuture<Boolean> initialize() {
         return CompletableFuture.supplyAsync(() -> {
             try {
-                plugin.getLogger().info("正在初始化 BlockColors 功能...");
+                plugin.getLogger().info("Initializing BlockColors feature...");
                 
                 // 1. 初始化快取系統
                 cache = new BlockColorCache(plugin);
                 boolean cacheInitialized = cache.initialize().join();
                 
                 if (!cacheInitialized) {
-                    plugin.getLogger().severe("快取初始化失敗！");
+                    plugin.getLogger().severe("Cache initialization failed!");
                     return false;
                 }
                 
@@ -59,7 +60,7 @@ public class BlockColorsFeature {
                 termsTracker = new TermsTracker(plugin);
                 
                 // 4. 初始化指令處理器
-                commandHandler = new BlockColorsCommand(plugin, this);
+                commandHandler = new BlockColorsCommand((Ombre) plugin, this);
                 
                 // 5. 註冊事件監聽器
                 plugin.getServer().getPluginManager().registerEvents(
@@ -72,13 +73,13 @@ public class BlockColorsFeature {
                 );
                 
                 initialized = true;
-                plugin.getLogger().info("BlockColors 功能初始化完成！");
+                plugin.getLogger().info("BlockColors feature initialization complete!");
                 
                 return true;
                 
             } catch (Exception e) {
                 plugin.getLogger().log(java.util.logging.Level.SEVERE, 
-                    "初始化 BlockColors 功能時發生錯誤", e);
+                    "Error occurred while initializing BlockColors feature", e);
                 return false;
             }
         });
@@ -101,7 +102,7 @@ public class BlockColorsFeature {
         pendingTermsAcceptance.clear();
         
         initialized = false;
-        plugin.getLogger().info("BlockColors 功能已關閉");
+        plugin.getLogger().info("BlockColors feature disabled");
     }
 
     /**
@@ -110,7 +111,7 @@ public class BlockColorsFeature {
     public CompletableFuture<Boolean> reload() {
         return CompletableFuture.supplyAsync(() -> {
             try {
-                plugin.getLogger().info("正在重新載入 BlockColors...");
+                plugin.getLogger().info("Reloading BlockColors...");
                 
                 // 重新載入快取
                 boolean success = cache.reload().join();
@@ -120,16 +121,16 @@ public class BlockColorsFeature {
                     ColorMatcher.clearCache();
                     ColorMatcher.initialize(cache);
                     
-                    plugin.getLogger().info("BlockColors 重新載入完成");
+                    plugin.getLogger().info("BlockColors reload complete");
                     return true;
                 } else {
-                    plugin.getLogger().warning("BlockColors 重新載入失敗");
+                    plugin.getLogger().warning("BlockColors reload failed");
                     return false;
                 }
                 
             } catch (Exception e) {
                 plugin.getLogger().log(java.util.logging.Level.SEVERE, 
-                    "重新載入時發生錯誤", e);
+                    "Error occurred during reload", e);
                 return false;
             }
         });

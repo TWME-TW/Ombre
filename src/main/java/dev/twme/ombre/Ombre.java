@@ -8,6 +8,8 @@ import dev.twme.ombre.color.ColorDataGenerator;
 import dev.twme.ombre.color.ColorService;
 import dev.twme.ombre.command.CommandHandler;
 import dev.twme.ombre.gui.GUIManager;
+import dev.twme.ombre.i18n.MessageManager;
+import dev.twme.ombre.i18n.PlayerLocaleListener;
 import dev.twme.ombre.manager.ConfigManager;
 import dev.twme.ombre.palette.BlockFilterManager;
 
@@ -21,16 +23,23 @@ public final class Ombre extends JavaPlugin {
     private CommandHandler commandHandler;
     private BlockColorsFeature blockColorsFeature;
     private BlockPalettesFeature blockPalettesFeature;
+    private MessageManager messageManager;
 
     @Override
     public void onEnable() {
         // 儲存預設配置
         saveDefaultConfig();
         
+        // 初始化訊息管理器
+        messageManager = new MessageManager(this);
+        
+        // 註冊玩家語言監聽器
+        getServer().getPluginManager().registerEvents(new PlayerLocaleListener(messageManager), this);
+        
         // 初始化顏色資料生成器
         colorDataGenerator = new ColorDataGenerator(this);
         
-        // 生成 colors.yml（如果不存在）
+        // 如果不存在則生成 colors.yml
         int retryCount = getConfig().getInt("error-handling.color-generation-retry", 3);
         boolean colorGenerated = false;
         
@@ -39,13 +48,13 @@ public final class Ombre extends JavaPlugin {
                 colorGenerated = true;
                 break;
             }
-            getLogger().warning(String.format("顏色檔案生成失敗，重試 %d/%d", i + 1, retryCount));
+            getLogger().warning(String.format("Color file generation failed, retry %d/%d", i + 1, retryCount));
         }
         
         if (!colorGenerated) {
-            getLogger().severe("無法生成 colors.yml，插件可能無法正常運作");
+            getLogger().severe("Failed to generate colors.yml, plugin may not work properly");
             if (!getConfig().getBoolean("error-handling.regenerate-on-corruption", true)) {
-                getLogger().severe("已禁用自動重新生成，插件將停用");
+                getLogger().severe("Auto-regeneration disabled, plugin will be disabled");
                 getServer().getPluginManager().disablePlugin(this);
                 return;
             }
@@ -54,7 +63,7 @@ public final class Ombre extends JavaPlugin {
         // 初始化顏色服務
         colorService = new ColorService(this);
         if (!colorService.loadColorsFromFile()) {
-            getLogger().warning("載入顏色檔案失敗，將使用動態顏色獲取");
+            getLogger().warning("Failed to load color file, will use dynamic color retrieval");
         }
         
         // 初始化配置管理器
@@ -78,13 +87,13 @@ public final class Ombre extends JavaPlugin {
         blockColorsFeature = new BlockColorsFeature(this);
         blockColorsFeature.initialize().thenAccept(success -> {
             if (success) {
-                getLogger().info("BlockColors 功能已啟用");
+                getLogger().info("BlockColors feature enabled");
                 
                 // 註冊 BlockColors 指令
                 getCommand("blockcolorsapp").setExecutor(blockColorsFeature.getCommandHandler());
                 getCommand("blockcolorsapp").setTabCompleter(blockColorsFeature.getCommandHandler());
             } else {
-                getLogger().warning("BlockColors 功能初始化失敗");
+                getLogger().warning("BlockColors feature initialization failed");
             }
         });
         
@@ -92,17 +101,17 @@ public final class Ombre extends JavaPlugin {
         blockPalettesFeature = new BlockPalettesFeature(this);
         blockPalettesFeature.initialize().thenAccept(success -> {
             if (success) {
-                getLogger().info("Block Palettes 功能已啟用");
+                getLogger().info("Block Palettes feature enabled");
                 
                 // 註冊 Block Palettes 指令
                 getCommand("blockpalettes").setExecutor(blockPalettesFeature.getCommandHandler());
                 getCommand("blockpalettes").setTabCompleter(blockPalettesFeature.getCommandHandler());
             } else {
-                getLogger().warning("Block Palettes 功能初始化失敗");
+                getLogger().warning("Block Palettes feature initialization failed");
             }
         });
         
-        getLogger().info("Ombre 插件已啟用！");
+        getLogger().info("Ombre plugin enabled!");
     }
 
     @Override
@@ -122,7 +131,7 @@ public final class Ombre extends JavaPlugin {
             guiManager.cleanup();
         }
         
-        getLogger().info("Ombre 插件已停用！");
+        getLogger().info("Ombre plugin disabled!");
     }
     
     // Getters
@@ -156,5 +165,9 @@ public final class Ombre extends JavaPlugin {
     
     public BlockPalettesFeature getBlockPalettesFeature() {
         return blockPalettesFeature;
+    }
+    
+    public MessageManager getMessageManager() {
+        return messageManager;
     }
 }

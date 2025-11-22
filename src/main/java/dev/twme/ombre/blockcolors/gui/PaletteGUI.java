@@ -2,6 +2,7 @@ package dev.twme.ombre.blockcolors.gui;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -11,10 +12,12 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 
+import dev.twme.ombre.Ombre;
 import dev.twme.ombre.blockcolors.BlockColorsFeature;
 import dev.twme.ombre.blockcolors.data.BlockColorData;
 import dev.twme.ombre.blockcolors.data.PlayerPalette;
 import dev.twme.ombre.blockcolors.util.GuiUtils;
+import dev.twme.ombre.i18n.MessageManager;
 
 /**
  * 調色盤管理 GUI
@@ -42,14 +45,19 @@ public class PaletteGUI implements InventoryHolder {
     private final BlockColorsGUI parentGUI;
     private final Inventory inventory;
     private final PlayerPalette palette;
+    private final Ombre plugin;
+    private final MessageManager msg;
 
     public PaletteGUI(BlockColorsFeature feature, Player player, BlockColorsGUI parentGUI) {
         this.feature = feature;
         this.player = player;
         this.parentGUI = parentGUI;
         this.palette = feature.getPlayerPalette(player.getUniqueId());
+        this.plugin = (Ombre) feature.getPlugin();
+        this.msg = plugin.getMessageManager();
         
-        this.inventory = Bukkit.createInventory(this, SIZE, "§d我的調色盤");
+        this.inventory = Bukkit.createInventory(this, SIZE, 
+            msg.getComponent("blockcolors.gui.palette.title", player));
         
         setupGUI();
     }
@@ -60,13 +68,13 @@ public class PaletteGUI implements InventoryHolder {
     private void setupGUI() {
         // 第1行：控制列
         inventory.setItem(SLOT_BACK, GuiUtils.createItem(
-            Material.ARROW, "§e返回", "§7返回 BlockColors 主介面"
+            Material.ARROW, msg.getMessage("blockcolors.gui.palette.back", player), msg.getMessage("blockcolors.gui.palette.back-lore", player)
         ));
         inventory.setItem(4, GuiUtils.createItem(
-            Material.PAINTING, "§d§l我的調色盤"
+            Material.PAINTING, msg.getMessage("blockcolors.gui.palette.title", player)
         ));
         inventory.setItem(SLOT_CLOSE, GuiUtils.createItem(
-            Material.BARRIER, "§c關閉"
+            Material.BARRIER, msg.getMessage("blockcolors.gui.palette.close", player)
         ));
         
         // 更新調色盤顯示
@@ -74,15 +82,13 @@ public class PaletteGUI implements InventoryHolder {
         
         // 底部功能
         inventory.setItem(SLOT_CLEAR, GuiUtils.createItem(
-            Material.LAVA_BUCKET, "§c清空調色盤",
-            "§7點擊清空所有方塊",
-            "§c警告: 此操作無法復原！"
+            Material.LAVA_BUCKET, msg.getMessage("blockcolors.gui.palette.clear", player),
+            msg.getMessageList("blockcolors.gui.palette.clear-lore")
         ));
         
         inventory.setItem(SLOT_HELP, GuiUtils.createItem(
-            Material.BOOK, "§e說明",
-            "§7點擊方塊可將其移除",
-            "§7最多可儲存 " + palette.getMaxSize() + " 個方塊"
+            Material.BOOK, msg.getMessage("blockcolors.gui.palette.help", player),
+            msg.getMessageList("blockcolors.gui.palette.help-lore")
         ));
         
         // 填充其他空格
@@ -111,23 +117,13 @@ public class PaletteGUI implements InventoryHolder {
             // 從快取獲取方塊資訊
             BlockColorData blockData = feature.getCache().getBlockByMaterial(material);
             
-            List<String> lore = new ArrayList<>();
-            if (blockData != null) {
-                lore.add("§7" + blockData.getDisplayName());
-                lore.add("");
-                lore.add("§7HEX: §f" + blockData.getHexColor());
-                lore.add("§7RGB: §f(" + blockData.getRed() + ", " + 
-                         blockData.getGreen() + ", " + blockData.getBlue() + ")");
-            }
-            lore.add("");
-            lore.add("§c左鍵 §7移除");
-            lore.add("§e右鍵 §7拿取方塊");
-            
-            String displayName = blockData != null ? 
-                "§b" + blockData.getDisplayName() : 
-                "§b" + material.name();
-            
-            ItemStack item = GuiUtils.createItem(material, displayName, lore);
+            List<String> lore = buildPaletteBlockLore(blockData);
+            String displayName = blockData != null ? blockData.getDisplayName() : material.name();
+            ItemStack item = GuiUtils.createItem(
+                material,
+                msg.getMessage("blockcolors.gui.palette.item-name", player, Map.of("name", displayName)),
+                lore
+            );
             inventory.setItem(PALETTE_START + i, item);
         }
         
@@ -135,10 +131,25 @@ public class PaletteGUI implements InventoryHolder {
         for (int i = blocks.size(); i < 18; i++) {
             inventory.setItem(PALETTE_START + i, GuiUtils.createItem(
                 Material.LIGHT_GRAY_STAINED_GLASS_PANE,
-                "§7空槽位",
-                "§7在主介面點擊方塊加入"
+                msg.getMessage("blockcolors.gui.palette.empty-slot-title", player),
+                msg.getMessage("blockcolors.gui.palette.empty-slot-lore", player)
             ));
         }
+    }
+
+    private List<String> buildPaletteBlockLore(BlockColorData data) {
+        List<String> lore = new ArrayList<>();
+        if (data != null) {
+            lore.add(msg.getMessage("blockcolors.gui.palette.block-info.display-name", player, Map.of("name", data.getDisplayName())));
+            lore.add("");
+            lore.add(msg.getMessage("blockcolors.gui.palette.block-info.hex", player, Map.of("hex", data.getHexColor())));
+            String rgb = "(" + data.getRed() + ", " + data.getGreen() + ", " + data.getBlue() + ")";
+            lore.add(msg.getMessage("blockcolors.gui.palette.block-info.rgb", player, Map.of("rgb", rgb)));
+        }
+        lore.add("");
+        lore.add(msg.getMessage("blockcolors.gui.palette.block-info.remove", player));
+        lore.add(msg.getMessage("blockcolors.gui.palette.block-info.take", player));
+        return lore;
     }
 
     /**
@@ -175,23 +186,21 @@ public class PaletteGUI implements InventoryHolder {
         }
         
         if (slot == SLOT_HELP) {
-            player.sendMessage("§d§l========== 調色盤說明 ==========");
-            player.sendMessage("§e功能:");
-            player.sendMessage("§7- 點擊方塊可將其從調色盤移除");
-            player.sendMessage("§7- 使用清空按鈕清除所有方塊");
-            player.sendMessage("§7- 最多可儲存 " + palette.getMaxSize() + " 個方塊");
+            msg.sendMessage(player, "blockcolors.gui.palette.help-title");
+            msg.getComponentList("blockcolors.gui.palette.help-lines", Map.of("max", palette.getMaxSize()))
+               .forEach(player::sendMessage);
             return;
         }
         
         if (slot == SLOT_CLEAR) {
             if (palette.isEmpty()) {
-                player.sendMessage("§c調色盤已經是空的");
+                msg.sendMessage(player, "blockcolors.gui.palette.messages.clear-empty");
                 return;
             }
             
             palette.clear();
             updatePaletteDisplay();
-            player.sendMessage("§a✓ 已清空調色盤");
+            msg.sendMessage(player, "blockcolors.gui.palette.messages.clear-success");
             return;
         }
         
@@ -208,37 +217,30 @@ public class PaletteGUI implements InventoryHolder {
                 
                 if (event.isRightClick()) {
                     // 右鍵 - 允許拿取方塊(事件已不取消)
-                    player.sendMessage("§a✓ 已獲得 " + displayName);
+                    msg.sendMessage(player, "blockcolors.gui.messages.obtained", Map.of("block", displayName));
                     
                     // 延遲補上相同方塊
                     final int targetSlot = slot;
                     final Material blockMaterial = material;
-                    Bukkit.getScheduler().runTaskLater(feature.getPlugin(), () -> {
+                    Bukkit.getScheduler().runTaskLater(plugin, () -> {
                         BlockColorData data = feature.getCache().getBlockByMaterial(blockMaterial);
                         
-                        List<String> lore = new ArrayList<>();
-                        if (data != null) {
-                            lore.add("§7" + data.getDisplayName());
-                            lore.add("");
-                            lore.add("§7HEX: §f" + data.getHexColor());
-                            lore.add("§7RGB: §f(" + data.getRed() + ", " + 
-                                     data.getGreen() + ", " + data.getBlue() + ")");
-                        }
-                        lore.add("");
-                        lore.add("§c左鍵 §7移除");
-                        lore.add("§e右鍵 §7拿取方塊");
-                        
-                        String name = data != null ? "§b" + data.getDisplayName() : "§b" + blockMaterial.name();
-                        ItemStack item = GuiUtils.createItem(blockMaterial, name, lore);
+                        List<String> lore = buildPaletteBlockLore(data);
+                        String name = data != null ? data.getDisplayName() : blockMaterial.name();
+                        ItemStack item = GuiUtils.createItem(
+                            blockMaterial,
+                            msg.getMessage("blockcolors.gui.palette.item-name", player, Map.of("name", name)),
+                            lore
+                        );
                         inventory.setItem(targetSlot, item);
                     }, 1L);
                 } else {
                     // 左鍵 - 移除
                     if (palette.removeBlock(material)) {
                         updatePaletteDisplay();
-                        player.sendMessage("§a✓ 已移除 " + displayName);
+                        msg.sendMessage(player, "blockcolors.gui.palette.messages.remove-success", Map.of("block", displayName));
                     } else {
-                        player.sendMessage("§c移除失敗");
+                        msg.sendMessage(player, "blockcolors.gui.palette.messages.remove-failed");
                     }
                 }
             }

@@ -17,8 +17,7 @@ import dev.twme.ombre.blockpalettes.BlockPalettesFeature;
 import dev.twme.ombre.blockpalettes.gui.FavoritesGUI;
 import dev.twme.ombre.blockpalettes.gui.PalettesListGUI;
 import dev.twme.ombre.blockpalettes.gui.TermsAcceptanceGUI;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
+import dev.twme.ombre.i18n.MessageManager;
 
 /**
  * Block Palettes 指令處理器
@@ -28,22 +27,24 @@ public class BlockPalettesCommand implements CommandExecutor, TabCompleter {
     
     private final Ombre plugin;
     private final BlockPalettesFeature feature;
+    private final MessageManager messageManager;
     
     public BlockPalettesCommand(Ombre plugin, BlockPalettesFeature feature) {
         this.plugin = plugin;
         this.feature = feature;
+        this.messageManager = plugin.getMessageManager();
     }
     
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
         if (!(sender instanceof Player player)) {
-            sender.sendMessage(Component.text("此指令只能由玩家執行").color(NamedTextColor.RED));
+            sender.sendMessage(messageManager.getComponent("blockpalettes.command.player-only"));
             return true;
         }
         
         // 檢查功能是否啟用
         if (!feature.isEnabled()) {
-            player.sendMessage(Component.text("Block Palettes 功能目前已停用").color(NamedTextColor.RED));
+            player.sendMessage(messageManager.getComponent("blockpalettes.command.feature-disabled"));
             return true;
         }
         
@@ -63,8 +64,8 @@ public class BlockPalettesCommand implements CommandExecutor, TabCompleter {
             case "favorites", "fav" -> handleFavorites(player);
             case "help" -> handleHelp(player);
             default -> {
-                player.sendMessage(Component.text("未知的子指令: " + subCommand).color(NamedTextColor.RED));
-                player.sendMessage(Component.text("使用 /bp help 查看幫助").color(NamedTextColor.GRAY));
+                player.sendMessage(messageManager.getComponent("blockpalettes.command.unknown-subcommand", "subcommand", subCommand));
+                player.sendMessage(messageManager.getComponent("blockpalettes.command.use-help"));
                 yield true;
             }
         };
@@ -79,6 +80,7 @@ public class BlockPalettesCommand implements CommandExecutor, TabCompleter {
             // 開啟條款同意介面
             TermsAcceptanceGUI termsGUI = new TermsAcceptanceGUI(
                 plugin,
+                messageManager,
                 player,
                 () -> {
                     // 同意後的回調
@@ -113,12 +115,12 @@ public class BlockPalettesCommand implements CommandExecutor, TabCompleter {
      */
     private boolean handleReload(Player player) {
         if (!player.hasPermission("ombre.blockpalettes.reload")) {
-            player.sendMessage(Component.text("你沒有權限執行此指令").color(NamedTextColor.RED));
+            player.sendMessage(messageManager.getComponent("blockpalettes.command.no-permission"));
             return true;
         }
         
         feature.getCache().clearAll();
-        player.sendMessage(Component.text("✓ 已重新載入 Block Palettes 快取").color(NamedTextColor.GREEN));
+        player.sendMessage(messageManager.getComponent("blockpalettes.command.reload-success"));
         return true;
     }
     
@@ -127,18 +129,16 @@ public class BlockPalettesCommand implements CommandExecutor, TabCompleter {
      */
     private boolean handleCache(Player player) {
         if (!player.hasPermission("ombre.blockpalettes.reload")) {
-            player.sendMessage(Component.text("你沒有權限執行此指令").color(NamedTextColor.RED));
+            player.sendMessage(messageManager.getComponent("blockpalettes.command.no-permission"));
             return true;
         }
         
         var stats = feature.getCache().getStatistics();
         
-        player.sendMessage(Component.text("━━━━ 快取統計 ━━━━").color(NamedTextColor.GOLD));
-        player.sendMessage(Component.text("列表快取數量: ").color(NamedTextColor.GRAY)
-            .append(Component.text(stats.get("list_cache_size").toString()).color(NamedTextColor.WHITE)));
-        player.sendMessage(Component.text("詳細快取數量: ").color(NamedTextColor.GRAY)
-            .append(Component.text(stats.get("detail_cache_size").toString()).color(NamedTextColor.WHITE)));
-        player.sendMessage(Component.text("━━━━━━━━━━━━━━━━").color(NamedTextColor.GOLD));
+        player.sendMessage(messageManager.getComponent("blockpalettes.command.cache.header"));
+        player.sendMessage(messageManager.getComponent("blockpalettes.command.cache.list-size", "count", stats.get("list_cache_size").toString()));
+        player.sendMessage(messageManager.getComponent("blockpalettes.command.cache.detail-size", "count", stats.get("detail_cache_size").toString()));
+        player.sendMessage(messageManager.getComponent("blockpalettes.command.cache.footer"));
         
         return true;
     }
@@ -150,12 +150,10 @@ public class BlockPalettesCommand implements CommandExecutor, TabCompleter {
         if (args.length < 2) {
             var stats = feature.getTermsTracker().getStatistics();
             
-            player.sendMessage(Component.text("━━━━ 條款資訊 ━━━━").color(NamedTextColor.GOLD));
-            player.sendMessage(Component.text("當前版本: ").color(NamedTextColor.GRAY)
-                .append(Component.text(stats.get("current_version").toString()).color(NamedTextColor.WHITE)));
-            player.sendMessage(Component.text("已同意人數: ").color(NamedTextColor.GRAY)
-                .append(Component.text(stats.get("total_agreed").toString()).color(NamedTextColor.WHITE)));
-            player.sendMessage(Component.text("━━━━━━━━━━━━━━━━").color(NamedTextColor.GOLD));
+            player.sendMessage(messageManager.getComponent("blockpalettes.command.terms.header"));
+            player.sendMessage(messageManager.getComponent("blockpalettes.command.terms.version", "version", stats.get("current_version").toString()));
+            player.sendMessage(messageManager.getComponent("blockpalettes.command.terms.agreed-count", "count", stats.get("total_agreed").toString()));
+            player.sendMessage(messageManager.getComponent("blockpalettes.command.terms.footer"));
             return true;
         }
         
@@ -163,18 +161,18 @@ public class BlockPalettesCommand implements CommandExecutor, TabCompleter {
         
         if ("reset".equals(subCmd) && player.hasPermission("ombre.blockpalettes.terms.manage")) {
             if (args.length < 3) {
-                player.sendMessage(Component.text("用法: /bp terms reset <玩家>").color(NamedTextColor.RED));
+                player.sendMessage(messageManager.getComponent("blockpalettes.command.terms.reset-usage"));
                 return true;
             }
             
             Player target = Bukkit.getPlayer(args[2]);
             if (target == null) {
-                player.sendMessage(Component.text("找不到玩家: " + args[2]).color(NamedTextColor.RED));
+                player.sendMessage(messageManager.getComponent("blockpalettes.command.player-not-found", "player", args[2]));
                 return true;
             }
             
             feature.getTermsTracker().revokeAgreement(target.getUniqueId());
-            player.sendMessage(Component.text("✓ 已重置玩家 " + target.getName() + " 的條款同意狀態").color(NamedTextColor.GREEN));
+            player.sendMessage(messageManager.getComponent("blockpalettes.command.terms.reset-success", "player", target.getName()));
             return true;
         }
         
@@ -188,8 +186,8 @@ public class BlockPalettesCommand implements CommandExecutor, TabCompleter {
         int count = feature.getFavoritesManager().getFavoriteCount(player.getUniqueId());
         
         if (count == 0) {
-            player.sendMessage(Component.text("你還沒有收藏任何調色板").color(NamedTextColor.YELLOW));
-            player.sendMessage(Component.text("使用 /bp 瀏覽並收藏喜歡的調色板").color(NamedTextColor.GRAY));
+            player.sendMessage(messageManager.getComponent("blockpalettes.command.favorites.empty"));
+            player.sendMessage(messageManager.getComponent("blockpalettes.command.favorites.hint"));
             return true;
         }
         
@@ -205,18 +203,13 @@ public class BlockPalettesCommand implements CommandExecutor, TabCompleter {
      * 處理 help 子指令
      */
     private boolean handleHelp(Player player) {
-        player.sendMessage(Component.text("━━━━ Block Palettes 幫助 ━━━━").color(NamedTextColor.GOLD));
-        player.sendMessage(Component.text("/bp").color(NamedTextColor.YELLOW)
-            .append(Component.text(" - 開啟調色板瀏覽介面").color(NamedTextColor.GRAY)));
-        player.sendMessage(Component.text("/bp favorites").color(NamedTextColor.YELLOW)
-            .append(Component.text(" - 查看收藏的調色板").color(NamedTextColor.GRAY)));
-        player.sendMessage(Component.text("/bp reload").color(NamedTextColor.YELLOW)
-            .append(Component.text(" - 重新載入快取 (需要權限)").color(NamedTextColor.GRAY)));
-        player.sendMessage(Component.text("/bp cache").color(NamedTextColor.YELLOW)
-            .append(Component.text(" - 查看快取統計 (需要權限)").color(NamedTextColor.GRAY)));
-        player.sendMessage(Component.text("/bp terms").color(NamedTextColor.YELLOW)
-            .append(Component.text(" - 查看條款資訊").color(NamedTextColor.GRAY)));
-        player.sendMessage(Component.text("━━━━━━━━━━━━━━━━━━━━━━").color(NamedTextColor.GOLD));
+        player.sendMessage(messageManager.getComponent("blockpalettes.command.help.header"));
+        player.sendMessage(messageManager.getComponent("blockpalettes.command.help.main"));
+        player.sendMessage(messageManager.getComponent("blockpalettes.command.help.favorites"));
+        player.sendMessage(messageManager.getComponent("blockpalettes.command.help.reload"));
+        player.sendMessage(messageManager.getComponent("blockpalettes.command.help.cache"));
+        player.sendMessage(messageManager.getComponent("blockpalettes.command.help.terms"));
+        player.sendMessage(messageManager.getComponent("blockpalettes.command.help.footer"));
         return true;
     }
     

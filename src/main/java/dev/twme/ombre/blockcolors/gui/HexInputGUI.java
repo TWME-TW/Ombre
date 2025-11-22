@@ -14,8 +14,10 @@ import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
+import dev.twme.ombre.Ombre;
 import dev.twme.ombre.blockcolors.BlockColorsFeature;
 import dev.twme.ombre.blockcolors.util.ColorConverter;
+import dev.twme.ombre.i18n.MessageManager;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 
@@ -24,23 +26,26 @@ import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
  * 使用 Anvil 介面讓玩家輸入 HEX 色碼
  */
 public class HexInputGUI implements Listener {
-    private final BlockColorsFeature feature;
     private final Player player;
     private final BlockColorsGUI parentGUI;
+    private final Ombre plugin;
+    private final MessageManager msg;
     private boolean processed = false;
 
     public HexInputGUI(BlockColorsFeature feature, Player player, BlockColorsGUI parentGUI) {
-        this.feature = feature;
         this.player = player;
         this.parentGUI = parentGUI;
+        this.plugin = (Ombre) feature.getPlugin();
+        this.msg = plugin.getMessageManager();
     }
 
     /**
      * 開啟 Anvil GUI
      */
+    @SuppressWarnings("deprecation")
     public void open() {
         // 註冊事件監聽器
-        Bukkit.getPluginManager().registerEvents(this, feature.getPlugin());
+        Bukkit.getPluginManager().registerEvents(this, plugin);
         
         // 開啟 Anvil GUI
         InventoryView view = player.openAnvil(null, true);
@@ -51,16 +56,17 @@ public class HexInputGUI implements Listener {
             ItemStack input = new ItemStack(Material.PAPER);
             ItemMeta meta = input.getItemMeta();
             if (meta != null) {
-                meta.displayName(Component.text("#FFFFFF"));
+                meta.displayName(msg.getComponent("blockcolors.gui.hex-input-gui.default-text", player));
                 input.setItemMeta(meta);
             }
             
             anvil.setItem(0, input);
             
-            player.sendMessage("§e請輸入 HEX 色碼 (例如: #FF5733 或 FF5733)");
-            player.sendMessage("§7完成後點擊結果槽");
+            for (Component line : msg.getComponentList("blockcolors.gui.hex-input-gui.instructions")) {
+                player.sendMessage(line);
+            }
         } else {
-            player.sendMessage("§c無法開啟 HEX 輸入介面");
+            msg.sendMessage(player, "blockcolors.gui.hex-input-gui.open-failed");
             cleanup();
         }
     }
@@ -84,7 +90,7 @@ public class HexInputGUI implements Listener {
         
         ItemStack result = event.getCurrentItem();
         if (result == null || result.getType() == Material.AIR) {
-            player.sendMessage("§c請先輸入 HEX 色碼");
+            msg.sendMessage(player, "blockcolors.gui.hex-input-gui.input-required");
             return;
         }
         
@@ -104,14 +110,14 @@ public class HexInputGUI implements Listener {
         
         // 驗證並解析 HEX
         if (!ColorConverter.isValidHex(input)) {
-            player.sendMessage("§c無效的 HEX 色碼格式");
-            player.sendMessage("§7請使用格式: #RRGGBB 或 RRGGBB");
+            msg.sendMessage(player, "blockcolors.gui.hex-input-gui.invalid-format");
+            msg.sendMessage(player, "blockcolors.gui.hex-input-gui.format-hint");
             return;
         }
         
         int rgb = ColorConverter.hexToRgb(input);
         if (rgb == -1) {
-            player.sendMessage("§c無法解析 HEX 色碼");
+            msg.sendMessage(player, "blockcolors.gui.hex-input-gui.parse-failed");
             return;
         }
         
@@ -122,11 +128,18 @@ public class HexInputGUI implements Listener {
         processed = true;
         
         player.closeInventory();
-        player.sendMessage("§a✓ 已設定顏色為 " + ColorConverter.rgbToHex(red, green, blue));
-        player.sendMessage("§7RGB: (" + red + ", " + green + ", " + blue + ")");
+        String hexValue = ColorConverter.rgbToHex(red, green, blue);
+        msg.sendMessage(player, "blockcolors.gui.hex-input-gui.set-success", java.util.Map.of(
+            "hex", hexValue
+        ));
+        msg.sendMessage(player, "blockcolors.gui.hex-input-gui.rgb-value", java.util.Map.of(
+            "r", red,
+            "g", green,
+            "b", blue
+        ));
         
         // 延遲開啟主 GUI 並設定顏色
-        Bukkit.getScheduler().runTaskLater(feature.getPlugin(), () -> {
+        Bukkit.getScheduler().runTaskLater(plugin, () -> {
             if (parentGUI != null) {
                 parentGUI.setColor(red, green, blue);
                 parentGUI.open();
@@ -145,7 +158,7 @@ public class HexInputGUI implements Listener {
         
         // 如果還沒處理完就關閉了，清理並返回主 GUI
         if (!processed) {
-            Bukkit.getScheduler().runTaskLater(feature.getPlugin(), () -> {
+            Bukkit.getScheduler().runTaskLater(plugin, () -> {
                 if (parentGUI != null) {
                     parentGUI.open();
                 }

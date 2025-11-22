@@ -41,11 +41,8 @@ public class BlockPalettesAPI {
         return CompletableFuture.supplyAsync(() -> {
             try {
                 String urlStr = BASE_URL + ALL_PALETTES_ENDPOINT + "?" + filter.toQueryString();
-                plugin.getLogger().info("API 請求: " + urlStr);
                 
                 String jsonResponse = makeRequest(urlStr);
-                plugin.getLogger().info("API 回應長度: " + jsonResponse.length() + " 字元");
-                plugin.getLogger().info("API 回應內容: " + jsonResponse.substring(0, Math.min(500, jsonResponse.length())));
                 
                 JsonObject json = gson.fromJson(jsonResponse, JsonObject.class);
                 APIResponse response = new APIResponse();
@@ -67,17 +64,17 @@ public class BlockPalettesAPI {
                     response.setPalettes(palettes);
                 } else {
                     response.setSuccess(false);
-                    response.setError(json.has("error") ? json.get("error").getAsString() : "未知錯誤");
+                    response.setError(json.has("error") ? json.get("error").getAsString() : "Unknown error");
                     response.setErrorCode(json.has("error_code") ? json.get("error_code").getAsString() : "UNKNOWN");
                 }
                 
                 return response;
                 
             } catch (Exception e) {
-                plugin.getLogger().warning("API 請求失敗: " + e.getMessage());
+                plugin.getLogger().warning("API request failed: " + e.getMessage());
                 APIResponse errorResponse = new APIResponse();
                 errorResponse.setSuccess(false);
-                errorResponse.setError("連線錯誤: " + e.getMessage());
+                errorResponse.setError("Connection error: " + e.getMessage());
                 errorResponse.setErrorCode("CONNECTION_ERROR");
                 return errorResponse;
             }
@@ -92,7 +89,6 @@ public class BlockPalettesAPI {
         return CompletableFuture.supplyAsync(() -> {
             // API 不提供詳細資訊端點，直接返回基本物件
             // 詳細資訊應該從列表 API 中獲取
-            plugin.getLogger().fine("詳細資訊 API 不可用，返回基本資料結構");
             
             PaletteData basicData = new PaletteData();
             basicData.setId(id);
@@ -160,7 +156,7 @@ public class BlockPalettesAPI {
             
             return response.toString();
         } else {
-            throw new Exception("HTTP 錯誤代碼: " + responseCode);
+            throw new Exception("HTTP error code: " + responseCode);
         }
     }
 }

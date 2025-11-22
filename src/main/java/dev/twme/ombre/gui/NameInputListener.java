@@ -11,9 +11,8 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerQuitEvent;
 
 import dev.twme.ombre.Ombre;
+import dev.twme.ombre.i18n.MessageManager;
 import io.papermc.paper.event.player.AsyncChatEvent;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 
 /**
@@ -23,14 +22,14 @@ import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 public class NameInputListener implements Listener {
     
     private final Ombre plugin;
-    private final GUIManager guiManager;
+    private final MessageManager messageManager;
     
     // 等待輸入名稱的玩家
     private final Map<UUID, OmbreGUI> awaitingInput;
     
     public NameInputListener(Ombre plugin, GUIManager guiManager) {
         this.plugin = plugin;
-        this.guiManager = guiManager;
+        this.messageManager = plugin.getMessageManager();
         this.awaitingInput = new HashMap<>();
     }
     
@@ -68,15 +67,15 @@ public class NameInputListener implements Listener {
             return;
         }
         
-        // 取消事件，避免訊息被發送到聊天
+        // Cancel the event to prevent the message from being sent to chat
         event.setCancelled(true);
         
         OmbreGUI gui = awaitingInput.remove(playerId);
         
-        // 將 Component 訊息轉換為純文字
+        // Convert Component message to plain text
         String input = PlainTextComponentSerializer.plainText().serialize(event.message()).trim();
         
-        // 在主執行緒中處理名稱設定
+        // Handle name input on the main thread
         plugin.getServer().getScheduler().runTask(plugin, () -> {
             handleNameInput(player, gui, input);
         });
@@ -94,32 +93,31 @@ public class NameInputListener implements Listener {
      * 處理名稱輸入（必須在主執行緒執行）
      */
     private void handleNameInput(Player player, OmbreGUI gui, String input) {
-        // 檢查取消命令
-        if (input.equalsIgnoreCase("cancel") || input.equalsIgnoreCase("取消")) {
-            player.sendMessage(Component.text("已取消命名").color(NamedTextColor.YELLOW));
+        // Check for cancel command
+        if (input.equalsIgnoreCase("cancel")) {
+            messageManager.sendMessage(player, "messages.naming.name-input.cancelled");
             gui.open(player);
             return;
         }
         
-        // 驗證名稱長度
+        // Validate name length
         if (input.isEmpty()) {
-            player.sendMessage(Component.text("名稱不能為空！請重新輸入或輸入 'cancel' 取消").color(NamedTextColor.RED));
+            messageManager.sendMessage(player, "messages.naming.name-input.empty");
             awaitingInput.put(player.getUniqueId(), gui);
             return;
         }
         
         if (input.length() > 32) {
-            player.sendMessage(Component.text("名稱太長！請輸入不超過32字元的名稱或輸入 'cancel' 取消").color(NamedTextColor.RED));
+            messageManager.sendMessage(player, "messages.naming.name-input.too-long");
             awaitingInput.put(player.getUniqueId(), gui);
             return;
         }
         
-        // 設定名稱
+        // Set the name
         gui.setGradientName(input);
-        player.sendMessage(Component.text("已將漸層命名為: ").color(NamedTextColor.GREEN)
-            .append(Component.text(input).color(NamedTextColor.YELLOW)));
+        messageManager.sendMessage(player, "messages.naming.name-input.success", "name", input);
         
-        // 重新打開 GUI
+        // Reopen the GUI
         gui.open(player);
     }
 }

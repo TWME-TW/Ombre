@@ -65,29 +65,29 @@ public class BlockColorCache {
     public CompletableFuture<Boolean> initialize() {
         return CompletableFuture.supplyAsync(() -> {
             try {
-                plugin.getLogger().info("正在初始化 BlockColors 快取...");
+                plugin.getLogger().info("Initializing BlockColors cache...");
                 
                 // 檢查是否需要更新
                 if (needsUpdate()) {
-                    plugin.getLogger().info("快取不存在或已過期，正在從 API 下載資料...");
+                    plugin.getLogger().info("Cache does not exist or has expired, downloading data from API...");
                     boolean downloaded = downloadFromAPI();
                     
                     if (downloaded) {
-                        plugin.getLogger().info("API 資料下載成功");
+                        plugin.getLogger().info("API data downloaded successfully");
                         saveCacheToFile();
                     } else {
-                        plugin.getLogger().warning("API 下載失敗，嘗試從快取檔案載入...");
+                        plugin.getLogger().warning("API download failed, attempting to load from cache file...");
                         if (!loadCacheFromFile()) {
-                            plugin.getLogger().severe("快取載入失敗！BlockColors 功能可能無法正常運作");
+                            plugin.getLogger().severe("Cache loading failed! BlockColors feature may not work properly");
                             return false;
                         }
                     }
                 } else {
-                    plugin.getLogger().info("從快取檔案載入資料...");
+                    plugin.getLogger().info("Loading data from cache file...");
                     if (!loadCacheFromFile()) {
-                        plugin.getLogger().warning("快取檔案載入失敗，嘗試從 API 下載...");
+                        plugin.getLogger().warning("Cache file loading failed, attempting to download from API...");
                         if (!downloadFromAPI()) {
-                            plugin.getLogger().severe("無法載入方塊顏色資料！");
+                            plugin.getLogger().severe("Unable to load block color data!");
                             return false;
                         }
                         saveCacheToFile();
@@ -97,12 +97,12 @@ public class BlockColorCache {
                 // 建立索引
                 buildIndices();
                 
-                plugin.getLogger().info("BlockColors 快取初始化完成");
+                plugin.getLogger().info("BlockColors cache initialization complete");
                 plugin.getLogger().info(MaterialMapper.getMappingStats(blockColorMap.values()));
                 
                 return true;
             } catch (Exception e) {
-                plugin.getLogger().log(Level.SEVERE, "初始化 BlockColors 快取時發生錯誤", e);
+                plugin.getLogger().log(Level.SEVERE, "Error occurred while initializing BlockColors cache", e);
                 return false;
             }
         });
@@ -117,7 +117,7 @@ public class BlockColorCache {
         
         for (int attempt = 1; attempt <= maxRetries; attempt++) {
             try {
-                plugin.getLogger().info("嘗試從 API 下載 (第 " + attempt + "/" + maxRetries + " 次)...");
+                plugin.getLogger().info("Attempting to download from API (attempt " + attempt + "/" + maxRetries + ")...");
                 
                 URL url = new URL(API_URL);
                 HttpURLConnection connection = (HttpURLConnection) url.openConnection();
@@ -147,11 +147,11 @@ public class BlockColorCache {
                     
                     return true;
                 } else {
-                    plugin.getLogger().warning("API 回應代碼: " + responseCode);
+                    plugin.getLogger().warning("API response code: " + responseCode);
                 }
                 
             } catch (Exception e) {
-                plugin.getLogger().warning("API 下載失敗 (第 " + attempt + " 次): " + e.getMessage());
+                plugin.getLogger().warning("API download failed (attempt " + attempt + "): " + e.getMessage());
                 
                 if (attempt < maxRetries) {
                     try {
@@ -204,11 +204,11 @@ public class BlockColorCache {
                     data.setMaterial(material);
                     blockColorMap.put(id, data);
                 } else if (material != null) {
-                    plugin.getLogger().fine("跳過非物品方塊: " + textureName + " (" + material.name() + ")");
+                    plugin.getLogger().fine("Skipping non-item block: " + textureName + " (" + material.name() + ")");
                 }
                 
             } catch (Exception e) {
-                plugin.getLogger().warning("解析方塊資料失敗 (ID: " + id + "): " + e.getMessage());
+                plugin.getLogger().warning("Failed to parse block data (ID: " + id + "): " + e.getMessage());
             }
         }
     }
@@ -234,7 +234,7 @@ public class BlockColorCache {
             }
         }
         
-        plugin.getLogger().info("已建立索引: " + materialToBlockMap.size() + " 個可用方塊");
+        plugin.getLogger().info("Index created: " + materialToBlockMap.size() + " available blocks");
     }
 
     /**
@@ -272,10 +272,10 @@ public class BlockColorCache {
             }
             
             config.save(cacheFile);
-            plugin.getLogger().info("快取已儲存到: " + cacheFile.getAbsolutePath());
+            plugin.getLogger().info("Cache saved to: " + cacheFile.getAbsolutePath());
             
         } catch (Exception e) {
-            plugin.getLogger().log(Level.SEVERE, "儲存快取檔案失敗", e);
+            plugin.getLogger().log(Level.SEVERE, "Failed to save cache file", e);
         }
     }
 
@@ -332,16 +332,16 @@ public class BlockColorCache {
                         blockColorMap.put(id, data);
                         
                     } catch (Exception e) {
-                        plugin.getLogger().warning("載入方塊資料失敗 (ID: " + id + "): " + e.getMessage());
+                        plugin.getLogger().warning("Failed to load block data (ID: " + id + "): " + e.getMessage());
                     }
                 }
             }
             
-            plugin.getLogger().info("從快取檔案載入了 " + blockColorMap.size() + " 個方塊");
+            plugin.getLogger().info("Loaded " + blockColorMap.size() + " blocks from cache file");
             return !blockColorMap.isEmpty();
             
         } catch (Exception e) {
-            plugin.getLogger().log(Level.SEVERE, "載入快取檔案失敗", e);
+            plugin.getLogger().log(Level.SEVERE, "Failed to load cache file", e);
             return false;
         }
     }
@@ -365,14 +365,14 @@ public class BlockColorCache {
      */
     public CompletableFuture<Boolean> reload() {
         return CompletableFuture.supplyAsync(() -> {
-            plugin.getLogger().info("重新載入 BlockColors 快取...");
+            plugin.getLogger().info("Reloading BlockColors cache...");
             boolean success = downloadFromAPI();
             if (success) {
                 saveCacheToFile();
                 buildIndices();
-                plugin.getLogger().info("快取重新載入完成");
+                plugin.getLogger().info("Cache reload complete");
             } else {
-                plugin.getLogger().warning("快取重新載入失敗");
+                plugin.getLogger().warning("Cache reload failed");
             }
             return success;
         });
@@ -392,7 +392,7 @@ public class BlockColorCache {
             cacheFile.delete();
         }
         
-        plugin.getLogger().info("快取已清除");
+        plugin.getLogger().info("Cache cleared");
     }
 
     // Getters

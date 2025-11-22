@@ -1,17 +1,33 @@
 package dev.twme.ombre.blockcolors.data;
 
+import dev.twme.ombre.i18n.MessageManager;
+import net.kyori.adventure.text.Component;
+
 /**
- * 顏色匹配結果
+ * Color matching result
  */
 public class ColorMatch implements Comparable<ColorMatch> {
     private final BlockColorData block;
-    private final double similarity;      // 0-100，100 為完全匹配
-    private final double deltaE;          // 色彩差異值
+    private final double similarity;      // 0-100, 100 is perfect match
+    private final double deltaE;          // Color difference value
+    private MessageManager messageManager; // Optional for localization
 
     public ColorMatch(BlockColorData block, double similarity, double deltaE) {
         this.block = block;
         this.similarity = similarity;
         this.deltaE = deltaE;
+        this.messageManager = null;
+    }
+    
+    public ColorMatch(BlockColorData block, double similarity, double deltaE, MessageManager messageManager) {
+        this.block = block;
+        this.similarity = similarity;
+        this.deltaE = deltaE;
+        this.messageManager = messageManager;
+    }
+    
+    public void setMessageManager(MessageManager messageManager) {
+        this.messageManager = messageManager;
     }
 
     public BlockColorData getBlock() {
@@ -27,18 +43,49 @@ public class ColorMatch implements Comparable<ColorMatch> {
     }
 
     /**
-     * 取得相似度等級的描述
+     * Get similarity level as localized Component
      */
-    public String getSimilarityLevel() {
-        if (similarity >= 95) return "§a完美匹配";
-        if (similarity >= 85) return "§a極度相似";
-        if (similarity >= 70) return "§e非常相似";
-        if (similarity >= 50) return "§6相似";
-        return "§c較不相似";
+    public Component getSimilarityLevelComponent() {
+        String key;
+        if (similarity >= 95) {
+            key = "blockcolors.similarity.perfect";
+        } else if (similarity >= 85) {
+            key = "blockcolors.similarity.very-similar";
+        } else if (similarity >= 70) {
+            key = "blockcolors.similarity.quite-similar";
+        } else if (similarity >= 50) {
+            key = "blockcolors.similarity.similar";
+        } else {
+            key = "blockcolors.similarity.not-similar";
+        }
+        
+        if (messageManager != null) {
+            return messageManager.getComponent(key);
+        } else {
+            // Fallback to English if MessageManager not available
+            return getFallbackComponent(key);
+        }
+    }
+    
+    private Component getFallbackComponent(String key) {
+        switch(key) {
+            case "blockcolors.similarity.perfect":
+                return Component.text("Perfect match").color(net.kyori.adventure.text.format.NamedTextColor.GREEN);
+            case "blockcolors.similarity.very-similar":
+                return Component.text("Very similar").color(net.kyori.adventure.text.format.NamedTextColor.GREEN);
+            case "blockcolors.similarity.quite-similar":
+                return Component.text("Quite similar").color(net.kyori.adventure.text.format.NamedTextColor.YELLOW);
+            case "blockcolors.similarity.similar":
+                return Component.text("Similar").color(net.kyori.adventure.text.format.NamedTextColor.GOLD);
+            case "blockcolors.similarity.not-similar":
+                return Component.text("Not very similar").color(net.kyori.adventure.text.format.NamedTextColor.RED);
+            default:
+                return Component.text("Unknown");
+        }
     }
 
     /**
-     * 取得相似度百分比字串
+     * Get similarity percentage as string
      */
     public String getSimilarityPercentage() {
         return String.format("%.1f%%", similarity);
@@ -46,7 +93,7 @@ public class ColorMatch implements Comparable<ColorMatch> {
 
     @Override
     public int compareTo(ColorMatch other) {
-        // 相似度高的排在前面
+        // Higher similarity comes first
         return Double.compare(other.similarity, this.similarity);
     }
 

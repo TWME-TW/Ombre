@@ -80,7 +80,7 @@ public class ConfigManager {
             yaml.save(configFile);
             return true;
         } catch (IOException e) {
-            plugin.getLogger().log(Level.SEVERE, "儲存配置失敗: " + config.getId(), e);
+            plugin.getLogger().log(Level.SEVERE, "Failed to save configuration: " + config.getId(), e);
             return false;
         }
     }
@@ -132,7 +132,7 @@ public class ConfigManager {
             return new GradientConfig(id, name, creatorUuid, creatorName, configNumber, 
                                      timestamp, blocks, published, favoriteCount, loadCount);
         } catch (Exception e) {
-            plugin.getLogger().log(Level.SEVERE, "載入配置失敗: " + file.getName(), e);
+            plugin.getLogger().log(Level.SEVERE, "Failed to load configuration: " + file.getName(), e);
             return null;
         }
     }
@@ -175,7 +175,7 @@ public class ConfigManager {
             saveGradient(config);
             return true;
         } catch (IOException e) {
-            plugin.getLogger().log(Level.SEVERE, "發布配置失敗: " + configId, e);
+            plugin.getLogger().log(Level.SEVERE, "Failed to publish configuration: " + configId, e);
             return false;
         }
     }
@@ -205,6 +205,34 @@ public class ConfigManager {
         if (config.isPublished()) {
             File sharedFile = new File(sharedFolder, configId.toString() + ".yml");
             sharedFile.delete();
+        }
+        
+        return deleted;
+    }
+    
+    /**
+     * 通過配置 ID 刪除配置（管理員）
+     */
+    public boolean deleteGradientById(UUID configId) {
+        boolean deleted = false;
+        
+        // 搜尋所有玩家資料夾
+        File[] playerFolders = playersFolder.listFiles(File::isDirectory);
+        if (playerFolders != null) {
+            for (File playerFolder : playerFolders) {
+                File configFile = new File(playerFolder, configId.toString() + ".yml");
+                if (configFile.exists()) {
+                    deleted = configFile.delete();
+                    if (deleted) {
+                        // 同時刪除共享庫中的對應檔案
+                        File sharedFile = new File(sharedFolder, configId.toString() + ".yml");
+                        if (sharedFile.exists()) {
+                            sharedFile.delete();
+                        }
+                        break;
+                    }
+                }
+            }
         }
         
         return deleted;
@@ -333,7 +361,7 @@ public class ConfigManager {
             try {
                 yaml.save(sharedFile);
             } catch (IOException e) {
-                plugin.getLogger().log(Level.WARNING, "更新載入次數失敗", e);
+                plugin.getLogger().log(Level.WARNING, "Failed to update load count", e);
             }
         }
     }
@@ -350,7 +378,7 @@ public class ConfigManager {
             try {
                 yaml.save(sharedFile);
             } catch (IOException e) {
-                plugin.getLogger().log(Level.WARNING, "更新收藏數失敗", e);
+                plugin.getLogger().log(Level.WARNING, "Failed to update favorite count", e);
             }
         }
     }
@@ -367,7 +395,7 @@ public class ConfigManager {
             try {
                 yaml.save(sharedFile);
             } catch (IOException e) {
-                plugin.getLogger().log(Level.WARNING, "更新收藏數失敗", e);
+                plugin.getLogger().log(Level.WARNING, "Failed to update favorite count", e);
             }
         }
     }
@@ -423,7 +451,7 @@ public class ConfigManager {
         try {
             yaml.save(favoritesFile);
         } catch (IOException e) {
-            plugin.getLogger().log(Level.WARNING, "儲存收藏列表失敗", e);
+            plugin.getLogger().log(Level.WARNING, "Failed to save favorites list", e);
         }
     }
     

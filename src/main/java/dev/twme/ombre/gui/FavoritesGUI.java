@@ -6,7 +6,9 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -22,14 +24,15 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 import dev.twme.ombre.Ombre;
 import dev.twme.ombre.data.GradientConfig;
+import dev.twme.ombre.i18n.MessageManager;
 import dev.twme.ombre.manager.ConfigManager;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 
 /**
- * 我的最愛 GUI
- * 顯示玩家收藏的漸層配置
+ * Favorites GUI
+ * Displays player's favorited gradient configurations
  */
 public class FavoritesGUI implements InventoryHolder {
     
@@ -56,6 +59,7 @@ public class FavoritesGUI implements InventoryHolder {
     private final Player player;
     private final ConfigManager configManager;
     private final GUIManager guiManager;
+    private final MessageManager messageManager;
     private final Inventory inventory;
     
     private List<GradientConfig> favoriteConfigs;
@@ -63,19 +67,9 @@ public class FavoritesGUI implements InventoryHolder {
     private SortMode sortMode;
     
     public enum SortMode {
-        TIME("時間"),
-        POPULAR("熱度"),
-        CREATOR("建立者");
-        
-        private final String displayName;
-        
-        SortMode(String displayName) {
-            this.displayName = displayName;
-        }
-        
-        public String getDisplayName() {
-            return displayName;
-        }
+        TIME,
+        POPULAR,
+        CREATOR
     }
     
     public FavoritesGUI(Ombre plugin, Player player, GUIManager guiManager, ConfigManager configManager) {
@@ -83,12 +77,13 @@ public class FavoritesGUI implements InventoryHolder {
         this.player = player;
         this.guiManager = guiManager;
         this.configManager = configManager;
+        this.messageManager = plugin.getMessageManager();
         this.favoriteConfigs = new ArrayList<>();
         this.currentPage = 0;
         this.sortMode = SortMode.TIME;
         
         this.inventory = Bukkit.createInventory(this, ROWS * COLS, 
-            Component.text("我的最愛").color(NamedTextColor.GOLD));
+            messageManager.getComponent("gui.favorites.title"));
         
         loadFavorites();
         setupGUI();
@@ -157,11 +152,15 @@ public class FavoritesGUI implements InventoryHolder {
         // 頁碼顯示（第 1 行中間）
         ItemStack pageInfo = new ItemStack(Material.BOOK);
         ItemMeta pageMeta = pageInfo.getItemMeta();
-        pageMeta.displayName(Component.text("§6我的最愛")
+        pageMeta.displayName(messageManager.getComponent("gui.favorites.page-info")
             .decoration(TextDecoration.ITALIC, false));
-        List<Component> lore = new ArrayList<>();
-        lore.add(Component.text("共 " + favoriteConfigs.size() + " 個收藏").color(NamedTextColor.GRAY));
-        lore.add(Component.text("第 " + (currentPage + 1) + " / " + Math.max(1, totalPages) + " 頁").color(NamedTextColor.GRAY));
+        
+        Map<String, Object> loreParams = new HashMap<>();
+        loreParams.put("count", String.valueOf(favoriteConfigs.size()));
+        loreParams.put("page", String.valueOf(currentPage + 1));
+        loreParams.put("total", String.valueOf(Math.max(1, totalPages)));
+        
+        List<Component> lore = messageManager.getComponentList("gui.favorites.page-lore", loreParams);
         pageMeta.lore(lore);
         pageInfo.setItemMeta(pageMeta);
         inventory.setItem(BUTTON_PAGE_INFO, pageInfo);
@@ -170,10 +169,12 @@ public class FavoritesGUI implements InventoryHolder {
         if (currentPage > 0) {
             ItemStack prevPage = new ItemStack(Material.ARROW);
             ItemMeta meta = prevPage.getItemMeta();
-            meta.displayName(Component.text("§a上一頁")
+            meta.displayName(messageManager.getComponent("gui.favorites.button.prev-page")
                 .decoration(TextDecoration.ITALIC, false));
-            List<Component> prevLore = new ArrayList<>();
-            prevLore.add(Component.text("§7第 " + currentPage + " 頁"));
+            
+            Map<String, Object> prevParams = new HashMap<>();
+            prevParams.put("page", String.valueOf(currentPage));
+            List<Component> prevLore = messageManager.getComponentList("gui.favorites.button.prev-page-lore", prevParams);
             meta.lore(prevLore);
             prevPage.setItemMeta(meta);
             inventory.setItem(BUTTON_PREV_PAGE, prevPage);
@@ -183,10 +184,12 @@ public class FavoritesGUI implements InventoryHolder {
         if (currentPage < totalPages - 1) {
             ItemStack nextPage = new ItemStack(Material.ARROW);
             ItemMeta meta = nextPage.getItemMeta();
-            meta.displayName(Component.text("§a下一頁")
+            meta.displayName(messageManager.getComponent("gui.favorites.button.next-page")
                 .decoration(TextDecoration.ITALIC, false));
-            List<Component> nextLore = new ArrayList<>();
-            nextLore.add(Component.text("§7第 " + (currentPage + 2) + " 頁"));
+            
+            Map<String, Object> nextParams = new HashMap<>();
+            nextParams.put("page", String.valueOf(currentPage + 2));
+            List<Component> nextLore = messageManager.getComponentList("gui.favorites.button.next-page-lore", nextParams);
             meta.lore(nextLore);
             nextPage.setItemMeta(meta);
             inventory.setItem(BUTTON_NEXT_PAGE, nextPage);
@@ -241,14 +244,16 @@ public class FavoritesGUI implements InventoryHolder {
         // 設置名稱
         String displayName = config.getName() != null ? config.getName() : 
             config.getCreatorName() + "#" + config.getConfigNumber();
-        meta.displayName(Component.text(displayName)
-            .color(NamedTextColor.GOLD)
-            .decoration(TextDecoration.ITALIC, false)
-            .decorate(TextDecoration.BOLD));
+        Map<String, Object> nameParams = new HashMap<>();
+        nameParams.put("name", displayName);
+        meta.displayName(messageManager.getComponent("gui.favorites.config.display-name", player, nameParams));
         
         // 設置 Lore
         List<Component> lore = new ArrayList<>();
-        lore.add(Component.text("建立者: " + config.getCreatorName()).color(NamedTextColor.GRAY));
+        
+        Map<String, Object> creatorParams = new HashMap<>();
+        creatorParams.put("creator", config.getCreatorName());
+        lore.add(messageManager.getComponent("gui.favorites.config.creator", player, creatorParams));
         
         // 格式化時間
         LocalDateTime dateTime = LocalDateTime.ofInstant(
@@ -256,16 +261,22 @@ public class FavoritesGUI implements InventoryHolder {
             ZoneId.systemDefault()
         );
         String formattedTime = dateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"));
-        lore.add(Component.text("時間: " + formattedTime).color(NamedTextColor.GRAY));
+        Map<String, Object> timeParams = new HashMap<>();
+        timeParams.put("time", formattedTime);
+        lore.add(messageManager.getComponent("gui.favorites.config.time", player, timeParams));
         
         // 收藏狀態（我的最愛中一定是已收藏）
-        lore.add(Component.text("⭐ 已收藏 (" + config.getFavoriteCount() + " 人收藏)")
-            .color(NamedTextColor.YELLOW));
+        Map<String, Object> favParams = new HashMap<>();
+        favParams.put("count", String.valueOf(config.getFavoriteCount()));
+        lore.add(messageManager.getComponent("gui.favorites.config.favorited", player, favParams));
         
-        lore.add(Component.text("載入次數: " + config.getLoadCount()).color(NamedTextColor.GREEN));
+        Map<String, Object> loadParams = new HashMap<>();
+        loadParams.put("count", String.valueOf(config.getLoadCount()));
+        lore.add(messageManager.getComponent("gui.favorites.config.load-count", player, loadParams));
+        
         lore.add(Component.empty());
-        lore.add(Component.text("左鍵載入配置").color(NamedTextColor.DARK_GRAY));
-        lore.add(Component.text("右鍵取消收藏").color(NamedTextColor.DARK_GRAY));
+        lore.add(messageManager.getComponent("gui.favorites.config.action.left-click", player));
+        lore.add(messageManager.getComponent("gui.favorites.config.action.right-click", player));
         
         meta.lore(lore);
         display.setItemMeta(meta);
@@ -299,7 +310,7 @@ public class FavoritesGUI implements InventoryHolder {
         // 返回按鈕
         ItemStack back = new ItemStack(Material.BARRIER);
         ItemMeta backMeta = back.getItemMeta();
-        backMeta.displayName(Component.text("返回").color(NamedTextColor.RED)
+        backMeta.displayName(messageManager.getComponent("gui.favorites.button.back")
             .decoration(TextDecoration.ITALIC, false));
         back.setItemMeta(backMeta);
         inventory.setItem(BUTTON_BACK, back);
@@ -307,38 +318,42 @@ public class FavoritesGUI implements InventoryHolder {
         // 排序按鈕 - 時間
         ItemStack sortTime = new ItemStack(Material.CLOCK);
         ItemMeta sortTimeMeta = sortTime.getItemMeta();
-        sortTimeMeta.displayName(Component.text("按時間排序")
-            .color(sortMode == SortMode.TIME ? NamedTextColor.GREEN : NamedTextColor.GRAY)
-            .decoration(TextDecoration.ITALIC, false));
+        Component sortTimeComp = messageManager.getComponent("gui.favorites.button.sort-time");
+        if (sortMode != SortMode.TIME) {
+            sortTimeComp = sortTimeComp.color(NamedTextColor.GRAY);
+        }
+        sortTimeMeta.displayName(sortTimeComp.decoration(TextDecoration.ITALIC, false));
         sortTime.setItemMeta(sortTimeMeta);
         inventory.setItem(BUTTON_SORT_TIME, sortTime);
         
         // 排序按鈕 - 熱度
         ItemStack sortPopular = new ItemStack(Material.BLAZE_POWDER);
         ItemMeta sortPopularMeta = sortPopular.getItemMeta();
-        sortPopularMeta.displayName(Component.text("按熱度排序")
-            .color(sortMode == SortMode.POPULAR ? NamedTextColor.GREEN : NamedTextColor.GRAY)
-            .decoration(TextDecoration.ITALIC, false));
+        Component sortPopularComp = messageManager.getComponent("gui.favorites.button.sort-popular");
+        if (sortMode != SortMode.POPULAR) {
+            sortPopularComp = sortPopularComp.color(NamedTextColor.GRAY);
+        }
+        sortPopularMeta.displayName(sortPopularComp.decoration(TextDecoration.ITALIC, false));
         sortPopular.setItemMeta(sortPopularMeta);
         inventory.setItem(BUTTON_SORT_POPULAR, sortPopular);
         
         // 排序按鈕 - 建立者
         ItemStack sortCreator = new ItemStack(Material.PLAYER_HEAD);
         ItemMeta sortCreatorMeta = sortCreator.getItemMeta();
-        sortCreatorMeta.displayName(Component.text("按建立者排序")
-            .color(sortMode == SortMode.CREATOR ? NamedTextColor.GREEN : NamedTextColor.GRAY)
-            .decoration(TextDecoration.ITALIC, false));
+        Component sortCreatorComp = messageManager.getComponent("gui.favorites.button.sort-creator");
+        if (sortMode != SortMode.CREATOR) {
+            sortCreatorComp = sortCreatorComp.color(NamedTextColor.GRAY);
+        }
+        sortCreatorMeta.displayName(sortCreatorComp.decoration(TextDecoration.ITALIC, false));
         sortCreator.setItemMeta(sortCreatorMeta);
         inventory.setItem(BUTTON_SORT_CREATOR, sortCreator);
         
         // 清空收藏按鈕
         ItemStack clearAll = new ItemStack(Material.TNT);
         ItemMeta clearAllMeta = clearAll.getItemMeta();
-        clearAllMeta.displayName(Component.text("清空所有收藏").color(NamedTextColor.RED)
+        clearAllMeta.displayName(messageManager.getComponent("gui.favorites.button.clear-all")
             .decoration(TextDecoration.ITALIC, false));
-        List<Component> clearLore = new ArrayList<>();
-        clearLore.add(Component.text("注意：此操作不可撤銷！").color(NamedTextColor.DARK_RED));
-        clearLore.add(Component.text("再次點擊確認清空").color(NamedTextColor.GRAY));
+        List<Component> clearLore = messageManager.getComponentList("gui.favorites.button.clear-all-lore");
         clearAllMeta.lore(clearLore);
         clearAll.setItemMeta(clearAllMeta);
         inventory.setItem(BUTTON_CLEAR_ALL, clearAll);
@@ -465,15 +480,17 @@ public class FavoritesGUI implements InventoryHolder {
     private void loadConfiguration(GradientConfig config) {
         player.closeInventory();
         
-        // 打開漸層製作 GUI 並載入配置（帶返回按鈕）
+        // Open gradient creation GUI and load configuration (with back button)
         guiManager.openOmbreGUI(player, config, "favorites");
         
-        // 增加載入次數
+        // Increment load count
         configManager.incrementLoadCount(config.getId());
         
-        player.sendMessage(Component.text("已載入配置: " + 
-            (config.getName() != null ? config.getName() : config.getCreatorName() + "#" + config.getConfigNumber()))
-            .color(NamedTextColor.GREEN));
+        String displayName = config.getName() != null ? config.getName() : 
+            config.getCreatorName() + "#" + config.getConfigNumber();
+        Map<String, Object> params = new HashMap<>();
+        params.put("name", displayName);
+        messageManager.sendMessage(player, "gui.favorites.messages.loaded", params);
     }
     
     /**
@@ -483,8 +500,7 @@ public class FavoritesGUI implements InventoryHolder {
         configManager.removeFavorite(player.getUniqueId(), config.getId());
         configManager.decrementFavoriteCount(config.getId());
         
-        player.sendMessage(Component.text("已從收藏中移除")
-            .color(NamedTextColor.YELLOW));
+        messageManager.sendMessage(player, "gui.favorites.messages.removed");
         
         // 重新載入並刷新 GUI
         loadFavorites();
@@ -504,16 +520,17 @@ public class FavoritesGUI implements InventoryHolder {
      */
     private void handleClearAll() {
         if (favoriteConfigs.isEmpty()) {
-            player.sendMessage(Component.text("收藏列表已經是空的").color(NamedTextColor.YELLOW));
+            messageManager.sendMessage(player, "gui.favorites.empty");
             return;
         }
         
-        // 需要二次確認
-        player.sendMessage(Component.text("確定要清空所有收藏嗎？").color(NamedTextColor.RED));
-        player.sendMessage(Component.text("這將移除 " + favoriteConfigs.size() + " 個收藏，此操作不可撤銷！")
-            .color(NamedTextColor.YELLOW));
-        player.sendMessage(Component.text("使用 /ombre favorites clear confirm 確認清空")
-            .color(NamedTextColor.GRAY));
+        // Require confirmation
+        messageManager.sendMessage(player, "gui.favorites.messages.clear-confirm");
+        
+        Map<String, Object> params = new HashMap<>();
+        params.put("count", String.valueOf(favoriteConfigs.size()));
+        messageManager.sendMessage(player, "gui.favorites.messages.clear-warning", params);
+        messageManager.sendMessage(player, "gui.favorites.messages.clear-hint");
     }
     
     /**
@@ -522,15 +539,17 @@ public class FavoritesGUI implements InventoryHolder {
     public void confirmClearAll() {
         int count = favoriteConfigs.size();
         
-        // 移除所有收藏
+        // Remove all favorites
         for (GradientConfig config : favoriteConfigs) {
             configManager.removeFavorite(player.getUniqueId(), config.getId());
             configManager.decrementFavoriteCount(config.getId());
         }
         
-        player.sendMessage(Component.text("已清空 " + count + " 個收藏").color(NamedTextColor.GREEN));
+        Map<String, Object> params = new HashMap<>();
+        params.put("count", String.valueOf(count));
+        messageManager.sendMessage(player, "gui.favorites.messages.cleared", params);
         
-        // 重新載入
+        // Reload
         loadFavorites();
         currentPage = 0;
         setupGUI();

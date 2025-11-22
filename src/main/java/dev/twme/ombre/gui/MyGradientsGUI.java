@@ -3,7 +3,9 @@ package dev.twme.ombre.gui;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import org.bukkit.Bukkit;
@@ -17,9 +19,9 @@ import org.bukkit.inventory.meta.ItemMeta;
 
 import dev.twme.ombre.Ombre;
 import dev.twme.ombre.data.GradientConfig;
+import dev.twme.ombre.i18n.MessageManager;
 import dev.twme.ombre.manager.ConfigManager;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 
 /**
  * 我的漸層 GUI
@@ -46,6 +48,7 @@ public class MyGradientsGUI implements InventoryHolder {
     private final Player player;
     private final GUIManager guiManager;
     private final ConfigManager configManager;
+    private final MessageManager messageManager;
     private final Inventory inventory;
     
     private List<GradientConfig> myConfigs;
@@ -56,24 +59,24 @@ public class MyGradientsGUI implements InventoryHolder {
      * 排序模式
      */
     private enum SortMode {
-        TIME("按時間", "最新的在前面"),
-        NAME("按名稱", "按字母順序排序"),
-        POPULARITY("按人氣", "最多收藏在前面");
+        TIME("gui.my-gradients.sort.time", "gui.my-gradients.sort.time-desc"),
+        NAME("gui.my-gradients.sort.name", "gui.my-gradients.sort.name-desc"),
+        POPULARITY("gui.my-gradients.sort.popularity", "gui.my-gradients.sort.popularity-desc");
         
-        private final String displayName;
-        private final String description;
+        private final String displayNameKey;
+        private final String descriptionKey;
         
-        SortMode(String displayName, String description) {
-            this.displayName = displayName;
-            this.description = description;
+        SortMode(String displayNameKey, String descriptionKey) {
+            this.displayNameKey = displayNameKey;
+            this.descriptionKey = descriptionKey;
         }
         
-        public String getDisplayName() {
-            return displayName;
+        public String getDisplayNameKey() {
+            return displayNameKey;
         }
         
-        public String getDescription() {
-            return description;
+        public String getDescriptionKey() {
+            return descriptionKey;
         }
     }
     
@@ -82,12 +85,13 @@ public class MyGradientsGUI implements InventoryHolder {
         this.player = player;
         this.guiManager = guiManager;
         this.configManager = configManager;
+        this.messageManager = plugin.getMessageManager();
         this.currentPage = 0;
         this.sortMode = SortMode.TIME;
         this.myConfigs = new ArrayList<>();
         
         this.inventory = Bukkit.createInventory(this, ROWS * COLS,
-            Component.text("我的漸層").color(NamedTextColor.GOLD));
+            messageManager.getComponent("gui.my-gradients.title"));
         
         loadMyConfigs();
         setupGUI();
@@ -139,7 +143,7 @@ public class MyGradientsGUI implements InventoryHolder {
                 }
             } catch (Exception e) {
                 // 忽略無法載入的配置
-                plugin.getLogger().warning("無法載入配置檔案: " + file.getName());
+                plugin.getLogger().warning("Failed to load config file: " + file.getName());
             }
         }
         
@@ -232,27 +236,36 @@ public class MyGradientsGUI implements InventoryHolder {
         if (meta != null) {
             // 顯示名稱
             String displayName = config.getName() != null ? config.getName() : 
-                "配置 #" + config.getConfigNumber();
-            meta.displayName(Component.text(displayName).color(NamedTextColor.AQUA));
+                messageManager.getMessage("gui.my-gradients.config.default-name", player,
+                    "number", String.valueOf(config.getConfigNumber()));
+            Map<String, Object> nameParams = new HashMap<>();
+            nameParams.put("name", displayName);
+            meta.displayName(messageManager.getComponent("gui.my-gradients.config.display-name", player, nameParams));
             
             // 說明文字
             List<Component> lore = new ArrayList<>();
-            lore.add(Component.text("創建者: " + config.getCreatorName()).color(NamedTextColor.GRAY));
-            lore.add(Component.text("方塊數: " + config.getBlockConfiguration().size()).color(NamedTextColor.GRAY));
-            lore.add(Component.text("收藏數: " + config.getFavoriteCount()).color(NamedTextColor.YELLOW));
+            lore.add(messageManager.getComponent("gui.my-gradients.config.creator", player,
+                "creator", config.getCreatorName()));
+            lore.add(messageManager.getComponent("gui.my-gradients.config.blocks", player,
+                "count", String.valueOf(config.getBlockConfiguration().size())));
+            lore.add(messageManager.getComponent("gui.my-gradients.config.favorites", player,
+                "count", String.valueOf(config.getFavoriteCount())));
             
             if (config.isPublished()) {
-                lore.add(Component.text("已發布").color(NamedTextColor.GREEN));
-                lore.add(Component.text("載入次數: " + config.getLoadCount()).color(NamedTextColor.GRAY));
+                lore.add(messageManager.getComponent("gui.my-gradients.config.published", player));
+                lore.add(messageManager.getComponent("gui.my-gradients.config.loads", player,
+                    "count", String.valueOf(config.getLoadCount())));
             } else {
-                lore.add(Component.text("未發布").color(NamedTextColor.RED));
+                lore.add(messageManager.getComponent("gui.my-gradients.config.not-published", player));
             }
             
-            lore.add(Component.text(""));
-            lore.add(Component.text("§e左鍵 §7載入配置"));
-            lore.add(Component.text("§eShift+左鍵 §7編輯配置"));
-            lore.add(Component.text("§e右鍵 §7" + (config.isPublished() ? "取消發布" : "發布到共享庫")));
-            lore.add(Component.text("§eShift+右鍵 §7刪除配置"));
+            lore.add(Component.empty());
+            lore.add(messageManager.getComponent("gui.my-gradients.config.action.left-click", player));
+            lore.add(messageManager.getComponent("gui.my-gradients.config.action.shift-left-click", player));
+            lore.add(messageManager.getComponent(config.isPublished() ? 
+                "gui.my-gradients.config.action.right-click-unpublish" : 
+                "gui.my-gradients.config.action.right-click-publish", player));
+            lore.add(messageManager.getComponent("gui.my-gradients.config.action.shift-right-click", player));
             
             meta.lore(lore);
             item.setItemMeta(meta);
@@ -268,31 +281,40 @@ public class MyGradientsGUI implements InventoryHolder {
         // 上一頁按鈕
         if (currentPage > 0) {
             inventory.setItem(BUTTON_PREVIOUS_PAGE, createItem(Material.ARROW, 
-                "§a上一頁", "§7第 " + currentPage + " 頁"));
+                messageManager.getMessage("gui.my-gradients.button.prev-page", player),
+                messageManager.getMessage("gui.my-gradients.button.prev-page-lore", player,
+                    "page", String.valueOf(currentPage))));
         }
         
         // 排序按鈕
         inventory.setItem(BUTTON_SORT, createItem(Material.COMPARATOR, 
-            "§b排序: " + sortMode.getDisplayName(), 
-            "§7" + sortMode.getDescription(),
-            "§e點擊切換排序方式"));
+            messageManager.getMessage("gui.my-gradients.button.sort", player,
+                "mode", messageManager.getMessage(sortMode.getDisplayNameKey(), player)),
+            messageManager.getMessage(sortMode.getDescriptionKey(), player),
+            messageManager.getMessage("gui.my-gradients.button.sort-hint", player)));
         
         // 下一頁按鈕
         int totalPages = (int) Math.ceil((double) myConfigs.size() / CONFIGS_PER_PAGE);
         if (currentPage < totalPages - 1) {
             inventory.setItem(BUTTON_NEXT_PAGE, createItem(Material.ARROW, 
-                "§a下一頁", "§7第 " + (currentPage + 2) + " 頁"));
+                messageManager.getMessage("gui.my-gradients.button.next-page", player),
+                messageManager.getMessage("gui.my-gradients.button.next-page-lore", player,
+                    "page", String.valueOf(currentPage + 2))));
         }
         
         // 頁碼資訊
         inventory.setItem(4, createItem(Material.BOOK, 
-            "§6我的漸層配置",
-            "§7共 " + myConfigs.size() + " 個配置",
-            "§7第 " + (currentPage + 1) + " / " + Math.max(1, totalPages) + " 頁"));
+            messageManager.getMessage("gui.my-gradients.page-info.title", player),
+            messageManager.getMessage("gui.my-gradients.page-info.total", player,
+                "count", String.valueOf(myConfigs.size())),
+            messageManager.getMessage("gui.my-gradients.page-info.page", player,
+                "current", String.valueOf(currentPage + 1),
+                "total", String.valueOf(Math.max(1, totalPages)))));
         
         // 返回按鈕（右下角）
         inventory.setItem(BUTTON_BACK, createItem(Material.BARRIER, 
-            "§c返回", "§7關閉此界面"));
+            messageManager.getMessage("gui.my-gradients.button.back", player),
+            messageManager.getMessage("gui.my-gradients.button.back-lore", player)));
     }
     
     /**
@@ -302,10 +324,12 @@ public class MyGradientsGUI implements InventoryHolder {
         ItemStack item = new ItemStack(material);
         ItemMeta meta = item.getItemMeta();
         if (meta != null) {
-            meta.displayName(Component.text(name));
+            // 使用 MiniMessage 解析名稱
+            meta.displayName(net.kyori.adventure.text.minimessage.MiniMessage.miniMessage().deserialize(name));
             if (lore.length > 0) {
+                // 使用 MiniMessage 解析 Lore
                 meta.lore(Arrays.stream(lore)
-                    .map(Component::text)
+                    .map(line -> net.kyori.adventure.text.minimessage.MiniMessage.miniMessage().deserialize(line))
                     .toList());
             }
             item.setItemMeta(meta);
@@ -413,9 +437,10 @@ public class MyGradientsGUI implements InventoryHolder {
         // 打開漸層製作 GUI 並載入配置（帶返回按鈕）
         guiManager.openOmbreGUI(player, config, "my");
         
-        player.sendMessage(Component.text("已載入配置: " + 
-            (config.getName() != null ? config.getName() : "配置 #" + config.getConfigNumber()))
-            .color(NamedTextColor.GREEN));
+        String configName = config.getName() != null ? config.getName() : 
+            messageManager.getMessage("gui.my-gradients.config.default-name", player,
+                "number", String.valueOf(config.getConfigNumber()));
+        messageManager.sendMessage(player, "gui.my-gradients.messages.loaded", "name", configName);
     }
     
     /**
@@ -427,8 +452,7 @@ public class MyGradientsGUI implements InventoryHolder {
         // 打開漸層製作 GUI 並載入配置（帶返回按鈕）
         guiManager.openOmbreGUI(player, config, "my");
         
-        player.sendMessage(Component.text("進入編輯模式")
-            .color(NamedTextColor.YELLOW));
+        messageManager.sendMessage(player, "gui.my-gradients.messages.edit-mode");
     }
     
     /**
@@ -439,14 +463,12 @@ public class MyGradientsGUI implements InventoryHolder {
             // 取消發布
             config.setPublished(false);
             configManager.saveGradient(config);
-            player.sendMessage(Component.text("已取消發布")
-                .color(NamedTextColor.YELLOW));
+            messageManager.sendMessage(player, "gui.my-gradients.messages.unpublished");
         } else {
             // 發布到共享庫
             config.setPublished(true);
             configManager.saveGradient(config);
-            player.sendMessage(Component.text("已發布到共享庫")
-                .color(NamedTextColor.GREEN));
+            messageManager.sendMessage(player, "gui.my-gradients.messages.published");
         }
         
         // 重新載入並更新顯示
@@ -459,8 +481,7 @@ public class MyGradientsGUI implements InventoryHolder {
      */
     private void deleteConfiguration(GradientConfig config) {
         if (configManager.deleteGradient(config.getId(), player)) {
-            player.sendMessage(Component.text("配置已刪除")
-                .color(NamedTextColor.RED));
+            messageManager.sendMessage(player, "gui.my-gradients.messages.deleted");
             
             // 重新載入配置
             loadMyConfigs();
@@ -472,8 +493,7 @@ public class MyGradientsGUI implements InventoryHolder {
             
             setupGUI();
         } else {
-            player.sendMessage(Component.text("刪除失敗")
-                .color(NamedTextColor.RED));
+            messageManager.sendMessage(player, "gui.my-gradients.messages.delete-failed");
         }
     }
     
@@ -489,7 +509,7 @@ public class MyGradientsGUI implements InventoryHolder {
         currentPage = 0; // 重置到第一頁
         setupGUI();
         
-        player.sendMessage(Component.text("排序方式: " + sortMode.getDisplayName())
-            .color(NamedTextColor.YELLOW));
+        messageManager.sendMessage(player, "gui.my-gradients.messages.sort-changed", 
+            "mode", messageManager.getMessage(sortMode.getDisplayNameKey(), player));
     }
 }

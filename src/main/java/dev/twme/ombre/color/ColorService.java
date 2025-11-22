@@ -1,6 +1,7 @@
 package dev.twme.ombre.color;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
@@ -33,16 +34,16 @@ public class ColorService {
      */
     public boolean loadColorsFromFile() {
         if (!colorsFile.exists()) {
-            plugin.getLogger().warning("colors.yml 不存在，無法載入顏色資料");
+            plugin.getLogger().warning("colors.yml does not exist, unable to load color data");
             return false;
         }
         
         try {
             colorsConfig = YamlConfiguration.loadConfiguration(colorsFile);
-            plugin.getLogger().info("成功載入 colors.yml");
+            plugin.getLogger().info("Successfully loaded colors.yml");
             return true;
         } catch (Exception e) {
-            plugin.getLogger().log(Level.SEVERE, "載入 colors.yml 失敗", e);
+            plugin.getLogger().log(Level.SEVERE, "Failed to load colors.yml", e);
             return false;
         }
     }
@@ -69,7 +70,7 @@ public class ColorService {
             if (color != null) {
                 cacheColor(blockDataString, color);
                 // 改用 FINE 級別，減少日誌輸出
-                plugin.getLogger().fine("動態獲取方塊 " + blockDataString + " 的顏色並快取");
+                plugin.getLogger().fine(String.format("Dynamically resolved color for block %s and cached it", blockDataString));
             }
         } else {
             // 快取到記憶體
@@ -102,7 +103,7 @@ public class ColorService {
             
             return new BlockColor(r, g, b);
         } catch (Exception e) {
-            plugin.getLogger().warning("讀取方塊 " + blockDataString + " 的顏色時發生錯誤: " + e.getMessage());
+            plugin.getLogger().warning(String.format("Error reading color for block %s: %s", blockDataString, e.getMessage()));
             return null;
         }
     }
@@ -117,7 +118,7 @@ public class ColorService {
             Color mapColor = blockData.getMapColor();
             return new BlockColor(mapColor.getRed(), mapColor.getGreen(), mapColor.getBlue());
         } catch (Exception e) {
-            plugin.getLogger().warning("獲取方塊 " + blockData.getAsString() + " 的地圖顏色時發生錯誤: " + e.getMessage());
+            plugin.getLogger().warning(String.format("Error retrieving map color for block %s: %s", blockData.getAsString(), e.getMessage()));
             return null;
         }
     }
@@ -143,8 +144,8 @@ public class ColorService {
             plugin.getServer().getScheduler().runTaskAsynchronously(plugin, () -> {
                 try {
                     colorsConfig.save(colorsFile);
-                } catch (Exception e) {
-                    plugin.getLogger().log(Level.WARNING, "儲存顏色快取失敗", e);
+                } catch (IOException e) {
+                    plugin.getLogger().log(Level.WARNING, "Failed to save color cache", e);
                 }
             });
         }
@@ -155,7 +156,7 @@ public class ColorService {
      */
     public void clearCache() {
         colorCache.clear();
-        plugin.getLogger().info("已清除顏色快取");
+        plugin.getLogger().info("Color cache cleared");
     }
     
     /**

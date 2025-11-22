@@ -83,8 +83,8 @@ public class BlockFilterManager {
         if (file.exists()) return;
         
         YamlConfiguration config = new YamlConfiguration();
-        config.set("name", "技術性方塊");
-        config.set("description", "指令方塊、屏障方塊等技術性方塊");
+        config.set("name", "Technical Blocks");
+        config.set("description", "Command blocks, barriers, and other technical blocks");
         config.set("enabled", true);
         config.set("blocks", Arrays.asList(
             "COMMAND_BLOCK", "CHAIN_COMMAND_BLOCK", "REPEATING_COMMAND_BLOCK",
@@ -100,8 +100,8 @@ public class BlockFilterManager {
         if (file.exists()) return;
         
         YamlConfiguration config = new YamlConfiguration();
-        config.set("name", "無法放置的方塊");
-        config.set("description", "無法作為物品放置的特殊方塊（冰霜冰、火焰等）");
+        config.set("name", "Unplaceable Blocks");
+        config.set("description", "Blocks that cannot be placed normally");
         config.set("enabled", true);
         config.set("blocks", Arrays.asList(
             "FROSTED_ICE",
@@ -151,8 +151,8 @@ public class BlockFilterManager {
         if (file.exists()) return;
         
         YamlConfiguration config = new YamlConfiguration();
-        config.set("name", "流體方塊");
-        config.set("description", "水、岩漿等流體");
+        config.set("name", "Fluids");
+        config.set("description", "Water and lava blocks");
         config.set("enabled", true);
         config.set("blocks", Arrays.asList("WATER", "LAVA", "BUBBLE_COLUMN"));
         
@@ -164,8 +164,8 @@ public class BlockFilterManager {
         if (file.exists()) return;
         
         YamlConfiguration config = new YamlConfiguration();
-        config.set("name", "裝飾性方塊");
-        config.set("description", "火把、梯子、門等裝飾性方塊");
+        config.set("name", "Decorative Blocks");
+        config.set("description", "Torches, doors, buttons, and other decorative blocks");
         config.set("enabled", true);
         config.set("blocks", Arrays.asList(
             "ALL:TORCH", "LADDER", "LEVER",
@@ -180,8 +180,8 @@ public class BlockFilterManager {
         if (file.exists()) return;
         
         YamlConfiguration config = new YamlConfiguration();
-        config.set("name", "植物方塊");
-        config.set("description", "花、草、樹苗等植物");
+        config.set("name", "Plants");
+        config.set("description", "Saplings, leaves, grass, and flowers");
         config.set("enabled", false);
         config.set("blocks", Arrays.asList(
             "ALL:SAPLING", "ALL:LEAVES", "GRASS", "TALL_GRASS",
@@ -196,8 +196,8 @@ public class BlockFilterManager {
         if (file.exists()) return;
         
         YamlConfiguration config = new YamlConfiguration();
-        config.set("name", "紅石方塊");
-        config.set("description", "紅石相關元件");
+        config.set("name", "Redstone Components");
+        config.set("description", "Redstone wire, repeaters, and other redstone components");
         config.set("enabled", false);
         config.set("blocks", Arrays.asList(
             "REDSTONE_WIRE", "REPEATER", "COMPARATOR", "REDSTONE_LAMP",
@@ -224,8 +224,8 @@ public class BlockFilterManager {
         if (file.exists()) return;
         
         YamlConfiguration config = new YamlConfiguration();
-        config.set("name", "羊毛");
-        config.set("description", "16 種顏色的羊毛方塊");
+        config.set("name", "Wool Blocks");
+        config.set("description", "All colored wool blocks");
         config.set("enabled", true);
         config.set("blocks", Arrays.asList(
             "WHITE_WOOL", "ORANGE_WOOL", "MAGENTA_WOOL", "LIGHT_BLUE_WOOL",
@@ -242,8 +242,8 @@ public class BlockFilterManager {
         if (file.exists()) return;
         
         YamlConfiguration config = new YamlConfiguration();
-        config.set("name", "混凝土");
-        config.set("description", "16 種顏色的混凝土方塊");
+        config.set("name", "Concrete Blocks");
+        config.set("description", "All colored concrete blocks");
         config.set("enabled", true);
         config.set("blocks", Arrays.asList(
             "WHITE_CONCRETE", "ORANGE_CONCRETE", "MAGENTA_CONCRETE", "LIGHT_BLUE_CONCRETE",
@@ -260,8 +260,8 @@ public class BlockFilterManager {
         if (file.exists()) return;
         
         YamlConfiguration config = new YamlConfiguration();
-        config.set("name", "陶土");
-        config.set("description", "16 種顏色的陶土方塊");
+        config.set("name", "Terracotta Blocks");
+        config.set("description", "All colored terracotta blocks");
         config.set("enabled", true);
         config.set("blocks", Arrays.asList(
             "WHITE_TERRACOTTA", "ORANGE_TERRACOTTA", "MAGENTA_TERRACOTTA", "LIGHT_BLUE_TERRACOTTA",
@@ -278,8 +278,8 @@ public class BlockFilterManager {
         if (file.exists()) return;
         
         YamlConfiguration config = new YamlConfiguration();
-        config.set("name", "染色玻璃");
-        config.set("description", "16 種顏色的染色玻璃");
+        config.set("name", "Stained Glass");
+        config.set("description", "All colored stained glass blocks");
         config.set("enabled", true);
         config.set("blocks", Arrays.asList(
             "WHITE_STAINED_GLASS", "ORANGE_STAINED_GLASS", "MAGENTA_STAINED_GLASS", "LIGHT_BLUE_STAINED_GLASS",
@@ -296,8 +296,8 @@ public class BlockFilterManager {
         if (file.exists()) return;
         
         YamlConfiguration config = new YamlConfiguration();
-        config.set("name", "自然石頭");
-        config.set("description", "各種自然石頭方塊");
+        config.set("name", "Natural Stone");
+        config.set("description", "Natural stone blocks including granite, diorite, and andesite");
         config.set("enabled", true);
         config.set("blocks", Arrays.asList(
             "STONE", "GRANITE", "POLISHED_GRANITE", "DIORITE", "POLISHED_DIORITE",
@@ -315,8 +315,8 @@ public class BlockFilterManager {
         if (file.exists()) return;
         
         YamlConfiguration config = new YamlConfiguration();
-        config.set("name", "木頭");
-        config.set("description", "各種木頭方塊");
+        config.set("name", "Wood Blocks");
+        config.set("description", "Wooden planks and logs");
         config.set("enabled", true);
         config.set("blocks", Arrays.asList(
             "OAK_PLANKS", "SPRUCE_PLANKS", "BIRCH_PLANKS", "JUNGLE_PLANKS",
@@ -335,7 +335,7 @@ public class BlockFilterManager {
         try {
             config.save(file);
         } catch (IOException e) {
-            plugin.getLogger().log(Level.SEVERE, "無法儲存配置檔案: " + file.getName(), e);
+            plugin.getLogger().log(Level.SEVERE, "Failed to save configuration file: " + file.getName(), e);
         }
     }
     
@@ -363,7 +363,7 @@ public class BlockFilterManager {
             }
         }
         
-        plugin.getLogger().info("已載入 " + exclusionLists.size() + " 個排除列表");
+        plugin.getLogger().info(String.format("Loaded %d exclusion list(s)", exclusionLists.size()));
     }
     
     /**
@@ -382,7 +382,7 @@ public class BlockFilterManager {
             }
         }
         
-        plugin.getLogger().info("已載入 " + colorPalettes.size() + " 個色表");
+        plugin.getLogger().info(String.format("Loaded %d palette(s)", colorPalettes.size()));
     }
     
     /**
@@ -400,7 +400,7 @@ public class BlockFilterManager {
             
             return new BlockList(id, name, description, enabled, blocks);
         } catch (Exception e) {
-            plugin.getLogger().log(Level.SEVERE, "載入列表失敗: " + file.getName(), e);
+            plugin.getLogger().log(Level.SEVERE, "Failed to load list: " + file.getName(), e);
             return null;
         }
     }
@@ -495,7 +495,7 @@ public class BlockFilterManager {
                     materials.add(material);
                 }
             } catch (IllegalArgumentException e) {
-                plugin.getLogger().warning("未知的方塊類型: " + pattern);
+                plugin.getLogger().warning(String.format("Unknown block type: %s", pattern));
             }
         }
         

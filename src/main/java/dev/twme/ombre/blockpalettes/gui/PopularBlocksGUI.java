@@ -15,6 +15,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import dev.twme.ombre.Ombre;
 import dev.twme.ombre.blockpalettes.BlockPalettesFeature;
 import dev.twme.ombre.blockpalettes.api.PaletteFilter;
+import dev.twme.ombre.i18n.MessageManager;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -30,24 +31,25 @@ public class PopularBlocksGUI implements Listener {
     private final Inventory inventory;
     private final PaletteFilter currentFilter;
     private final Runnable onFilterApplied;
+    private final MessageManager messageManager;
     
     // 熱門方塊列表（根據 blockpalettes.com 統計）
-    private static final String[][] POPULAR_BLOCKS = {
-        {"spruce_planks", "雲杉木材"},
-        {"stone_bricks", "石磚"},
-        {"dark_oak_planks", "黑橡木材"},
-        {"deepslate_tiles", "深板岩磚"},
-        {"spruce_log", "雲杉原木"},
-        {"moss_block", "苔蘚方塊"},
-        {"stripped_spruce_log", "剝皮雲杉原木"},
-        {"deepslate_bricks", "深板岩磚塊"},
-        {"calcite", "方解石"},
-        {"quartz_block", "石英方塊"},
-        {"oak_planks", "橡木材"},
-        {"white_concrete", "白色混凝土"},
-        {"gray_concrete", "灰色混凝土"},
-        {"smooth_stone", "平滑石頭"},
-        {"polished_andesite", "磨製安山岩"}
+    private static final String[] POPULAR_BLOCKS = {
+        "spruce_planks",
+        "stone_bricks",
+        "dark_oak_planks",
+        "deepslate_tiles",
+        "spruce_log",
+        "moss_block",
+        "stripped_spruce_log",
+        "deepslate_bricks",
+        "calcite",
+        "quartz_block",
+        "oak_planks",
+        "white_concrete",
+        "gray_concrete",
+        "smooth_stone",
+        "polished_andesite"
     };
     
     public PopularBlocksGUI(Ombre plugin, BlockPalettesFeature feature, Player player,
@@ -57,12 +59,11 @@ public class PopularBlocksGUI implements Listener {
         this.player = player;
         this.currentFilter = currentFilter;
         this.onFilterApplied = onFilterApplied;
+        this.messageManager = plugin.getMessageManager();
         
         // 建立 54 格箱子 (6x9)
         this.inventory = Bukkit.createInventory(null, 54,
-            Component.text("熱門方塊篩選")
-                .color(NamedTextColor.GOLD)
-                .decoration(TextDecoration.BOLD, true)
+            messageManager.getComponent("blockpalettes.gui.popular-blocks.title", player)
         );
         
         setupItems();
@@ -80,8 +81,8 @@ public class PopularBlocksGUI implements Listener {
         };
         
         for (int i = 0; i < Math.min(POPULAR_BLOCKS.length, slots.length); i++) {
-            String blockId = POPULAR_BLOCKS[i][0];
-            String displayName = POPULAR_BLOCKS[i][1];
+            String blockId = POPULAR_BLOCKS[i];
+            String displayName = messageManager.getMessage("blockpalettes.gui.popular-blocks.block." + blockId, player);
             Material material = getMaterialFromId(blockId);
             
             ItemStack item = createBlockItem(material, displayName, blockId);
@@ -90,19 +91,19 @@ public class PopularBlocksGUI implements Listener {
         
         // 清除篩選 (格子 45)
         ItemStack clearItem = createItem(Material.BARRIER,
-            Component.text("清除方塊篩選").color(NamedTextColor.RED),
+            messageManager.getComponent("blockpalettes.gui.popular-blocks.clear.title", player),
             List.of(
-                Component.text("移除方塊篩選條件").color(NamedTextColor.GRAY),
+                messageManager.getComponent("blockpalettes.gui.popular-blocks.clear.description", player),
                 Component.empty(),
-                Component.text("▸ 點擊清除").color(NamedTextColor.YELLOW)
+                messageManager.getComponent("blockpalettes.gui.popular-blocks.clear.click", player)
             )
         );
         inventory.setItem(45, clearItem);
         
         // 返回 (格子 53)
         ItemStack backItem = createItem(Material.ARROW,
-            Component.text("返回").color(NamedTextColor.YELLOW),
-            List.of(Component.text("▸ 點擊返回列表").color(NamedTextColor.YELLOW))
+            messageManager.getComponent("blockpalettes.gui.popular-blocks.back", player),
+            List.of(messageManager.getComponent("blockpalettes.gui.popular-blocks.back-lore", player))
         );
         inventory.setItem(53, backItem);
     }
@@ -114,11 +115,11 @@ public class PopularBlocksGUI implements Listener {
         boolean selected = blockId.equals(currentFilter.getBlockSearch());
         
         List<Component> lore = List.of(
-            Component.text("搜尋包含此方塊的調色板").color(NamedTextColor.GRAY),
+            messageManager.getComponent("blockpalettes.gui.popular-blocks.description", player),
             Component.empty(),
             selected ? 
-                Component.text("✓ 當前選擇").color(NamedTextColor.GREEN) :
-                Component.text("▸ 點擊選擇").color(NamedTextColor.YELLOW)
+                messageManager.getComponent("blockpalettes.gui.popular-blocks.selected", player) :
+                messageManager.getComponent("blockpalettes.gui.popular-blocks.click-to-select", player)
         );
         
         ItemStack item = createItem(material,
@@ -204,16 +205,15 @@ public class PopularBlocksGUI implements Listener {
         int[] slots = {10, 11, 12, 13, 14, 19, 20, 21, 22, 23, 28, 29, 30, 31, 32};
         for (int i = 0; i < slots.length; i++) {
             if (slot == slots[i] && i < POPULAR_BLOCKS.length) {
-                String blockId = POPULAR_BLOCKS[i][0];
-                String displayName = POPULAR_BLOCKS[i][1];
+                String blockId = POPULAR_BLOCKS[i];
+                String displayName = messageManager.getMessage("blockpalettes.gui.popular-blocks.block." + blockId, player);
                 
                 currentFilter.setBlockSearch(blockId);
                 currentFilter.setPage(1); // 重置頁碼
                 
                 clicker.closeInventory();
                 clicker.sendMessage(
-                    Component.text("✓ 已篩選包含 " + displayName + " 的調色板")
-                        .color(NamedTextColor.GREEN)
+                    messageManager.getComponent("blockpalettes.gui.popular-blocks.messages.filtered", player, "block", displayName)
                 );
                 clicker.playSound(clicker.getLocation(), org.bukkit.Sound.BLOCK_NOTE_BLOCK_PLING, 1.0f, 1.5f);
                 
@@ -230,7 +230,7 @@ public class PopularBlocksGUI implements Listener {
             currentFilter.setPage(1);
             
             clicker.closeInventory();
-            clicker.sendMessage(Component.text("✓ 已清除方塊篩選").color(NamedTextColor.GREEN));
+            clicker.sendMessage(messageManager.getComponent("blockpalettes.gui.popular-blocks.messages.cleared", player));
             clicker.playSound(clicker.getLocation(), org.bukkit.Sound.ENTITY_ITEM_PICKUP, 1.0f, 1.0f);
             
             if (onFilterApplied != null) {
