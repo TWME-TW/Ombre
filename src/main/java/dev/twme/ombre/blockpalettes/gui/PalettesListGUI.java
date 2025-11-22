@@ -1,9 +1,8 @@
 package dev.twme.ombre.blockpalettes.gui;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Map;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -98,19 +97,6 @@ public class PalettesListGUI implements Listener {
         );
         inventory.setItem(2, colorItem);
         
-        // 熱門方塊 (格子 3)
-        String blockDisplay = filter.getBlockSearch().isEmpty() ? 
-            messageManager.getMessage("blockpalettes.gui.list.control.none", player) : getBlockDisplayName(filter.getBlockSearch());
-        ItemStack blockItem = createItem(Material.DIAMOND_BLOCK,
-            messageManager.getComponent("blockpalettes.gui.list.control.block.title", player, "block", blockDisplay),
-            List.of(
-                messageManager.getComponent("blockpalettes.gui.list.control.block.current", player, "block", blockDisplay),
-                Component.empty(),
-                messageManager.getComponent("blockpalettes.gui.list.control.block.click", player)
-            )
-        );
-        inventory.setItem(3, blockItem);
-        
         // 上一頁 (格子 7)
         updatePageButtons();
         
@@ -146,43 +132,43 @@ public class PalettesListGUI implements Listener {
         // 上一頁 (格子 7)
         if (filter.getPage() > 1) {
             ItemStack prevItem = createItem(Material.ARROW,
-                messageManager.getComponent("blockpalettes.gui.list.page.prev"),
+                messageManager.getComponent("blockpalettes.gui.list.page.prev", player),
                 List.of(
-                    messageManager.getComponent("blockpalettes.gui.list.page.number", "page", String.valueOf(filter.getPage() - 1))
+                    messageManager.getComponent("blockpalettes.gui.list.page.number", player, "page", String.valueOf(filter.getPage() - 1))
                 )
             );
             inventory.setItem(7, prevItem);
         } else {
             inventory.setItem(7, createItem(Material.GRAY_DYE,
-                messageManager.getComponent("blockpalettes.gui.list.page.prev"),
-                List.of(messageManager.getComponent("blockpalettes.gui.list.page.first"))
+                messageManager.getComponent("blockpalettes.gui.list.page.prev", player),
+                List.of(messageManager.getComponent("blockpalettes.gui.list.page.first", player))
             ));
         }
         
         // 下一頁 (格子 8)
         if (filter.getPage() < currentResponse.getTotalPages()) {
             ItemStack nextItem = createItem(Material.ARROW,
-                messageManager.getComponent("blockpalettes.gui.list.page.next"),
+                messageManager.getComponent("blockpalettes.gui.list.page.next", player),
                 List.of(
-                    messageManager.getComponent("blockpalettes.gui.list.page.number", "page", String.valueOf(filter.getPage() + 1))
+                    messageManager.getComponent("blockpalettes.gui.list.page.number", player, "page", String.valueOf(filter.getPage() + 1))
                 )
             );
             inventory.setItem(8, nextItem);
         } else {
             inventory.setItem(8, createItem(Material.GRAY_DYE,
-                messageManager.getComponent("blockpalettes.gui.list.page.next"),
-                List.of(messageManager.getComponent("blockpalettes.gui.list.page.last"))
+                messageManager.getComponent("blockpalettes.gui.list.page.next", player),
+                List.of(messageManager.getComponent("blockpalettes.gui.list.page.last", player))
             ));
         }
         
         // 統計資訊 (格子 45)
         int favoriteCount = feature.getFavoritesManager().getFavoriteCount(player.getUniqueId());
         ItemStack statsInfo = createItem(Material.PAPER,
-            messageManager.getComponent("blockpalettes.gui.list.stats.title"),
+            messageManager.getComponent("blockpalettes.gui.list.stats.title", player),
             List.of(
-                messageManager.getComponent("blockpalettes.gui.list.stats.current-page", "page", filter.getPage() + "/" + currentResponse.getTotalPages()),
-                messageManager.getComponent("blockpalettes.gui.list.stats.total", "total", String.valueOf(currentResponse.getTotalResults())),
-                messageManager.getComponent("blockpalettes.gui.list.stats.favorites", "count", favoriteCount + "/100")
+                messageManager.getComponent("blockpalettes.gui.list.stats.current-page", player, Map.of("page", filter.getPage() + "/" + currentResponse.getTotalPages())),
+                messageManager.getComponent("blockpalettes.gui.list.stats.total", player, Map.of("total", String.valueOf(currentResponse.getTotalResults()))),
+                messageManager.getComponent("blockpalettes.gui.list.stats.favorites", player, Map.of("count", favoriteCount + "/100"))
             )
         );
         inventory.setItem(45, statsInfo);
@@ -272,9 +258,9 @@ public class PalettesListGUI implements Listener {
         // 如果沒有結果
         if (palettes.isEmpty()) {
             ItemStack noResults = createItem(Material.BARRIER,
-                messageManager.getComponent("blockpalettes.gui.list.no-results.title"),
+                messageManager.getComponent("blockpalettes.gui.list.no-results.title", player),
                 List.of(
-                    messageManager.getComponent("blockpalettes.gui.list.no-results.hint")
+                    messageManager.getComponent("blockpalettes.gui.list.no-results.hint", player)
                 )
             );
             inventory.setItem(22, noResults);
@@ -286,16 +272,16 @@ public class PalettesListGUI implements Listener {
      */
     private ItemStack createPaletteInfoButton(PaletteData palette) {
         List<Component> lore = new ArrayList<>();
-        lore.add(messageManager.getComponent("blockpalettes.gui.list.palette.info.id", "id", String.valueOf(palette.getId())));
+        lore.add(messageManager.getComponent("blockpalettes.gui.list.palette.info.id", player, "id", String.valueOf(palette.getId())));
         lore.add(Component.empty());
-        lore.add(messageManager.getComponent("blockpalettes.gui.list.palette.info.author", "author", palette.getAuthor()));
-        lore.add(messageManager.getComponent("blockpalettes.gui.list.palette.info.time", "time", palette.getUploadTime()));
-        lore.add(messageManager.getComponent("blockpalettes.gui.list.palette.info.likes", "likes", String.valueOf(palette.getLikes())));
+        lore.add(messageManager.getComponent("blockpalettes.gui.list.palette.info.author", player, "author", palette.getAuthor()));
+        lore.add(messageManager.getComponent("blockpalettes.gui.list.palette.info.time", player, "time", palette.getUploadTime()));
+        lore.add(messageManager.getComponent("blockpalettes.gui.list.palette.info.likes", player, "likes", String.valueOf(palette.getLikes())));
         lore.add(Component.empty());
-        lore.add(messageManager.getComponent("blockpalettes.gui.list.palette.info.click"));
+        lore.add(messageManager.getComponent("blockpalettes.gui.list.palette.info.click", player));
         
         return createItem(Material.BOOK,
-            messageManager.getComponent("blockpalettes.gui.list.palette.info.title")
+            messageManager.getComponent("blockpalettes.gui.list.palette.info.title", player)
                 .decoration(TextDecoration.BOLD, true)
                 .decoration(TextDecoration.ITALIC, false),
             lore
@@ -310,21 +296,21 @@ public class PalettesListGUI implements Listener {
         
         Material material = isFavorite ? Material.NETHER_STAR : Material.GOLD_NUGGET;
         Component titleComponent = isFavorite ? 
-            messageManager.getComponent("blockpalettes.gui.list.palette.favorite.favorited") :
-            messageManager.getComponent("blockpalettes.gui.list.palette.favorite.title");
+            messageManager.getComponent("blockpalettes.gui.list.palette.favorite.favorited", player) :
+            messageManager.getComponent("blockpalettes.gui.list.palette.favorite.title", player);
         
         List<Component> lore = new ArrayList<>();
-        lore.add(messageManager.getComponent("blockpalettes.gui.list.palette.favorite.id", "id", String.valueOf(palette.getId())));
+        lore.add(messageManager.getComponent("blockpalettes.gui.list.palette.favorite.id", player, "id", String.valueOf(palette.getId())));
         lore.add(Component.empty());
         
         if (isFavorite) {
-            lore.add(messageManager.getComponent("blockpalettes.gui.list.palette.favorite.already"));
+            lore.add(messageManager.getComponent("blockpalettes.gui.list.palette.favorite.already", player));
             lore.add(Component.empty());
-            lore.add(messageManager.getComponent("blockpalettes.gui.list.palette.favorite.remove-click"));
+            lore.add(messageManager.getComponent("blockpalettes.gui.list.palette.favorite.remove-click", player));
         } else {
-            lore.add(messageManager.getComponent("blockpalettes.gui.list.palette.favorite.description"));
+            lore.add(messageManager.getComponent("blockpalettes.gui.list.palette.favorite.description", player));
             lore.add(Component.empty());
-            lore.add(messageManager.getComponent("blockpalettes.gui.list.palette.favorite.add-click"));
+            lore.add(messageManager.getComponent("blockpalettes.gui.list.palette.favorite.add-click", player));
         }
         
         return createItem(material,
@@ -339,9 +325,9 @@ public class PalettesListGUI implements Listener {
      */
     private void showLoading() {
         ItemStack loading = createItem(Material.HOPPER,
-            messageManager.getComponent("blockpalettes.gui.list.loading.title"),
+            messageManager.getComponent("blockpalettes.gui.list.loading.title", player),
             List.of(
-                messageManager.getComponent("blockpalettes.gui.list.loading.description")
+                messageManager.getComponent("blockpalettes.gui.list.loading.description", player)
             )
         );
         inventory.setItem(22, loading);
@@ -352,11 +338,11 @@ public class PalettesListGUI implements Listener {
      */
     private void showError(String error) {
         ItemStack errorItem = createItem(Material.BARRIER,
-            messageManager.getComponent("blockpalettes.gui.list.error.title"),
+            messageManager.getComponent("blockpalettes.gui.list.error.title", player),
             List.of(
                 Component.text(error).color(NamedTextColor.GRAY),
                 Component.empty(),
-                messageManager.getComponent("blockpalettes.gui.list.error.retry")
+                messageManager.getComponent("blockpalettes.gui.list.error.retry", player)
             )
         );
         inventory.setItem(22, errorItem);
@@ -492,12 +478,6 @@ public class PalettesListGUI implements Listener {
             return;
         }
         
-        // 熱門方塊 (格子 3)
-        if (slot == 3) {
-            openPopularBlocks(clicker);
-            return;
-        }
-        
         // 排序 (格子 1)
         if (slot == 1) {
             toggleSort();
@@ -566,18 +546,6 @@ public class PalettesListGUI implements Listener {
     }
     
     /**
-     * 取得方塊顯示名稱
-     */
-    private String getBlockDisplayName(String blockId) {
-        if (blockId == null || blockId.isEmpty()) {
-            return "無";
-        }
-        return Arrays.stream(blockId.split("_"))
-            .map(word -> word.substring(0, 1).toUpperCase() + word.substring(1))
-            .collect(Collectors.joining(" "));
-    }
-    
-    /**
      * 開啟搜尋輸入選單
      */
     private void openSearchInput(Player player) {
@@ -616,43 +584,24 @@ public class PalettesListGUI implements Listener {
     }
     
     /**
-     * 開啟熱門方塊選單
-     */
-    private void openPopularBlocks(Player player) {
-        player.closeInventory();
-        
-        Bukkit.getScheduler().runTaskLater(plugin, () -> {
-            PopularBlocksGUI blocksGUI = new PopularBlocksGUI(plugin, feature, player, filter, () -> {
-                Bukkit.getScheduler().runTaskLater(plugin, () -> {
-                    setupControlItems();  // 更新控制項顯示
-                    loadPalettes(true);
-                    player.openInventory(inventory);
-                }, 2L);
-            });
-            Bukkit.getPluginManager().registerEvents(blocksGUI, plugin);
-            blocksGUI.open();
-        }, 2L);
-    }
-    
-    /**
      * 複製方塊清單到聊天欄
      */
     private void copyBlockList(Player player, PaletteData palette) {
-        player.sendMessage(messageManager.getComponent("blockpalettes.gui.list.copy.separator"));
+        player.sendMessage(messageManager.getComponent("blockpalettes.gui.list.copy.separator", player));
         player.sendMessage(
-            messageManager.getComponent("blockpalettes.gui.list.copy.title", "id", String.valueOf(palette.getId()))
+            messageManager.getComponent("blockpalettes.gui.list.copy.title", player, "id", String.valueOf(palette.getId()))
         );
-        player.sendMessage(messageManager.getComponent("blockpalettes.gui.list.copy.author", "author", palette.getAuthor()));
-        player.sendMessage(messageManager.getComponent("blockpalettes.gui.list.copy.time", "time", palette.getUploadTime()));
-        player.sendMessage(messageManager.getComponent("blockpalettes.gui.list.copy.likes", "likes", String.valueOf(palette.getLikes())));
+        player.sendMessage(messageManager.getComponent("blockpalettes.gui.list.copy.author", player, "author", palette.getAuthor()));
+        player.sendMessage(messageManager.getComponent("blockpalettes.gui.list.copy.time", player, "time", palette.getUploadTime()));
+        player.sendMessage(messageManager.getComponent("blockpalettes.gui.list.copy.likes", player, "likes", String.valueOf(palette.getLikes())));
         player.sendMessage(Component.empty());
         
         for (String blockName : palette.getDisplayNames()) {
             player.sendMessage(Component.text("• " + blockName).color(NamedTextColor.WHITE));
         }
         
-        player.sendMessage(messageManager.getComponent("blockpalettes.gui.list.copy.separator"));
-        player.sendMessage(messageManager.getComponent("blockpalettes.gui.list.copy.success"));
+        player.sendMessage(messageManager.getComponent("blockpalettes.gui.list.copy.separator", player));
+        player.sendMessage(messageManager.getComponent("blockpalettes.gui.list.copy.success", player));
         player.playSound(player.getLocation(), org.bukkit.Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.0f, 1.0f);
     }
     
@@ -665,16 +614,16 @@ public class PalettesListGUI implements Listener {
         if (isFavorite) {
             // 移除收藏
             feature.getFavoritesManager().removeFavorite(player.getUniqueId(), palette.getId());
-            player.sendMessage(messageManager.getComponent("blockpalettes.gui.list.messages.removed", "id", String.valueOf(palette.getId())));
+            player.sendMessage(messageManager.getComponent("blockpalettes.gui.list.messages.removed", player, "id", String.valueOf(palette.getId())));
             player.playSound(player.getLocation(), org.bukkit.Sound.ENTITY_ITEM_PICKUP, 1.0f, 0.8f);
         } else {
             // 加入收藏
             boolean success = feature.getFavoritesManager().addFavorite(player.getUniqueId(), palette);
             if (success) {
-                player.sendMessage(messageManager.getComponent("blockpalettes.gui.list.messages.added", "id", String.valueOf(palette.getId())));
+                player.sendMessage(messageManager.getComponent("blockpalettes.gui.list.messages.added", player, "id", String.valueOf(palette.getId())));
                 player.playSound(player.getLocation(), org.bukkit.Sound.ENTITY_PLAYER_LEVELUP, 1.0f, 2.0f);
             } else {
-                player.sendMessage(messageManager.getComponent("blockpalettes.gui.list.messages.full"));
+                player.sendMessage(messageManager.getComponent("blockpalettes.gui.list.messages.full", player));
                 player.playSound(player.getLocation(), org.bukkit.Sound.ENTITY_VILLAGER_NO, 1.0f, 1.0f);
             }
         }

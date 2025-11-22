@@ -75,6 +75,54 @@ public class GuiUtils {
     }
 
     /**
+     * 建立 GUI 物品 (使用 Component)
+     * 
+     * @param material 材質
+     * @param displayName 顯示名稱 Component
+     * @param lore 描述文字 Components
+     * @return ItemStack
+     */
+    public static ItemStack createItem(Material material, Component displayName, Component... lore) {
+        ItemStack item = new ItemStack(material);
+        ItemMeta meta = item.getItemMeta();
+        
+        if (meta != null) {
+            meta.displayName(displayName);
+            if (lore.length > 0) {
+                meta.lore(Arrays.asList(lore));
+            }
+            meta.addItemFlags(ItemFlag.values());
+            item.setItemMeta(meta);
+        }
+        
+        return item;
+    }
+
+    /**
+     * 建立 GUI 物品 (使用 Component 和 List)
+     * 
+     * @param material 材質
+     * @param displayName 顯示名稱 Component
+     * @param lore 描述文字 Component List
+     * @return ItemStack
+     */
+    public static ItemStack createItem(Material material, Component displayName, List<Component> lore) {
+        ItemStack item = new ItemStack(material);
+        ItemMeta meta = item.getItemMeta();
+        
+        if (meta != null) {
+            meta.displayName(displayName);
+            if (lore != null && !lore.isEmpty()) {
+                meta.lore(lore);
+            }
+            meta.addItemFlags(ItemFlag.values());
+            item.setItemMeta(meta);
+        }
+        
+        return item;
+    }
+
+    /**
      * 建立帶自定義模型資料的物品
      */
     public static ItemStack createItemWithCustomModelData(Material material, String displayName, 
@@ -100,6 +148,32 @@ public class GuiUtils {
      */
     public static ItemStack createColoredPane(int rgb, String displayName, String... lore) {
         // 根據 RGB 值選擇最接近的羊毛顏色
+        Material paneMaterial = getClosestGlassPane(rgb);
+        return createItem(paneMaterial, displayName, lore);
+    }
+
+    /**
+     * 建立玻璃片（用於顯示顏色，使用 Component）
+     * 
+     * @param rgb RGB 顏色值
+     * @param displayName 顯示名稱 Component
+     * @param lore 描述文字 Components
+     * @return ItemStack
+     */
+    public static ItemStack createColoredPane(int rgb, Component displayName, Component... lore) {
+        Material paneMaterial = getClosestGlassPane(rgb);
+        return createItem(paneMaterial, displayName, lore);
+    }
+
+    /**
+     * 建立玻璃片（用於顯示顏色，使用 Component List）
+     * 
+     * @param rgb RGB 顏色值
+     * @param displayName 顯示名稱 Component
+     * @param lore 描述文字 Component List
+     * @return ItemStack
+     */
+    public static ItemStack createColoredPane(int rgb, Component displayName, List<Component> lore) {
         Material paneMaterial = getClosestGlassPane(rgb);
         return createItem(paneMaterial, displayName, lore);
     }

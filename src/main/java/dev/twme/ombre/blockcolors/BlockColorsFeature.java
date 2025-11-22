@@ -10,6 +10,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import dev.twme.ombre.Ombre;
 import dev.twme.ombre.blockcolors.command.BlockColorsCommand;
 import dev.twme.ombre.blockcolors.gui.BlockColorsGUIListener;
+import dev.twme.ombre.blockcolors.gui.PaletteListener;
 import dev.twme.ombre.blockcolors.gui.TermsAcceptanceListener;
 
 /**
@@ -21,6 +22,7 @@ public class BlockColorsFeature {
     private BlockColorCache cache;
     private TermsTracker termsTracker;
     private BlockColorsCommand commandHandler;
+    private dev.twme.ombre.blockcolors.data.PaletteDataManager paletteDataManager;
     
     // 玩家調色盤管理
     private final Map<UUID, dev.twme.ombre.blockcolors.data.PlayerPalette> playerPalettes;
@@ -34,6 +36,7 @@ public class BlockColorsFeature {
         this.plugin = plugin;
         this.playerPalettes = new HashMap<>();
         this.pendingTermsAcceptance = new HashMap<>();
+        this.paletteDataManager = new dev.twme.ombre.blockcolors.data.PaletteDataManager(plugin);
     }
 
     /**
@@ -71,6 +74,10 @@ public class BlockColorsFeature {
                     new BlockColorsGUIListener(), 
                     plugin
                 );
+                plugin.getServer().getPluginManager().registerEvents(
+                    new PaletteListener(this), 
+                    plugin
+                );
                 
                 initialized = true;
                 plugin.getLogger().info("BlockColors feature initialization complete!");
@@ -89,6 +96,11 @@ public class BlockColorsFeature {
      * 關閉 BlockColors 功能
      */
     public void shutdown() {
+        // 儲存所有玩家的調色盤
+        for (Map.Entry<UUID, dev.twme.ombre.blockcolors.data.PlayerPalette> entry : playerPalettes.entrySet()) {
+            paletteDataManager.savePalette(entry.getKey(), entry.getValue());
+        }
+        
         if (cache != null) {
             cache.saveCacheToFile();
         }
@@ -141,8 +153,42 @@ public class BlockColorsFeature {
      */
     public dev.twme.ombre.blockcolors.data.PlayerPalette getPlayerPalette(UUID playerId) {
         return playerPalettes.computeIfAbsent(playerId, 
-            k -> new dev.twme.ombre.blockcolors.data.PlayerPalette(18)
+            k -> paletteDataManager.loadPalette(k, 18)
         );
+    }
+
+    /**
+     * 取得玩家的調色盤（如果存在於記憶體中）
+     */
+    public dev.twme.ombre.blockcolors.data.PlayerPalette getPlayerPaletteIfExists(UUID playerId) {
+        return playerPalettes.get(playerId);
+    }
+
+    /**
+     * 載入玩家的調色盤資料
+     */
+    public void loadPlayerPalette(UUID playerId) {
+        if (!playerPalettes.containsKey(playerId)) {
+            dev.twme.ombre.blockcolors.data.PlayerPalette palette = paletteDataManager.loadPalette(playerId, 18);
+            playerPalettes.put(playerId, palette);
+        }
+    }
+
+    /**
+     * 儲存玩家的調色盤資料
+     */
+    public void savePlayerPalette(UUID playerId) {
+        dev.twme.ombre.blockcolors.data.PlayerPalette palette = playerPalettes.get(playerId);
+        if (palette != null) {
+            paletteDataManager.savePalette(playerId, palette);
+        }
+    }
+
+    /**
+     * 卸載玩家的調色盤資料（從記憶體移除）
+     */
+    public void unloadPlayerPalette(UUID playerId) {
+        playerPalettes.remove(playerId);
     }
 
     /**

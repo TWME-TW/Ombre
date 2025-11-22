@@ -68,13 +68,13 @@ public class PaletteGUI implements InventoryHolder {
     private void setupGUI() {
         // 第1行：控制列
         inventory.setItem(SLOT_BACK, GuiUtils.createItem(
-            Material.ARROW, msg.getMessage("blockcolors.gui.palette.back", player), msg.getMessage("blockcolors.gui.palette.back-lore", player)
+            Material.ARROW, msg.getComponent("blockcolors.gui.palette.back", player), msg.getComponent("blockcolors.gui.palette.back-lore", player)
         ));
         inventory.setItem(4, GuiUtils.createItem(
-            Material.PAINTING, msg.getMessage("blockcolors.gui.palette.title", player)
+            Material.PAINTING, msg.getComponent("blockcolors.gui.palette.title", player)
         ));
         inventory.setItem(SLOT_CLOSE, GuiUtils.createItem(
-            Material.BARRIER, msg.getMessage("blockcolors.gui.palette.close", player)
+            Material.BARRIER, msg.getComponent("blockcolors.gui.palette.close", player)
         ));
         
         // 更新調色盤顯示
@@ -82,13 +82,13 @@ public class PaletteGUI implements InventoryHolder {
         
         // 底部功能
         inventory.setItem(SLOT_CLEAR, GuiUtils.createItem(
-            Material.LAVA_BUCKET, msg.getMessage("blockcolors.gui.palette.clear", player),
-            msg.getMessageList("blockcolors.gui.palette.clear-lore")
+            Material.LAVA_BUCKET, msg.getComponent("blockcolors.gui.palette.clear", player),
+            msg.getComponentList("blockcolors.gui.palette.clear-lore")
         ));
         
         inventory.setItem(SLOT_HELP, GuiUtils.createItem(
-            Material.BOOK, msg.getMessage("blockcolors.gui.palette.help", player),
-            msg.getMessageList("blockcolors.gui.palette.help-lore")
+            Material.BOOK, msg.getComponent("blockcolors.gui.palette.help", player),
+            msg.getComponentList("blockcolors.gui.palette.help-lore")
         ));
         
         // 填充其他空格
@@ -117,11 +117,11 @@ public class PaletteGUI implements InventoryHolder {
             // 從快取獲取方塊資訊
             BlockColorData blockData = feature.getCache().getBlockByMaterial(material);
             
-            List<String> lore = buildPaletteBlockLore(blockData);
+            List<net.kyori.adventure.text.Component> lore = buildPaletteBlockLore(blockData);
             String displayName = blockData != null ? blockData.getDisplayName() : material.name();
             ItemStack item = GuiUtils.createItem(
                 material,
-                msg.getMessage("blockcolors.gui.palette.item-name", player, Map.of("name", displayName)),
+                msg.getComponent("blockcolors.gui.palette.item-name", player, Map.of("name", displayName)),
                 lore
             );
             inventory.setItem(PALETTE_START + i, item);
@@ -131,24 +131,24 @@ public class PaletteGUI implements InventoryHolder {
         for (int i = blocks.size(); i < 18; i++) {
             inventory.setItem(PALETTE_START + i, GuiUtils.createItem(
                 Material.LIGHT_GRAY_STAINED_GLASS_PANE,
-                msg.getMessage("blockcolors.gui.palette.empty-slot-title", player),
-                msg.getMessage("blockcolors.gui.palette.empty-slot-lore", player)
+                msg.getComponent("blockcolors.gui.palette.empty-slot-title", player),
+                msg.getComponent("blockcolors.gui.palette.empty-slot-lore", player)
             ));
         }
     }
 
-    private List<String> buildPaletteBlockLore(BlockColorData data) {
-        List<String> lore = new ArrayList<>();
+    private List<net.kyori.adventure.text.Component> buildPaletteBlockLore(BlockColorData data) {
+        List<net.kyori.adventure.text.Component> lore = new ArrayList<>();
         if (data != null) {
-            lore.add(msg.getMessage("blockcolors.gui.palette.block-info.display-name", player, Map.of("name", data.getDisplayName())));
-            lore.add("");
-            lore.add(msg.getMessage("blockcolors.gui.palette.block-info.hex", player, Map.of("hex", data.getHexColor())));
+            lore.add(msg.getComponent("blockcolors.gui.palette.block-info.display-name", player, Map.of("name", data.getDisplayName())));
+            lore.add(net.kyori.adventure.text.Component.empty());
+            lore.add(msg.getComponent("blockcolors.gui.palette.block-info.hex", player, Map.of("hex", data.getHexColor())));
             String rgb = "(" + data.getRed() + ", " + data.getGreen() + ", " + data.getBlue() + ")";
-            lore.add(msg.getMessage("blockcolors.gui.palette.block-info.rgb", player, Map.of("rgb", rgb)));
+            lore.add(msg.getComponent("blockcolors.gui.palette.block-info.rgb", player, Map.of("rgb", rgb)));
         }
-        lore.add("");
-        lore.add(msg.getMessage("blockcolors.gui.palette.block-info.remove", player));
-        lore.add(msg.getMessage("blockcolors.gui.palette.block-info.take", player));
+        lore.add(net.kyori.adventure.text.Component.empty());
+        lore.add(msg.getComponent("blockcolors.gui.palette.block-info.remove", player));
+        lore.add(msg.getComponent("blockcolors.gui.palette.block-info.take", player));
         return lore;
     }
 
@@ -201,6 +201,8 @@ public class PaletteGUI implements InventoryHolder {
             palette.clear();
             updatePaletteDisplay();
             msg.sendMessage(player, "blockcolors.gui.palette.messages.clear-success");
+            // 立即儲存調色盤
+            feature.savePlayerPalette(player.getUniqueId());
             return;
         }
         
@@ -225,11 +227,11 @@ public class PaletteGUI implements InventoryHolder {
                     Bukkit.getScheduler().runTaskLater(plugin, () -> {
                         BlockColorData data = feature.getCache().getBlockByMaterial(blockMaterial);
                         
-                        List<String> lore = buildPaletteBlockLore(data);
+                        List<net.kyori.adventure.text.Component> lore = buildPaletteBlockLore(data);
                         String name = data != null ? data.getDisplayName() : blockMaterial.name();
                         ItemStack item = GuiUtils.createItem(
                             blockMaterial,
-                            msg.getMessage("blockcolors.gui.palette.item-name", player, Map.of("name", name)),
+                            msg.getComponent("blockcolors.gui.palette.item-name", player, Map.of("name", name)),
                             lore
                         );
                         inventory.setItem(targetSlot, item);
@@ -239,6 +241,8 @@ public class PaletteGUI implements InventoryHolder {
                     if (palette.removeBlock(material)) {
                         updatePaletteDisplay();
                         msg.sendMessage(player, "blockcolors.gui.palette.messages.remove-success", Map.of("block", displayName));
+                        // 立即儲存調色盤
+                        feature.savePlayerPalette(player.getUniqueId());
                     } else {
                         msg.sendMessage(player, "blockcolors.gui.palette.messages.remove-failed");
                     }

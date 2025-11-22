@@ -224,253 +224,6 @@ gui:
       deleted: "<red>Configuration deleted</red>"
       delete-failed: "<red>Delete failed</red>"
       sort-changed: "<yellow>Sort mode: <mode></yellow>"
-  
-  blockcolors:
-    title: "<gold><bold>BlockColors.app</bold></gold>"
-    color-picker:
-      title: "Color Picker"
-      current: "Current Color"
-      red: "Red"
-      green: "Green"
-      blue: "Blue"
-      hex: "Input HEX"
-      reset: "Reset"
-    filter:
-      all: "All Blocks"
-      building: "Building Blocks"
-      decoration: "Decoration Blocks"
-    palette:
-      title: "My Palette"
-      empty: "<gray>Palette is empty</gray>"
-      add-hint: "<gray>Click blocks to add to palette</gray>"
-      full: "<red>Palette is full (<current>/<max>)</red>"
-  
-  blockpalettes:
-    title: "Block Palettes"
-    loading: "<yellow>Loading...</yellow>"
-    error: "<red>Loading failed</red>"
-    no-results: "<gray>No palettes found</gray>"
-    sort:
-      recent: "Recent"
-      popular: "Popular"
-      oldest: "Oldest"
-      trending: "Trending"
-    color-filter:
-      title: "<gold><bold>Color Filter</bold></gold>"
-      back: "<yellow>Back</yellow>"
-      back-lore: "<yellow>▸ Click to return to list</yellow>"
-      selected: "<green>✓ Current selection</green>"
-      click-to-select: "<yellow>▸ Click to select</yellow>"
-      filter-hint: "<gray>Filter <color> palettes</gray>"
-      applied: "<green>✓ Color filter applied: <color></green>"
-      color:
-        all: "All"
-        red: "Red"
-        orange: "Orange"
-        yellow: "Yellow"
-        green: "Green"
-        blue: "Blue"
-        purple: "Purple"
-        black: "Black"
-        white: "White"
-    favorites:
-      title: "<gold><bold>My Favorites</bold></gold>"
-      sort:
-        title: "<yellow>Sort: <mode></yellow>"
-        current: "<gray>Current sort: </gray><white><mode></white>"
-        click: "<yellow>▸ Left click to toggle sort</yellow>"
-      clear:
-        title: "<red>Clear Favorites</red>"
-        description: "<gray>Delete all favorited palettes</gray>"
-        confirm: "<red>⚠ Shift + Left click to confirm</red>"
-      back: "<yellow>Back to Main Menu</yellow>"
-      back-lore: "<yellow>▸ Click to return</yellow>"
-      close: "<red>Close</red>"
-      close-lore: "<yellow>▸ Click to close interface</yellow>"
-      info:
-        title: "<aqua>Info</aqua>"
-        palette-id: "<gold>Palette #<id></gold>"
-        author: "<gray>Author: </gray><white><author></white>"
-        time: "<gray>Time: </gray><white><time></white>"
-        likes: "<gray>Likes: </gray><yellow>❤ <likes></yellow>"
-        click-hint: "<yellow>▸ Click to view details</yellow>"
-      remove:
-        title: "<red>Remove</red>"
-        palette-id: "<gray>Palette #<id></gray>"
-        description: "<gray>Remove this palette from favorites</gray>"
-        click-hint: "<red>▸ Click to remove from favorites</red>"
-      empty:
-        title: "<yellow>No palettes favorited yet</yellow>"
-        line1: "<gray>Click the star icon on the</gray>"
-        line2: "<gray>palette detail page to add to favorites!</gray>"
-        limit: "<gray>Favorite limit: </gray><white>100</white>"
-      loading:
-        title: "<yellow>Loading favorites...</yellow>"
-        description: "<gray>Loading your favorites</gray>"
-      error:
-        title: "<red>Loading failed</red>"
-        retry: "<yellow>▸ Click to retry</yellow>"
-      page:
-        prev: "<yellow>Previous Page</yellow>"
-        next: "<yellow>Next Page</yellow>"
-        number: "<gray>Page <page></gray>"
-        first: "<gray>Already on first page</gray>"
-        last: "<gray>Already on last page</gray>"
-      stats:
-        title: "<yellow>Favorites Statistics</yellow>"
-        count: "<gray>Favorite count: </gray><white><count></white>"
-        sort: "<gray>Current sort: </gray><white><mode></white>"
-      sort-mode:
-        newest: "Newest→Oldest"
-        oldest: "Oldest→Newest"
-        likes: "Most Liked"
-      detail:
-        separator: "<gray>━━━━━━━━━━━━━━━━━━━━━━</gray>"
-        title: "<gold><bold>Palette #<id></bold></gold>"
-        author: "<gray>Author: </gray><white><author></white>"
-        time: "<gray>Time: </gray><white><time></white>"
-        likes: "<gray>Likes: </gray><yellow>❤ <likes></yellow>"
-      messages:
-        removed: "<yellow>✓ Removed Palette #<id> from favorites</yellow>"
-        cleared: "<green>✓ Cleared all favorites</green>"
-    list:
-      title: "<gold><bold>Block Palettes</bold></gold>"
-      control:
-        none: "None"
-        search:
-          title: "<yellow>Search Block: <search></yellow>"
-          current: "<gray>Current search: </gray><white><search></white>"
-          click: "<yellow>▸ Click to open search</yellow>"
-        sort:
-          title: "<yellow>Sort: <mode></yellow>"
-          current: "<gray>Current sort: </gray><white><mode></white>"
-          click: "<yellow>▸ Click to toggle sort</yellow>"
-        color:
-          title: "<yellow>Color Filter: <color></yellow>"
-          current: "<gray>Current color: </gray><white><color></white>"
-          click: "<yellow>▸ Click to open color menu</yellow>"
-        block:
-          title: "<yellow>Block Filter: <block></yellow>"
-          current: "<gray>Current block: </gray><white><block></white>"
-          click: "<yellow>▸ Click to open popular blocks</yellow>"
-        refresh:
-          title: "<green>Refresh</green>"
-          description: "<gray>Reload latest data</gray>"
-          click: "<yellow>▸ Click to refresh</yellow>"
-        close:
-          title: "<red>Close</red>"
-          click: "<yellow>▸ Click to close interface</yellow>"
-      page:
-        prev: "<yellow>Previous Page</yellow>"
-        next: "<yellow>Next Page</yellow>"
-        number: "<gray>Page <page></gray>"
-        first: "<gray>Already on first page</gray>"
-        last: "<gray>Already on last page</gray>"
-      stats:
-        title: "<yellow>Statistics</yellow>"
-        current-page: "<gray>Current page: </gray><white><page></white>"
-        total: "<gray>Total palettes: </gray><white><total></white>"
-        favorites: "<gray>My favorites: </gray><gold><count></gold>"
-      loading:
-        title: "<yellow>Loading...</yellow>"
-        description: "<gray>Loading data from Block Palettes</gray>"
-      error:
-        title: "<red>Loading Failed</red>"
-        retry: "<yellow>▸ Click to retry</yellow>"
-        load-failed: "Load failed: <error>"
-      no-results:
-        title: "<gray>No matching palettes found</gray>"
-        hint: "<gray>Try adjusting search criteria</gray>"
-      palette:
-        info:
-          title: "<aqua>Info</aqua>"
-          id: "<gold>Palette #<id></gold>"
-          author: "<gray>Author: </gray><white><author></white>"
-          time: "<gray>Time: </gray><white><time></white>"
-          likes: "<gray>Likes: </gray><yellow>❤ <likes></yellow>"
-          click: "<yellow>▸ Click to copy block list</yellow>"
-        favorite:
-          title: "<yellow>Favorite</yellow>"
-          favorited: "<gold>Favorited</gold>"
-          id: "<gray>Palette #<id></gray>"
-          description: "<gray>Add this palette to favorites</gray>"
-          already: "<gray>This palette is already in favorites</gray>"
-          add-click: "<yellow>▸ Click to add to favorites</yellow>"
-          remove-click: "<red>▸ Click to remove from favorites</red>"
-      copy:
-        separator: "<gray>━━━━━━━━━━━━━━━━━━━━━━</gray>"
-        title: "<gold><bold>Palette #<id></bold></gold>"
-        author: "<gray>Author: </gray><white><author></white>"
-        time: "<gray>Time: </gray><white><time></white>"
-        likes: "<gray>Likes: </gray><yellow>❤ <likes></yellow>"
-        success: "<green>✓ Block list copied</green>"
-      sort-mode:
-        recent: "Recent"
-        popular: "Popular"
-        oldest: "Oldest"
-        trending: "Trending"
-      messages:
-        removed: "<yellow>✓ Removed Palette #<id> from favorites</yellow>"
-        added: "<green>✓ Added Palette #<id> to favorites</green>"
-        full: "<red>✗ Favorites full (max 100)</red>"
-    popular-blocks:
-      title: "<gold><bold>Popular Blocks</bold></gold>"
-      description: "<gray>Search palettes containing this block</gray>"
-      selected: "<green>✓ Currently selected</green>"
-      click-to-select: "<yellow>▸ Click to select</yellow>"
-      clear:
-        title: "<red>Clear Block Filter</red>"
-        description: "<gray>Remove block filter criteria</gray>"
-        click: "<yellow>▸ Click to clear</yellow>"
-      back: "<yellow>Back</yellow>"
-      back-lore: "<yellow>▸ Click to return to list</yellow>"
-      block:
-        spruce_planks: "Spruce Planks"
-        stone_bricks: "Stone Bricks"
-        dark_oak_planks: "Dark Oak Planks"
-        deepslate_tiles: "Deepslate Tiles"
-        spruce_log: "Spruce Log"
-        moss_block: "Moss Block"
-        stripped_spruce_log: "Stripped Spruce Log"
-        deepslate_bricks: "Deepslate Bricks"
-        calcite: "Calcite"
-        quartz_block: "Quartz Block"
-        oak_planks: "Oak Planks"
-        white_concrete: "White Concrete"
-        gray_concrete: "Gray Concrete"
-        smooth_stone: "Smooth Stone"
-        polished_andesite: "Polished Andesite"
-      messages:
-        filtered: "<green>✓ Filtered palettes containing <block></green>"
-        cleared: "<green>✓ Cleared block filter</green>"
-    search-input:
-      title: "<dark_purple>Block Search</dark_purple>"
-      info:
-        title: "<yellow>Search Blocks</yellow>"
-        description: "<gray>Enter block name in chat</gray>"
-        example-title: "<white>Examples:</white>"
-        example-1: "<gray>  • oak_planks</gray>"
-        example-2: "<gray>  • stone</gray>"
-        example-3: "<gray>  • brick</gray>"
-        click: "<yellow>▸ Click to start search</yellow>"
-      current:
-        title: "<yellow>Current Search</yellow>"
-        content: "<gray>Search content: </gray><white><search></white>"
-        none: "None"
-      clear:
-        title: "<red>Clear Search</red>"
-        click: "<yellow>▸ Click to clear current search</yellow>"
-      back: "<yellow>Back</yellow>"
-      back-lore: "<yellow>▸ Click to return to list</yellow>"
-      prompt:
-        separator: "<dark_gray>━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</dark_gray>"
-        title: "<yellow>  Please enter block name in chat</yellow>"
-        example: "<gray>  Example: </gray><white>oak_planks, stone, brick</white>"
-        cancel: "<gray>  Enter </gray><red>cancel</red><gray> to cancel search</gray>"
-      messages:
-        cancelled: "<red>✘ </red><gray>Search cancelled</gray>"
-        empty: "<red>✘ </red><gray>Search content cannot be empty</gray>"
-        applied: "<green>✓ </green><gray>Search: </gray><white><search></white>"
 
 # Messages
 messages:
@@ -714,7 +467,7 @@ blockcolors:
     filter-decoration: "<yellow>Decoration Blocks</yellow>"
     filter-current: "<green>✓ Current Filter</green>"
     filter-hint: "<gray>Click to switch</gray>"
-    my-palette: "<purple>My Palette</purple>"
+    my-palette: "<light_purple>My Palette</light_purple>"
     my-palette-lore: "<gray>View and manage saved blocks</gray>"
     back: "<red>Back</red>"
     back-lore: "<gray>Return to main menu</gray>"
@@ -725,7 +478,7 @@ blockcolors:
       - "<gray>• Use RGB buttons to fine-tune color</gray>"
       - "<gray>• Click HEX Input for precise color codes</gray>"
       - "<gray>• Toggle category filters to find blocks</gray>"
-      - "<gray>• Left-click block to get, Shift+Left-click to add to palette</gray>"
+      - "<gray>• Left-click to take block, right-click to add to palette</gray>"
     help-title: "<gold><bold>========== BlockColors Help ==========</bold></gold>"
     help-content:
       - "<yellow>How to use:</yellow>"
@@ -737,12 +490,13 @@ blockcolors:
     next-page: "<yellow>Next Page ▶</yellow>"
     page-info: "<gray>Page <current>/<total></gray>"
     block-info:
+      title: "<aqua><name></aqua>"
       display-name: "<gray><name></gray>"
       similarity: "<yellow>Similarity: <percentage></yellow>"
       hex: "<gray>HEX: <hex></gray>"
       rgb: "<gray>RGB: <rgb></gray>"
-      left-click: "<green>Left Click</green> <gray>Add to palette</gray>"
-      right-click: "<yellow>Right Click</yellow> <gray>Take block</gray>"
+      left-click: "<green>Left Click</green> <gray>Take block</gray>"
+      right-click: "<yellow>Right Click</yellow> <gray>Add to palette</gray>"
     messages:
       reset: "<green>✓ Reset to white</green>"
       obtained: "<green>✓ Obtained <block></green>"
@@ -752,7 +506,7 @@ blockcolors:
       color-extracted: "<green>✓ Extracted color from <block></green>"
       color-value: "<gray>Color: <hex></gray>"
     palette:
-      title: "<purple>My Palette</purple>"
+      title: "<light_purple>My Palette</light_purple>"
       back: "<yellow>Back</yellow>"
       back-lore: "<gray>Return to BlockColors main interface</gray>"
       close: "<red>Close</red>"
@@ -875,6 +629,105 @@ blockpalettes:
       cache: "<yellow>/bp cache</yellow><gray> - View cache statistics (requires permission)</gray>"
       terms: "<yellow>/bp terms</yellow><gray> - View terms information</gray>"
       footer: "<gold>━━━━━━━━━━━━━━━━━━━━━━</gold>"
+  gui:
+    list:
+      title: "<gold><bold>Block Palettes</bold></gold>"
+      control:
+        none: "None"
+        search:
+          title: "<yellow>Search Block: <search></yellow>"
+          current: "<gray>Current search: </gray><white><search></white>"
+          click: "<yellow>▸ Click to open search</yellow>"
+        sort:
+          title: "<yellow>Sort: <mode></yellow>"
+          current: "<gray>Current sort: </gray><white><mode></white>"
+          click: "<yellow>▸ Click to toggle sort</yellow>"
+        color:
+          title: "<yellow>Color Filter: <color></yellow>"
+          current: "<gray>Current color: </gray><white><color></white>"
+          click: "<yellow>▸ Click to open color menu</yellow>"
+        block:
+          title: "<yellow>Block Filter: <block></yellow>"
+          current: "<gray>Current block: </gray><white><block></white>"
+          click: "<yellow>▸ Click to open popular blocks</yellow>"
+        refresh:
+          title: "<green>Refresh</green>"
+          description: "<gray>Reload latest data</gray>"
+          click: "<yellow>▸ Click to refresh</yellow>"
+        close:
+          title: "<red>Close</red>"
+          click: "<yellow>▸ Click to close interface</yellow>"
+      page:
+        prev: "<yellow>Previous Page</yellow>"
+        next: "<yellow>Next Page</yellow>"
+        number: "<gray>Page <page></gray>"
+        first: "<gray>Already on first page</gray>"
+        last: "<gray>Already on last page</gray>"
+      stats:
+        title: "<yellow>Statistics</yellow>"
+        current-page: "<gray>Current page: </gray><white><page></white>"
+        total: "<gray>Total palettes: </gray><white><total></white>"
+        favorites: "<gray>My favorites: </gray><gold><count></gold>"
+      loading:
+        title: "<yellow>Loading...</yellow>"
+        description: "<gray>Loading data from Block Palettes</gray>"
+      error:
+        title: "<red>Load Failed</red>"
+        retry: "<yellow>▸ Click to retry</yellow>"
+        load-failed: "Load failed: <error>"
+      no-results:
+        title: "<gray>No palettes match the criteria</gray>"
+        hint: "<gray>Try adjusting search criteria</gray>"
+      palette:
+        info:
+          title: "<aqua>Information</aqua>"
+          id: "<gold>Palette #<id></gold>"
+          author: "<gray>Author: </gray><white><author></white>"
+          time: "<gray>Time: </gray><white><time></white>"
+          likes: "<gray>Likes: </gray><yellow>❤ <likes></yellow>"
+          click: "<yellow>▸ Click to copy block list</yellow>"
+        favorite:
+          title: "<yellow>Favorite</yellow>"
+          favorited: "<gold>Favorited</gold>"
+          id: "<gray>Palette #<id></gray>"
+          description: "<gray>Add this palette to favorites</gray>"
+          already: "<gray>This palette is already in favorites</gray>"
+          add-click: "<yellow>▸ Click to add to favorites</yellow>"
+          remove-click: "<red>▸ Click to remove from favorites</red>"
+      copy:
+        separator: "<gray>━━━━━━━━━━━━━━━━━━━━━━</gray>"
+        title: "<gold><bold>Palette #<id></bold></gold>"
+        author: "<gray>Author: </gray><white><author></white>"
+        time: "<gray>Time: </gray><white><time></white>"
+        likes: "<gray>Likes: </gray><yellow>❤ <likes></yellow>"
+        success: "<green>✓ Block list copied</green>"
+      sort-mode:
+        recent: "Most Recent"
+        popular: "Most Popular"
+        oldest: "Oldest"
+        trending: "Trending"
+      messages:
+        removed: "<yellow>✓ Removed Palette #<id> from favorites</yellow>"
+        added: "<green>✓ Added Palette #<id> to favorites</green>"
+        full: "<red>✗ Favorites full (limit 100)</red>"
+    color-filter:
+      title: "<gold><bold>Color Filter</bold></gold>"
+      back: "<yellow>Back</yellow>"
+      back-lore: "<yellow>▸ Click to return to list</yellow>"
+      selected: "<green>✓ Currently selected</green>"
+      click-to-select: "<yellow>▸ Click to select</yellow>"
+      filter-hint: "<gray>Filter <color> palettes</gray>"
+      applied: "<green>✓ Applied color filter: <color></green>"
+      color:
+        all: "All"
+        red: "Red"
+        orange: "Orange"
+        yellow: "Yellow"
+        green: "Green"
+        blue: "Blue"
+        purple: "Purple"
+        black: "Black"
+        white: "White"
   palette:
     unknown-author: "Unknown Author"
   time:

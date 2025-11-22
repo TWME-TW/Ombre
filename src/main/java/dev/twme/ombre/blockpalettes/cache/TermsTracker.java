@@ -43,8 +43,6 @@ public class TermsTracker {
         if (!dataFolder.exists()) {
             dataFolder.mkdirs();
         }
-        
-        plugin.getLogger().info("條款追蹤器已初始化，當前版本: " + currentVersion);
     }
     
     /**
@@ -62,10 +60,6 @@ public class TermsTracker {
         
         // 檢查是否同意且版本匹配
         boolean agreed = data.isAgreedToTerms() && currentVersion.equals(data.getTermsVersion());
-        
-        if (!agreed && data.isAgreedToTerms()) {
-            plugin.getLogger().info("玩家 " + playerUuid + " 需要重新同意條款 (版本已更新)");
-        }
         
         return agreed;
     }
@@ -89,8 +83,6 @@ public class TermsTracker {
         
         acceptanceRecords.put(playerUuid, data);
         savePlayerData(playerUuid, data);
-        
-        plugin.getLogger().info("玩家 " + playerUuid + " 已同意條款 v" + currentVersion);
     }
     
     /**
@@ -101,7 +93,6 @@ public class TermsTracker {
         File playerFile = new File(dataFolder, playerUuid + ".json");
         if (playerFile.exists()) {
             playerFile.delete();
-            plugin.getLogger().info("已撤銷玩家 " + playerUuid + " 的條款同意");
         }
     }
     
@@ -118,10 +109,9 @@ public class TermsTracker {
             TermsAcceptanceData data = gson.fromJson(reader, TermsAcceptanceData.class);
             if (data != null) {
                 acceptanceRecords.put(playerUuid, data);
-                plugin.getLogger().fine("已載入玩家 " + playerUuid + " 的條款資料");
             }
         } catch (IOException e) {
-            plugin.getLogger().warning("無法載入玩家 " + playerUuid + " 的條款資料: " + e.getMessage());
+            plugin.getLogger().warning("Failed to load terms data for player " + playerUuid + ": " + e.getMessage());
         }
     }
     
@@ -133,9 +123,8 @@ public class TermsTracker {
         
         try (FileWriter writer = new FileWriter(playerFile)) {
             gson.toJson(data, writer);
-            plugin.getLogger().fine("已儲存玩家 " + playerUuid + " 的條款資料");
         } catch (IOException e) {
-            plugin.getLogger().severe("無法儲存玩家 " + playerUuid + " 的條款資料: " + e.getMessage());
+            plugin.getLogger().severe("Failed to save terms data for player " + playerUuid + ": " + e.getMessage());
         }
     }
     

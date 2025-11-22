@@ -280,56 +280,59 @@ public class MyGradientsGUI implements InventoryHolder {
     private void setupNavigationButtons() {
         // 上一頁按鈕
         if (currentPage > 0) {
+            Map<String, Object> prevParams = new HashMap<>();
+            prevParams.put("page", String.valueOf(currentPage));
             inventory.setItem(BUTTON_PREVIOUS_PAGE, createItem(Material.ARROW, 
-                messageManager.getMessage("gui.my-gradients.button.prev-page", player),
-                messageManager.getMessage("gui.my-gradients.button.prev-page-lore", player,
-                    "page", String.valueOf(currentPage))));
+                messageManager.getComponent("gui.my-gradients.button.prev-page", player),
+                messageManager.getComponent("gui.my-gradients.button.prev-page-lore", player, prevParams)));
         }
         
         // 排序按鈕
+        Map<String, Object> sortParams = new HashMap<>();
+        sortParams.put("mode", messageManager.getMessage(sortMode.getDisplayNameKey(), player));
         inventory.setItem(BUTTON_SORT, createItem(Material.COMPARATOR, 
-            messageManager.getMessage("gui.my-gradients.button.sort", player,
-                "mode", messageManager.getMessage(sortMode.getDisplayNameKey(), player)),
-            messageManager.getMessage(sortMode.getDescriptionKey(), player),
-            messageManager.getMessage("gui.my-gradients.button.sort-hint", player)));
+            messageManager.getComponent("gui.my-gradients.button.sort", player, sortParams),
+            messageManager.getComponent(sortMode.getDescriptionKey(), player),
+            messageManager.getComponent("gui.my-gradients.button.sort-hint", player)));
         
         // 下一頁按鈕
         int totalPages = (int) Math.ceil((double) myConfigs.size() / CONFIGS_PER_PAGE);
         if (currentPage < totalPages - 1) {
+            Map<String, Object> nextParams = new HashMap<>();
+            nextParams.put("page", String.valueOf(currentPage + 2));
             inventory.setItem(BUTTON_NEXT_PAGE, createItem(Material.ARROW, 
-                messageManager.getMessage("gui.my-gradients.button.next-page", player),
-                messageManager.getMessage("gui.my-gradients.button.next-page-lore", player,
-                    "page", String.valueOf(currentPage + 2))));
+                messageManager.getComponent("gui.my-gradients.button.next-page", player),
+                messageManager.getComponent("gui.my-gradients.button.next-page-lore", player, nextParams)));
         }
         
         // 頁碼資訊
+        Map<String, Object> countParams = new HashMap<>();
+        countParams.put("count", String.valueOf(myConfigs.size()));
+        Map<String, Object> pageParams = new HashMap<>();
+        pageParams.put("current", String.valueOf(currentPage + 1));
+        pageParams.put("total", String.valueOf(Math.max(1, totalPages)));
         inventory.setItem(4, createItem(Material.BOOK, 
-            messageManager.getMessage("gui.my-gradients.page-info.title", player),
-            messageManager.getMessage("gui.my-gradients.page-info.total", player,
-                "count", String.valueOf(myConfigs.size())),
-            messageManager.getMessage("gui.my-gradients.page-info.page", player,
-                "current", String.valueOf(currentPage + 1),
-                "total", String.valueOf(Math.max(1, totalPages)))));
+            messageManager.getComponent("gui.my-gradients.page-info.title", player),
+            messageManager.getComponent("gui.my-gradients.page-info.total", player, countParams),
+            messageManager.getComponent("gui.my-gradients.page-info.page", player, pageParams)));
         
         // 返回按鈕（右下角）
         inventory.setItem(BUTTON_BACK, createItem(Material.BARRIER, 
-            messageManager.getMessage("gui.my-gradients.button.back", player),
-            messageManager.getMessage("gui.my-gradients.button.back-lore", player)));
+            messageManager.getComponent("gui.my-gradients.button.back", player),
+            messageManager.getComponent("gui.my-gradients.button.back-lore", player)));
     }
     
     /**
      * 創建物品
      */
-    private ItemStack createItem(Material material, String name, String... lore) {
+    private ItemStack createItem(Material material, Component name, Component... lore) {
         ItemStack item = new ItemStack(material);
         ItemMeta meta = item.getItemMeta();
         if (meta != null) {
-            // 使用 MiniMessage 解析名稱
-            meta.displayName(net.kyori.adventure.text.minimessage.MiniMessage.miniMessage().deserialize(name));
+            meta.displayName(name.decoration(net.kyori.adventure.text.format.TextDecoration.ITALIC, false));
             if (lore.length > 0) {
-                // 使用 MiniMessage 解析 Lore
                 meta.lore(Arrays.stream(lore)
-                    .map(line -> net.kyori.adventure.text.minimessage.MiniMessage.miniMessage().deserialize(line))
+                    .map(line -> line.decoration(net.kyori.adventure.text.format.TextDecoration.ITALIC, false))
                     .toList());
             }
             item.setItemMeta(meta);
