@@ -1,3 +1,5 @@
+<div align="center">
+
 # Ombre
 
 ![Minecraft Version](https://img.shields.io/badge/minecraft-1.21.5-brightgreen.svg) ![Java Version](https://img.shields.io/badge/java-21-orange.svg) ![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)
@@ -5,6 +7,8 @@
 A powerful Minecraft plugin for creating beautiful color gradients and managing block palettes | 功能強大的 Minecraft 插件，用於創建美麗的顏色漸變和管理方塊調色板
 
 [English](#english) | [繁體中文](#繁體中文)
+
+</div>
 
 ---
 
@@ -656,4 +660,8 @@ src/main/java/dev/twme/ombre/
 
 ---
 
+<div align="center">
+
 Made with ❤️ by TWME-TW
+
+</div>
