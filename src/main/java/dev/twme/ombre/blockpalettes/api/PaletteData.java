@@ -13,6 +13,8 @@ import org.bukkit.Material;
 
 import com.google.gson.JsonObject;
 
+import dev.twme.ombre.i18n.MessageManager;
+
 /**
  * 調色板資料模型
  */
@@ -27,9 +29,18 @@ public class PaletteData {
     private List<String> blocks;    // 6個方塊 (內部 ID: snake_case)
     private List<PaletteData> similarPalettes;  // 僅詳細頁面有
     
+    private static MessageManager messageManager; // For i18n support
+    
     public PaletteData() {
         this.blocks = new ArrayList<>();
         this.similarPalettes = new ArrayList<>();
+    }
+    
+    /**
+     * 設定 MessageManager 用於國際化
+     */
+    public static void setMessageManager(MessageManager msg) {
+        messageManager = msg;
     }
     
     /**
@@ -47,7 +58,7 @@ public class PaletteData {
         } else if (json.has("author") && json.get("author") != null) {
             data.author = json.get("author").getAsString();
         } else {
-            data.author = "未知作者";
+            data.author = messageManager != null ? messageManager.getMessage("blockpalettes.palette.unknown-author") : "Unknown Author";
         }
         
         // API 使用 date 欄位作為時間戳，time_ago 作為相對時間
@@ -119,11 +130,11 @@ public class PaletteData {
     }
     
     /**
-     * 計算相對時間
+     * 計算相對時間 (固定使用英文)
      */
     private static String calculateRelativeTime(String timestamp) {
         if (timestamp == null || timestamp.isEmpty()) {
-            return "未知時間";
+            return "Unknown time";
         }
         
         try {
@@ -136,19 +147,20 @@ public class PaletteData {
             long hours = ChronoUnit.HOURS.between(pastTime, now);
             long days = ChronoUnit.DAYS.between(pastTime, now);
             
+            // Always use English for data class
             if (minutes < 60) {
-                return minutes + " 分鐘前";
+                return minutes + " minutes ago";
             } else if (hours < 24) {
-                return hours + " 小時前";
+                return hours + " hours ago";
             } else if (days < 30) {
-                return days + " 天前";
+                return days + " days ago";
             } else if (days < 365) {
-                return (days / 30) + " 個月前";
+                return (days / 30) + " months ago";
             } else {
-                return (days / 365) + " 年前";
+                return (days / 365) + " years ago";
             }
         } catch (Exception e) {
-            return "未知時間";
+            return "Unknown time";
         }
     }
     

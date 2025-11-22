@@ -7,8 +7,10 @@ import java.util.concurrent.CompletableFuture;
 
 import org.bukkit.plugin.java.JavaPlugin;
 
+import dev.twme.ombre.Ombre;
 import dev.twme.ombre.blockcolors.command.BlockColorsCommand;
 import dev.twme.ombre.blockcolors.gui.BlockColorsGUIListener;
+import dev.twme.ombre.blockcolors.gui.PaletteListener;
 import dev.twme.ombre.blockcolors.gui.TermsAcceptanceListener;
 
 /**
@@ -20,6 +22,7 @@ public class BlockColorsFeature {
     private BlockColorCache cache;
     private TermsTracker termsTracker;
     private BlockColorsCommand commandHandler;
+    private dev.twme.ombre.blockcolors.data.PaletteDataManager paletteDataManager;
     
     // 玩家調色盤管理
     private final Map<UUID, dev.twme.ombre.blockcolors.data.PlayerPalette> playerPalettes;
@@ -33,6 +36,7 @@ public class BlockColorsFeature {
         this.plugin = plugin;
         this.playerPalettes = new HashMap<>();
         this.pendingTermsAcceptance = new HashMap<>();
+        this.paletteDataManager = new dev.twme.ombre.blockcolors.data.PaletteDataManager(plugin);
     }
 
     /**
@@ -41,14 +45,14 @@ public class BlockColorsFeature {
     public CompletableFuture<Boolean> initialize() {
         return CompletableFuture.supplyAsync(() -> {
             try {
-                plugin.getLogger().info("正在初始化 BlockColors 功能...");
+                plugin.getLogger().info("Initializing BlockColors feature...");
                 
                 // 1. 初始化快取系統
                 cache = new BlockColorCache(plugin);
                 boolean cacheInitialized = cache.initialize().join();
                 
                 if (!cacheInitialized) {
-                    plugin.getLogger().severe("快取初始化失敗！");
+                    plugin.getLogger().severe("Cache initialization failed!");
                     return false;
                 }
                 
@@ -59,7 +63,7 @@ public class BlockColorsFeature {
                 termsTracker = new TermsTracker(plugin);
                 
                 // 4. 初始化指令處理器
-                commandHandler = new BlockColorsCommand(plugin, this);
+                commandHandler = new BlockColorsCommand((Ombre) plugin, this);
                 
                 // 5. 註冊事件監聽器
                 plugin.getServer().getPluginManager().registerEvents(
@@ -70,15 +74,19 @@ public class BlockColorsFeature {
                     new BlockColorsGUIListener(), 
                     plugin
                 );
+                plugin.getServer().getPluginManager().registerEvents(
+                    new PaletteListener(this), 
+                    plugin
+                );
                 
                 initialized = true;
-                plugin.getLogger().info("BlockColors 功能初始化完成！");
+                plugin.getLogger().info("BlockColors feature initialization complete!");
                 
                 return true;
                 
             } catch (Exception e) {
                 plugin.getLogger().log(java.util.logging.Level.SEVERE, 
-                    "初始化 BlockColors 功能時發生錯誤", e);
+                    "Error occurred while initializing BlockColors feature", e);
                 return false;
             }
         });
@@ -88,6 +96,11 @@ public class BlockColorsFeature {
      * 關閉 BlockColors 功能
      */
     public void shutdown() {
+        // 儲存所有玩家的調色盤
+        for (Map.Entry<UUID, dev.twme.ombre.blockcolors.data.PlayerPalette> entry : playerPalettes.entrySet()) {
+            paletteDataManager.savePalette(entry.getKey(), entry.getValue());
+        }
+        
         if (cache != null) {
             cache.saveCacheToFile();
         }
@@ -101,7 +114,7 @@ public class BlockColorsFeature {
         pendingTermsAcceptance.clear();
         
         initialized = false;
-        plugin.getLogger().info("BlockColors 功能已關閉");
+        plugin.getLogger().info("BlockColors feature disabled");
     }
 
     /**
@@ -110,7 +123,7 @@ public class BlockColorsFeature {
     public CompletableFuture<Boolean> reload() {
         return CompletableFuture.supplyAsync(() -> {
             try {
-                plugin.getLogger().info("正在重新載入 BlockColors...");
+                plugin.getLogger().info("Reloading BlockColors...");
                 
                 // 重新載入快取
                 boolean success = cache.reload().join();
@@ -120,16 +133,16 @@ public class BlockColorsFeature {
                     ColorMatcher.clearCache();
                     ColorMatcher.initialize(cache);
                     
-                    plugin.getLogger().info("BlockColors 重新載入完成");
+                    plugin.getLogger().info("BlockColors reload complete");
                     return true;
                 } else {
-                    plugin.getLogger().warning("BlockColors 重新載入失敗");
+                    plugin.getLogger().warning("BlockColors reload failed");
                     return false;
                 }
                 
             } catch (Exception e) {
                 plugin.getLogger().log(java.util.logging.Level.SEVERE, 
-                    "重新載入時發生錯誤", e);
+                    "Error occurred during reload", e);
                 return false;
             }
         });
@@ -140,8 +153,42 @@ public class BlockColorsFeature {
      */
     public dev.twme.ombre.blockcolors.data.PlayerPalette getPlayerPalette(UUID playerId) {
         return playerPalettes.computeIfAbsent(playerId, 
-            k -> new dev.twme.ombre.blockcolors.data.PlayerPalette(18)
+            k -> paletteDataManager.loadPalette(k, 18)
         );
+    }
+
+    /**
+     * 取得玩家的調色盤（如果存在於記憶體中）
+     */
+    public dev.twme.ombre.blockcolors.data.PlayerPalette getPlayerPaletteIfExists(UUID playerId) {
+        return playerPalettes.get(playerId);
+    }
+
+    /**
+     * 載入玩家的調色盤資料
+     */
+    public void loadPlayerPalette(UUID playerId) {
+        if (!playerPalettes.containsKey(playerId)) {
+            dev.twme.ombre.blockcolors.data.PlayerPalette palette = paletteDataManager.loadPalette(playerId, 18);
+            playerPalettes.put(playerId, palette);
+        }
+    }
+
+    /**
+     * 儲存玩家的調色盤資料
+     */
+    public void savePlayerPalette(UUID playerId) {
+        dev.twme.ombre.blockcolors.data.PlayerPalette palette = playerPalettes.get(playerId);
+        if (palette != null) {
+            paletteDataManager.savePalette(playerId, palette);
+        }
+    }
+
+    /**
+     * 卸載玩家的調色盤資料（從記憶體移除）
+     */
+    public void unloadPlayerPalette(UUID playerId) {
+        playerPalettes.remove(playerId);
     }
 
     /**

@@ -32,11 +32,11 @@ public class ColorDataGenerator {
      */
     public boolean generateIfNotExists() {
         if (colorsFile.exists()) {
-            plugin.getLogger().info("colors.yml 已存在，跳過生成");
+            plugin.getLogger().info("colors.yml already exists, skipping generation");
             return true;
         }
         
-        plugin.getLogger().info("開始生成 colors.yml...");
+        plugin.getLogger().info("Starting colors.yml generation...");
         return generateColorsFile();
     }
     
@@ -45,7 +45,7 @@ public class ColorDataGenerator {
      * @return 是否成功生成
      */
     public boolean regenerateColorsFile() {
-        plugin.getLogger().info("強制重新生成 colors.yml...");
+        plugin.getLogger().info("Forcing colors.yml regeneration...");
         if (colorsFile.exists()) {
             colorsFile.delete();
         }
@@ -84,11 +84,11 @@ public class ColorDataGenerator {
             // 儲存檔案
             config.save(colorsFile);
             
-            plugin.getLogger().info("成功生成 colors.yml，共 " + blockColors.size() + " 個方塊數據");
+            plugin.getLogger().info(String.format("Successfully generated colors.yml with %d block states", blockColors.size()));
             return true;
             
         } catch (IOException e) {
-            plugin.getLogger().log(Level.SEVERE, "生成 colors.yml 失敗", e);
+            plugin.getLogger().log(Level.SEVERE, "Failed to generate colors.yml", e);
             return false;
         }
     }
@@ -137,16 +137,16 @@ public class ColorDataGenerator {
                 
                 // 每處理 100 個方塊記錄一次
                 if (processedCount % 100 == 0) {
-                    plugin.getLogger().info("已處理 " + processedCount + " 個方塊...");
+                    plugin.getLogger().info(String.format("Processed %d block states so far...", processedCount));
                 }
                 
             } catch (Exception e) {
-                plugin.getLogger().warning("處理方塊 " + material.name() + " 時發生錯誤: " + e.getMessage());
+                plugin.getLogger().warning(String.format("Error processing block %s: %s", material.name(), e.getMessage()));
                 skippedCount++;
             }
         }
         
-        plugin.getLogger().info("處理完成: " + processedCount + " 個可用方塊, " + skippedCount + " 個方塊已跳過");
+        plugin.getLogger().info(String.format("Processing complete: %d usable blocks, %d skipped", processedCount, skippedCount));
         return colorMap;
     }
     

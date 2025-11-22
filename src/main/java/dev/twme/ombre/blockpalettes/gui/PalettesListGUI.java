@@ -1,9 +1,8 @@
 package dev.twme.ombre.blockpalettes.gui;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Map;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -20,6 +19,7 @@ import dev.twme.ombre.blockpalettes.BlockPalettesFeature;
 import dev.twme.ombre.blockpalettes.api.APIResponse;
 import dev.twme.ombre.blockpalettes.api.PaletteData;
 import dev.twme.ombre.blockpalettes.api.PaletteFilter;
+import dev.twme.ombre.i18n.MessageManager;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -34,6 +34,7 @@ public class PalettesListGUI implements Listener {
     private final BlockPalettesFeature feature;
     private final Player player;
     private final Inventory inventory;
+    private final MessageManager messageManager;
     private PaletteFilter filter;
     private APIResponse currentResponse;
     private boolean loading;
@@ -42,15 +43,14 @@ public class PalettesListGUI implements Listener {
         this.plugin = plugin;
         this.feature = feature;
         this.player = player;
+        this.messageManager = plugin.getMessageManager();
         this.filter = new PaletteFilter();
         this.filter.setLimit(4);  // 每頁只顯示 4 個調色板
         this.loading = false;
         
         // 建立 54 格箱子 (6x9)
         this.inventory = Bukkit.createInventory(null, 54,
-            Component.text("Block Palettes")
-                .color(NamedTextColor.GOLD)
-                .decoration(TextDecoration.BOLD, true)
+            messageManager.getComponent("blockpalettes.gui.list.title", player)
         );
         
         setupControlItems();
@@ -62,26 +62,25 @@ public class PalettesListGUI implements Listener {
      */
     private void setupControlItems() {
         // 搜尋 (格子 0)
-        String searchDisplay = filter.getBlockSearch().isEmpty() ? "無" : filter.getBlockSearch();
+        String searchDisplay = filter.getBlockSearch().isEmpty() ? 
+            messageManager.getMessage("blockpalettes.gui.list.control.none", player) : filter.getBlockSearch();
         ItemStack searchItem = createItem(Material.WRITABLE_BOOK,
-            Component.text("搜尋方塊: " + searchDisplay).color(NamedTextColor.YELLOW),
+            messageManager.getComponent("blockpalettes.gui.list.control.search.title", player, "search", searchDisplay),
             List.of(
-                Component.text("當前搜尋: ").color(NamedTextColor.GRAY)
-                    .append(Component.text(searchDisplay).color(NamedTextColor.WHITE)),
+                messageManager.getComponent("blockpalettes.gui.list.control.search.current", player, "search", searchDisplay),
                 Component.empty(),
-                Component.text("▸ 點擊開啟搜尋").color(NamedTextColor.YELLOW)
+                messageManager.getComponent("blockpalettes.gui.list.control.search.click", player)
             )
         );
         inventory.setItem(0, searchItem);
         
         // 排序 (格子 1)
         ItemStack sortItem = createItem(Material.CLOCK,
-            Component.text("排序: " + getSortDisplayName()).color(NamedTextColor.YELLOW),
+            messageManager.getComponent("blockpalettes.gui.list.control.sort.title", player, "mode", getSortDisplayName()),
             List.of(
-                Component.text("當前排序: ").color(NamedTextColor.GRAY)
-                    .append(Component.text(getSortDisplayName()).color(NamedTextColor.WHITE)),
+                messageManager.getComponent("blockpalettes.gui.list.control.sort.current", player, "mode", getSortDisplayName()),
                 Component.empty(),
-                Component.text("▸ 點擊切換排序").color(NamedTextColor.YELLOW)
+                messageManager.getComponent("blockpalettes.gui.list.control.sort.click", player)
             )
         );
         inventory.setItem(1, sortItem);
@@ -89,48 +88,34 @@ public class PalettesListGUI implements Listener {
         // 顏色篩選 (格子 2)
         String colorDisplay = getColorDisplayName(filter.getColor());
         ItemStack colorItem = createItem(Material.LIME_DYE,
-            Component.text("顏色篩選: " + colorDisplay).color(NamedTextColor.YELLOW),
+            messageManager.getComponent("blockpalettes.gui.list.control.color.title", player, "color", colorDisplay),
             List.of(
-                Component.text("當前顏色: ").color(NamedTextColor.GRAY)
-                    .append(Component.text(colorDisplay).color(NamedTextColor.WHITE)),
+                messageManager.getComponent("blockpalettes.gui.list.control.color.current", player, "color", colorDisplay),
                 Component.empty(),
-                Component.text("▸ 點擊開啟顏色選單").color(NamedTextColor.YELLOW)
+                messageManager.getComponent("blockpalettes.gui.list.control.color.click", player)
             )
         );
         inventory.setItem(2, colorItem);
-        
-        // 熱門方塊 (格子 3)
-        String blockDisplay = filter.getBlockSearch().isEmpty() ? "無" : getBlockDisplayName(filter.getBlockSearch());
-        ItemStack blockItem = createItem(Material.DIAMOND_BLOCK,
-            Component.text("方塊篩選: " + blockDisplay).color(NamedTextColor.YELLOW),
-            List.of(
-                Component.text("當前方塊: ").color(NamedTextColor.GRAY)
-                    .append(Component.text(blockDisplay).color(NamedTextColor.WHITE)),
-                Component.empty(),
-                Component.text("▸ 點擊開啟熱門方塊").color(NamedTextColor.YELLOW)
-            )
-        );
-        inventory.setItem(3, blockItem);
         
         // 上一頁 (格子 7)
         updatePageButtons();
         
         // 重新整理 (格子 52)
         ItemStack refreshItem = createItem(Material.LIME_DYE,
-            Component.text("重新整理").color(NamedTextColor.GREEN),
+            messageManager.getComponent("blockpalettes.gui.list.control.refresh.title", player),
             List.of(
-                Component.text("重新載入最新資料").color(NamedTextColor.GRAY),
+                messageManager.getComponent("blockpalettes.gui.list.control.refresh.description", player),
                 Component.empty(),
-                Component.text("▸ 點擊重新整理").color(NamedTextColor.YELLOW)
+                messageManager.getComponent("blockpalettes.gui.list.control.refresh.click", player)
             )
         );
         inventory.setItem(52, refreshItem);
         
         // 關閉 (格子 53)
         ItemStack closeItem = createItem(Material.RED_DYE,
-            Component.text("關閉").color(NamedTextColor.RED),
+            messageManager.getComponent("blockpalettes.gui.list.control.close.title", player),
             List.of(
-                Component.text("▸ 點擊關閉介面").color(NamedTextColor.YELLOW)
+                messageManager.getComponent("blockpalettes.gui.list.control.close.click", player)
             )
         );
         inventory.setItem(53, closeItem);
@@ -147,46 +132,43 @@ public class PalettesListGUI implements Listener {
         // 上一頁 (格子 7)
         if (filter.getPage() > 1) {
             ItemStack prevItem = createItem(Material.ARROW,
-                Component.text("上一頁").color(NamedTextColor.YELLOW),
+                messageManager.getComponent("blockpalettes.gui.list.page.prev", player),
                 List.of(
-                    Component.text("第 " + (filter.getPage() - 1) + " 頁").color(NamedTextColor.GRAY)
+                    messageManager.getComponent("blockpalettes.gui.list.page.number", player, "page", String.valueOf(filter.getPage() - 1))
                 )
             );
             inventory.setItem(7, prevItem);
         } else {
             inventory.setItem(7, createItem(Material.GRAY_DYE,
-                Component.text("上一頁").color(NamedTextColor.DARK_GRAY),
-                List.of(Component.text("已經是第一頁").color(NamedTextColor.GRAY))
+                messageManager.getComponent("blockpalettes.gui.list.page.prev", player),
+                List.of(messageManager.getComponent("blockpalettes.gui.list.page.first", player))
             ));
         }
         
         // 下一頁 (格子 8)
         if (filter.getPage() < currentResponse.getTotalPages()) {
             ItemStack nextItem = createItem(Material.ARROW,
-                Component.text("下一頁").color(NamedTextColor.YELLOW),
+                messageManager.getComponent("blockpalettes.gui.list.page.next", player),
                 List.of(
-                    Component.text("第 " + (filter.getPage() + 1) + " 頁").color(NamedTextColor.GRAY)
+                    messageManager.getComponent("blockpalettes.gui.list.page.number", player, "page", String.valueOf(filter.getPage() + 1))
                 )
             );
             inventory.setItem(8, nextItem);
         } else {
             inventory.setItem(8, createItem(Material.GRAY_DYE,
-                Component.text("下一頁").color(NamedTextColor.DARK_GRAY),
-                List.of(Component.text("已經是最後一頁").color(NamedTextColor.GRAY))
+                messageManager.getComponent("blockpalettes.gui.list.page.next", player),
+                List.of(messageManager.getComponent("blockpalettes.gui.list.page.last", player))
             ));
         }
         
         // 統計資訊 (格子 45)
         int favoriteCount = feature.getFavoritesManager().getFavoriteCount(player.getUniqueId());
         ItemStack statsInfo = createItem(Material.PAPER,
-            Component.text("統計資訊").color(NamedTextColor.YELLOW),
+            messageManager.getComponent("blockpalettes.gui.list.stats.title", player),
             List.of(
-                Component.text("當前頁數: ").color(NamedTextColor.GRAY)
-                    .append(Component.text(filter.getPage() + "/" + currentResponse.getTotalPages()).color(NamedTextColor.WHITE)),
-                Component.text("總調色板數: ").color(NamedTextColor.GRAY)
-                    .append(Component.text(String.valueOf(currentResponse.getTotalResults())).color(NamedTextColor.WHITE)),
-                Component.text("我的收藏: ").color(NamedTextColor.GRAY)
-                    .append(Component.text(favoriteCount + "/100").color(NamedTextColor.GOLD))
+                messageManager.getComponent("blockpalettes.gui.list.stats.current-page", player, Map.of("page", filter.getPage() + "/" + currentResponse.getTotalPages())),
+                messageManager.getComponent("blockpalettes.gui.list.stats.total", player, Map.of("total", String.valueOf(currentResponse.getTotalResults()))),
+                messageManager.getComponent("blockpalettes.gui.list.stats.favorites", player, Map.of("count", favoriteCount + "/100"))
             )
         );
         inventory.setItem(45, statsInfo);
@@ -218,7 +200,7 @@ public class PalettesListGUI implements Listener {
         }).exceptionally(ex -> {
             Bukkit.getScheduler().runTask(plugin, () -> {
                 loading = false;
-                showError("載入失敗: " + ex.getMessage());
+                showError(messageManager.getMessage("blockpalettes.gui.list.error.load-failed", player, "error", ex.getMessage()));
             });
             return null;
         });
@@ -276,9 +258,9 @@ public class PalettesListGUI implements Listener {
         // 如果沒有結果
         if (palettes.isEmpty()) {
             ItemStack noResults = createItem(Material.BARRIER,
-                Component.text("沒有找到符合條件的調色板").color(NamedTextColor.GRAY),
+                messageManager.getComponent("blockpalettes.gui.list.no-results.title", player),
                 List.of(
-                    Component.text("嘗試調整搜尋條件").color(NamedTextColor.GRAY)
+                    messageManager.getComponent("blockpalettes.gui.list.no-results.hint", player)
                 )
             );
             inventory.setItem(22, noResults);
@@ -290,19 +272,16 @@ public class PalettesListGUI implements Listener {
      */
     private ItemStack createPaletteInfoButton(PaletteData palette) {
         List<Component> lore = new ArrayList<>();
-        lore.add(Component.text("Palette #" + palette.getId()).color(NamedTextColor.GOLD));
+        lore.add(messageManager.getComponent("blockpalettes.gui.list.palette.info.id", player, "id", String.valueOf(palette.getId())));
         lore.add(Component.empty());
-        lore.add(Component.text("作者: ").color(NamedTextColor.GRAY)
-            .append(Component.text(palette.getAuthor()).color(NamedTextColor.WHITE)));
-        lore.add(Component.text("時間: ").color(NamedTextColor.GRAY)
-            .append(Component.text(palette.getUploadTime()).color(NamedTextColor.WHITE)));
-        lore.add(Component.text("喜歡: ").color(NamedTextColor.GRAY)
-            .append(Component.text("❤ " + palette.getLikes()).color(NamedTextColor.YELLOW)));
+        lore.add(messageManager.getComponent("blockpalettes.gui.list.palette.info.author", player, "author", palette.getAuthor()));
+        lore.add(messageManager.getComponent("blockpalettes.gui.list.palette.info.time", player, "time", palette.getUploadTime()));
+        lore.add(messageManager.getComponent("blockpalettes.gui.list.palette.info.likes", player, "likes", String.valueOf(palette.getLikes())));
         lore.add(Component.empty());
-        lore.add(Component.text("▸ 點擊複製方塊清單").color(NamedTextColor.YELLOW));
+        lore.add(messageManager.getComponent("blockpalettes.gui.list.palette.info.click", player));
         
         return createItem(Material.BOOK,
-            Component.text("資訊").color(NamedTextColor.AQUA)
+            messageManager.getComponent("blockpalettes.gui.list.palette.info.title", player)
                 .decoration(TextDecoration.BOLD, true)
                 .decoration(TextDecoration.ITALIC, false),
             lore
@@ -316,26 +295,26 @@ public class PalettesListGUI implements Listener {
         boolean isFavorite = feature.getFavoritesManager().isFavorite(player.getUniqueId(), palette.getId());
         
         Material material = isFavorite ? Material.NETHER_STAR : Material.GOLD_NUGGET;
-        String text = isFavorite ? "已收藏" : "收藏";
-        NamedTextColor color = isFavorite ? NamedTextColor.GOLD : NamedTextColor.YELLOW;
+        Component titleComponent = isFavorite ? 
+            messageManager.getComponent("blockpalettes.gui.list.palette.favorite.favorited", player) :
+            messageManager.getComponent("blockpalettes.gui.list.palette.favorite.title", player);
         
         List<Component> lore = new ArrayList<>();
-        lore.add(Component.text("Palette #" + palette.getId()).color(NamedTextColor.GRAY));
+        lore.add(messageManager.getComponent("blockpalettes.gui.list.palette.favorite.id", player, "id", String.valueOf(palette.getId())));
         lore.add(Component.empty());
         
         if (isFavorite) {
-            lore.add(Component.text("此調色板已在收藏中").color(NamedTextColor.GRAY));
+            lore.add(messageManager.getComponent("blockpalettes.gui.list.palette.favorite.already", player));
             lore.add(Component.empty());
-            lore.add(Component.text("▸ 點擊移除收藏").color(NamedTextColor.RED));
+            lore.add(messageManager.getComponent("blockpalettes.gui.list.palette.favorite.remove-click", player));
         } else {
-            lore.add(Component.text("將此調色板加入收藏").color(NamedTextColor.GRAY));
+            lore.add(messageManager.getComponent("blockpalettes.gui.list.palette.favorite.description", player));
             lore.add(Component.empty());
-            lore.add(Component.text("▸ 點擊加入收藏").color(NamedTextColor.YELLOW));
+            lore.add(messageManager.getComponent("blockpalettes.gui.list.palette.favorite.add-click", player));
         }
         
         return createItem(material,
-            Component.text(text).color(color)
-                .decoration(TextDecoration.BOLD, true)
+            titleComponent.decoration(TextDecoration.BOLD, true)
                 .decoration(TextDecoration.ITALIC, false),
             lore
         );
@@ -346,9 +325,9 @@ public class PalettesListGUI implements Listener {
      */
     private void showLoading() {
         ItemStack loading = createItem(Material.HOPPER,
-            Component.text("載入中...").color(NamedTextColor.YELLOW),
+            messageManager.getComponent("blockpalettes.gui.list.loading.title", player),
             List.of(
-                Component.text("正在從 Block Palettes 載入資料").color(NamedTextColor.GRAY)
+                messageManager.getComponent("blockpalettes.gui.list.loading.description", player)
             )
         );
         inventory.setItem(22, loading);
@@ -359,11 +338,11 @@ public class PalettesListGUI implements Listener {
      */
     private void showError(String error) {
         ItemStack errorItem = createItem(Material.BARRIER,
-            Component.text("載入失敗").color(NamedTextColor.RED),
+            messageManager.getComponent("blockpalettes.gui.list.error.title", player),
             List.of(
                 Component.text(error).color(NamedTextColor.GRAY),
                 Component.empty(),
-                Component.text("▸ 點擊重試").color(NamedTextColor.YELLOW)
+                messageManager.getComponent("blockpalettes.gui.list.error.retry", player)
             )
         );
         inventory.setItem(22, errorItem);
@@ -373,13 +352,11 @@ public class PalettesListGUI implements Listener {
      * 取得排序顯示名稱
      */
     private String getSortDisplayName() {
-        return switch (filter.getSortBy()) {
-            case "recent" -> "最新";
-            case "popular" -> "最受歡迎";
-            case "oldest" -> "最舊";
-            case "trending" -> "趨勢";
-            default -> "最新";
-        };
+        String sortKey = filter.getSortBy();
+        if (sortKey == null || sortKey.isEmpty()) {
+            sortKey = "recent";
+        }
+        return messageManager.getMessage("blockpalettes.gui.list.sort-mode." + sortKey, player);
     }
     
     /**
@@ -501,12 +478,6 @@ public class PalettesListGUI implements Listener {
             return;
         }
         
-        // 熱門方塊 (格子 3)
-        if (slot == 3) {
-            openPopularBlocks(clicker);
-            return;
-        }
-        
         // 排序 (格子 1)
         if (slot == 1) {
             toggleSort();
@@ -568,30 +539,10 @@ public class PalettesListGUI implements Listener {
      * 取得顏色顯示名稱
      */
     private String getColorDisplayName(String colorId) {
-        return switch (colorId) {
-            case "all" -> "全部";
-            case "red" -> "紅色";
-            case "orange" -> "橙色";
-            case "yellow" -> "黃色";
-            case "green" -> "綠色";
-            case "blue" -> "藍色";
-            case "purple" -> "紫色";
-            case "black" -> "黑色";
-            case "white" -> "白色";
-            default -> "全部";
-        };
-    }
-    
-    /**
-     * 取得方塊顯示名稱
-     */
-    private String getBlockDisplayName(String blockId) {
-        if (blockId == null || blockId.isEmpty()) {
-            return "無";
+        if (colorId == null || colorId.isEmpty()) {
+            colorId = "all";
         }
-        return Arrays.stream(blockId.split("_"))
-            .map(word -> word.substring(0, 1).toUpperCase() + word.substring(1))
-            .collect(Collectors.joining(" "));
+        return messageManager.getMessage("blockpalettes.gui.color-filter.color." + colorId, player);
     }
     
     /**
@@ -633,48 +584,24 @@ public class PalettesListGUI implements Listener {
     }
     
     /**
-     * 開啟熱門方塊選單
-     */
-    private void openPopularBlocks(Player player) {
-        player.closeInventory();
-        
-        Bukkit.getScheduler().runTaskLater(plugin, () -> {
-            PopularBlocksGUI blocksGUI = new PopularBlocksGUI(plugin, feature, player, filter, () -> {
-                Bukkit.getScheduler().runTaskLater(plugin, () -> {
-                    setupControlItems();  // 更新控制項顯示
-                    loadPalettes(true);
-                    player.openInventory(inventory);
-                }, 2L);
-            });
-            Bukkit.getPluginManager().registerEvents(blocksGUI, plugin);
-            blocksGUI.open();
-        }, 2L);
-    }
-    
-    /**
      * 複製方塊清單到聊天欄
      */
     private void copyBlockList(Player player, PaletteData palette) {
-        player.sendMessage(Component.text("━━━━━━━━━━━━━━━━━━━━━━").color(NamedTextColor.GRAY));
+        player.sendMessage(messageManager.getComponent("blockpalettes.gui.list.copy.separator", player));
         player.sendMessage(
-            Component.text("Palette #" + palette.getId())
-                .color(NamedTextColor.GOLD)
-                .decoration(TextDecoration.BOLD, true)
+            messageManager.getComponent("blockpalettes.gui.list.copy.title", player, "id", String.valueOf(palette.getId()))
         );
-        player.sendMessage(Component.text("作者: ").color(NamedTextColor.GRAY)
-            .append(Component.text(palette.getAuthor()).color(NamedTextColor.WHITE)));
-        player.sendMessage(Component.text("時間: ").color(NamedTextColor.GRAY)
-            .append(Component.text(palette.getUploadTime()).color(NamedTextColor.WHITE)));
-        player.sendMessage(Component.text("喜歡: ").color(NamedTextColor.GRAY)
-            .append(Component.text("❤ " + palette.getLikes()).color(NamedTextColor.YELLOW)));
+        player.sendMessage(messageManager.getComponent("blockpalettes.gui.list.copy.author", player, "author", palette.getAuthor()));
+        player.sendMessage(messageManager.getComponent("blockpalettes.gui.list.copy.time", player, "time", palette.getUploadTime()));
+        player.sendMessage(messageManager.getComponent("blockpalettes.gui.list.copy.likes", player, "likes", String.valueOf(palette.getLikes())));
         player.sendMessage(Component.empty());
         
         for (String blockName : palette.getDisplayNames()) {
             player.sendMessage(Component.text("• " + blockName).color(NamedTextColor.WHITE));
         }
         
-        player.sendMessage(Component.text("━━━━━━━━━━━━━━━━━━━━━━").color(NamedTextColor.GRAY));
-        player.sendMessage(Component.text("✓ 已複製方塊清單").color(NamedTextColor.GREEN));
+        player.sendMessage(messageManager.getComponent("blockpalettes.gui.list.copy.separator", player));
+        player.sendMessage(messageManager.getComponent("blockpalettes.gui.list.copy.success", player));
         player.playSound(player.getLocation(), org.bukkit.Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.0f, 1.0f);
     }
     
@@ -687,16 +614,16 @@ public class PalettesListGUI implements Listener {
         if (isFavorite) {
             // 移除收藏
             feature.getFavoritesManager().removeFavorite(player.getUniqueId(), palette.getId());
-            player.sendMessage(Component.text("✓ 已從收藏中移除 Palette #" + palette.getId()).color(NamedTextColor.YELLOW));
+            player.sendMessage(messageManager.getComponent("blockpalettes.gui.list.messages.removed", player, "id", String.valueOf(palette.getId())));
             player.playSound(player.getLocation(), org.bukkit.Sound.ENTITY_ITEM_PICKUP, 1.0f, 0.8f);
         } else {
             // 加入收藏
             boolean success = feature.getFavoritesManager().addFavorite(player.getUniqueId(), palette);
             if (success) {
-                player.sendMessage(Component.text("✓ 已加入收藏 Palette #" + palette.getId()).color(NamedTextColor.GREEN));
+                player.sendMessage(messageManager.getComponent("blockpalettes.gui.list.messages.added", player, "id", String.valueOf(palette.getId())));
                 player.playSound(player.getLocation(), org.bukkit.Sound.ENTITY_PLAYER_LEVELUP, 1.0f, 2.0f);
             } else {
-                player.sendMessage(Component.text("✗ 收藏已滿 (最多 100 個)").color(NamedTextColor.RED));
+                player.sendMessage(messageManager.getComponent("blockpalettes.gui.list.messages.full", player));
                 player.playSound(player.getLocation(), org.bukkit.Sound.ENTITY_VILLAGER_NO, 1.0f, 1.0f);
             }
         }

@@ -19,6 +19,7 @@ import dev.twme.ombre.blockcolors.data.ColorMatch;
 import dev.twme.ombre.blockcolors.data.PlayerPalette;
 import dev.twme.ombre.blockcolors.util.ColorConverter;
 import dev.twme.ombre.blockcolors.util.GuiUtils;
+import net.kyori.adventure.text.Component;
 
 /**
  * BlockColors 主 GUI 介面
@@ -65,6 +66,7 @@ public class BlockColorsGUI implements InventoryHolder {
     private final Player player;
     private final Inventory inventory;
     private final Ombre plugin;
+    private final dev.twme.ombre.i18n.MessageManager msg;
     
     // 當前狀態
     private int currentRed = 255;
@@ -80,9 +82,11 @@ public class BlockColorsGUI implements InventoryHolder {
         this.feature = feature;
         this.player = player;
         this.plugin = (Ombre) feature.getPlugin();
+        this.msg = plugin.getMessageManager();
         this.rgbStep = plugin.getConfig().getInt("blockcolors.gui.rgb-step", 5);
         
-        this.inventory = Bukkit.createInventory(this, SIZE, "§6§lBlockColors.app");
+        this.inventory = Bukkit.createInventory(this, SIZE, 
+            msg.getComponent("blockcolors.gui.title", player));
         
         // 初始化界面
         setupGUI();
@@ -95,19 +99,20 @@ public class BlockColorsGUI implements InventoryHolder {
     private void setupGUI() {
         // 第1行：控制列
         inventory.setItem(SLOT_BACK, GuiUtils.createItem(
-            Material.ARROW, "§e返回", "§7返回 Ombre 主選單"
+            Material.ARROW, 
+            msg.getComponent("blockcolors.gui.back", player),
+            msg.getComponent("blockcolors.gui.back-lore", player)
         ));
         inventory.setItem(4, GuiUtils.createItem(
-            Material.NAME_TAG, "§6§lBlockColors.app"
+            Material.NAME_TAG, msg.getComponent("blockcolors.gui.title", player)
         ));
         inventory.setItem(SLOT_HELP, GuiUtils.createItem(
-            Material.BOOK, "§e說明",
-            "§7點擊調整 RGB 值來選擇顏色",
-            "§7或使用方塊取色槽",
-            "§7系統會顯示最接近的方塊"
+            Material.BOOK, 
+            msg.getComponent("blockcolors.gui.help", player),
+            msg.getComponentList("blockcolors.gui.help-lore")
         ));
         inventory.setItem(SLOT_CLOSE, GuiUtils.createItem(
-            Material.BARRIER, "§c關閉"
+            Material.BARRIER, msg.getComponent("blockcolors.gui.close", player)
         ));
         
         // 第2行：顏色調整
@@ -125,8 +130,9 @@ public class BlockColorsGUI implements InventoryHolder {
         // 第6行：底部功能
         updatePagination();
         inventory.setItem(SLOT_PALETTE, GuiUtils.createItem(
-            Material.PAINTING, "§d我的調色盤",
-            "§7點擊管理你的調色盤"
+            Material.PAINTING, 
+            msg.getComponent("blockcolors.gui.my-palette", player),
+            msg.getComponent("blockcolors.gui.my-palette-lore", player)
         ));
     }
 
@@ -138,49 +144,60 @@ public class BlockColorsGUI implements InventoryHolder {
         ItemStack currentPicker = inventory.getItem(SLOT_COLOR_PICKER);
         if (currentPicker == null || currentPicker.getType() == Material.AIR || currentPicker.getType() == Material.GLASS) {
             inventory.setItem(SLOT_COLOR_PICKER, GuiUtils.createItem(
-                Material.GLASS, "§e方塊取色槽",
-                "§7將方塊放入此槽以提取顏色",
-                "§7再次點擊可移除方塊"
+                Material.GLASS, 
+                msg.getComponent("blockcolors.gui.color-picker", player),
+                msg.getComponentList("blockcolors.gui.color-picker-lore")
             ));
         }
         
         // RGB 調整按鈕
+        Component currentValueR = msg.getComponent("blockcolors.gui.current-value", player, java.util.Map.of("value", String.valueOf(currentRed)));
         inventory.setItem(SLOT_R_PLUS, GuiUtils.createItem(
-            Material.RED_WOOL, "§cR +§f" + rgbStep,
-            "§7當前: §c" + currentRed
+            Material.RED_WOOL, 
+            msg.getComponent("blockcolors.gui.r-plus", player, java.util.Map.of("amount", String.valueOf(rgbStep))),
+            currentValueR
         ));
         inventory.setItem(SLOT_R_MINUS, GuiUtils.createItem(
-            Material.RED_WOOL, "§cR -§f" + rgbStep,
-            "§7當前: §c" + currentRed
+            Material.RED_WOOL, 
+            msg.getComponent("blockcolors.gui.r-minus", player, java.util.Map.of("amount", String.valueOf(rgbStep))),
+            currentValueR
         ));
         
+        Component currentValueG = msg.getComponent("blockcolors.gui.current-value", player, java.util.Map.of("value", String.valueOf(currentGreen)));
         inventory.setItem(SLOT_G_PLUS, GuiUtils.createItem(
-            Material.LIME_WOOL, "§aG +§f" + rgbStep,
-            "§7當前: §a" + currentGreen
+            Material.LIME_WOOL, 
+            msg.getComponent("blockcolors.gui.g-plus", player, java.util.Map.of("amount", String.valueOf(rgbStep))),
+            currentValueG
         ));
         inventory.setItem(SLOT_G_MINUS, GuiUtils.createItem(
-            Material.LIME_WOOL, "§aG -§f" + rgbStep,
-            "§7當前: §a" + currentGreen
+            Material.LIME_WOOL, 
+            msg.getComponent("blockcolors.gui.g-minus", player, java.util.Map.of("amount", String.valueOf(rgbStep))),
+            currentValueG
         ));
         
+        Component currentValueB = msg.getComponent("blockcolors.gui.current-value", player, java.util.Map.of("value", String.valueOf(currentBlue)));
         inventory.setItem(SLOT_B_PLUS, GuiUtils.createItem(
-            Material.BLUE_WOOL, "§9B +§f" + rgbStep,
-            "§7當前: §9" + currentBlue
+            Material.BLUE_WOOL, 
+            msg.getComponent("blockcolors.gui.b-plus", player, java.util.Map.of("amount", String.valueOf(rgbStep))),
+            currentValueB
         ));
         inventory.setItem(SLOT_B_MINUS, GuiUtils.createItem(
-            Material.BLUE_WOOL, "§9B -§f" + rgbStep,
-            "§7當前: §9" + currentBlue
+            Material.BLUE_WOOL, 
+            msg.getComponent("blockcolors.gui.b-minus", player, java.util.Map.of("amount", String.valueOf(rgbStep))),
+            currentValueB
         ));
         
+        String hex = ColorConverter.rgbToHex(currentRed, currentGreen, currentBlue);
         inventory.setItem(SLOT_HEX_INPUT, GuiUtils.createItem(
-            Material.PAPER, "§eHEX 輸入",
-            "§7點擊輸入 HEX 色碼",
-            "§7當前: §f" + ColorConverter.rgbToHex(currentRed, currentGreen, currentBlue)
+            Material.PAPER, 
+            msg.getComponent("blockcolors.gui.hex-input", player),
+            msg.getComponentList("blockcolors.gui.hex-input-lore", player, java.util.Map.of("hex", hex))
         ));
         
         inventory.setItem(SLOT_RESET, GuiUtils.createItem(
-            Material.WHITE_WOOL, "§f重置",
-            "§7重置為白色 (255, 255, 255)"
+            Material.WHITE_WOOL, 
+            msg.getComponent("blockcolors.gui.reset", player),
+            msg.getComponent("blockcolors.gui.reset-lore", player)
         ));
     }
 
@@ -190,12 +207,16 @@ public class BlockColorsGUI implements InventoryHolder {
     private void updateCurrentColorDisplay() {
         int rgb = ColorConverter.createRgb(currentRed, currentGreen, currentBlue);
         String hex = ColorConverter.rgbToHex(currentRed, currentGreen, currentBlue);
+        String rgbStr = "(" + currentRed + ", " + currentGreen + ", " + currentBlue + ")";
+        
+        java.util.Map<String, Object> placeholders = new java.util.HashMap<>();
+        placeholders.put("hex", hex);
+        placeholders.put("rgb", rgbStr);
         
         inventory.setItem(SLOT_CURRENT_COLOR, GuiUtils.createColoredPane(
             rgb,
-            "§e當前顏色",
-            "§7HEX: §f" + hex,
-            "§7RGB: §f(" + currentRed + ", " + currentGreen + ", " + currentBlue + ")"
+            msg.getComponent("blockcolors.gui.current-color", player),
+            msg.getComponentList("blockcolors.gui.current-color-lore", player, placeholders)
         ));
     }
 
@@ -207,23 +228,26 @@ public class BlockColorsGUI implements InventoryHolder {
         boolean isBuilding = currentCategory == BlockCategory.BUILDING;
         boolean isDecoration = currentCategory == BlockCategory.DECORATION;
         
+        Component filterHintAll = isAll ? msg.getComponent("blockcolors.gui.filter-current", player) : msg.getComponent("blockcolors.gui.filter-hint", player);
         inventory.setItem(SLOT_FILTER_ALL, GuiUtils.createItem(
             Material.CHEST,
-            isAll ? "§a§l全部方塊" : "§7全部方塊",
-            isAll ? "§a✓ 當前篩選" : "§7點擊切換"
+            msg.getComponent("blockcolors.gui.filter-all", player),
+            filterHintAll
         ));
         
+        Component filterHintBuilding = isBuilding ? msg.getComponent("blockcolors.gui.filter-current", player) : msg.getComponent("blockcolors.gui.filter-hint", player);
         inventory.setItem(SLOT_FILTER_BUILDING, GuiUtils.createItem(
             Material.BRICKS,
-            isBuilding ? "§a§l建築方塊" : "§7建築方塊",
-            isBuilding ? "§a✓ 當前篩選" : "§7點擊切換"
+            msg.getComponent("blockcolors.gui.filter-building", player),
+            filterHintBuilding
         ));
         
+        Component filterHintDecoration = isDecoration ? msg.getComponent("blockcolors.gui.filter-current", player) : msg.getComponent("blockcolors.gui.filter-hint", player);
         inventory.setItem(SLOT_FILTER_DECORATION, GuiUtils.createItem(
             Material.FLOWER_POT,
-            isDecoration ? "§a§l裝飾方塊" : "§7裝飾方塊",
-            isDecoration ? "§a✓ 當前篩選" : "§7點擊切換"
-        ));
+            msg.getComponent("blockcolors.gui.filter-decoration", player),
+            filterHintDecoration
+        )); 
     }
 
     /**
@@ -255,20 +279,25 @@ public class BlockColorsGUI implements InventoryHolder {
             
             if (material == null) continue;
             
-            List<String> lore = new ArrayList<>();
-            lore.add("§7" + match.getBlock().getDisplayName());
-            lore.add("");
-            lore.add("§e相似度: §f" + match.getSimilarityPercentage());
-            lore.add(match.getSimilarityLevel());
-            lore.add("");
-            lore.add("§7HEX: §f" + match.getBlock().getHexColor());
-            lore.add("§7RGB: §f(" + match.getBlock().getRed() + ", " + 
-                     match.getBlock().getGreen() + ", " + match.getBlock().getBlue() + ")");
-            lore.add("");
-            lore.add("§a左鍵 §7加入調色盤");
-            lore.add("§e右鍵 §7拿取方塊");
+            // 為 ColorMatch 設置 MessageManager 以便正確顯示相似度
+            match.setMessageManager(msg);
             
-            ItemStack item = GuiUtils.createItem(material, "§b" + match.getBlock().getDisplayName(), lore);
+            String rgbStr = "(" + match.getBlock().getRed() + ", " + match.getBlock().getGreen() + ", " + match.getBlock().getBlue() + ")";
+            
+            List<Component> lore = new ArrayList<>();
+            lore.add(msg.getComponent("blockcolors.gui.block-info.display-name", player, java.util.Map.of("name", match.getBlock().getDisplayName())));
+            lore.add(Component.empty());
+            lore.add(msg.getComponent("blockcolors.gui.block-info.similarity", player, java.util.Map.of("percentage", match.getSimilarityPercentage())));
+            lore.add(Component.text("  ").append(msg.getComponent("blockcolors.similarity." + getSimilarityKey(match.getSimilarity()), player)));
+            lore.add(Component.empty());
+            lore.add(msg.getComponent("blockcolors.gui.block-info.hex", player, java.util.Map.of("hex", match.getBlock().getHexColor())));
+            lore.add(msg.getComponent("blockcolors.gui.block-info.rgb", player, java.util.Map.of("rgb", rgbStr)));
+            lore.add(Component.empty());
+            lore.add(msg.getComponent("blockcolors.gui.block-info.right-click", player));
+            lore.add(msg.getComponent("blockcolors.gui.block-info.left-click", player));
+            
+            Component title = msg.getComponent("blockcolors.gui.block-info.title", player, java.util.Map.of("name", match.getBlock().getDisplayName()));
+            ItemStack item = GuiUtils.createItem(material, title, lore);
             inventory.setItem(BLOCKS_START + (i - startIndex), item);
         }
         
@@ -282,24 +311,28 @@ public class BlockColorsGUI implements InventoryHolder {
         int totalPages = (int) Math.ceil((double) currentMatches.size() / BLOCKS_PER_PAGE);
         
         if (currentPage > 0) {
+            Component pageInfo = msg.getComponent("blockcolors.gui.page-info", player, java.util.Map.of("current", String.valueOf(currentPage), "total", String.valueOf(totalPages)));
             inventory.setItem(SLOT_PREV_PAGE, GuiUtils.createItem(
-                Material.ARROW, "§e◀ 上一頁",
-                "§7頁數: §f" + (currentPage) + "/" + totalPages
+                Material.ARROW, 
+                msg.getComponent("blockcolors.gui.prev-page", player),
+                pageInfo
             ));
         } else {
             inventory.setItem(SLOT_PREV_PAGE, GuiUtils.createItem(
-                Material.GRAY_STAINED_GLASS_PANE, " "
+                Material.GRAY_STAINED_GLASS_PANE, Component.text(" ")
             ));
         }
         
         if (currentPage < totalPages - 1) {
+            Component pageInfo = msg.getComponent("blockcolors.gui.page-info", player, java.util.Map.of("current", String.valueOf(currentPage + 2), "total", String.valueOf(totalPages)));
             inventory.setItem(SLOT_NEXT_PAGE, GuiUtils.createItem(
-                Material.ARROW, "§e下一頁 ▶",
-                "§7頁數: §f" + (currentPage + 2) + "/" + totalPages
+                Material.ARROW, 
+                msg.getComponent("blockcolors.gui.next-page", player),
+                pageInfo
             ));
         } else {
             inventory.setItem(SLOT_NEXT_PAGE, GuiUtils.createItem(
-                Material.GRAY_STAINED_GLASS_PANE, " "
+                Material.GRAY_STAINED_GLASS_PANE, Component.text(" ")
             ));
         }
     }
@@ -321,11 +354,11 @@ public class BlockColorsGUI implements InventoryHolder {
             return;
         }
         
-        // 檢查是否是方塊區域的右鍵點擊
-        boolean isBlockRightClick = (slot >= BLOCKS_START && slot <= BLOCKS_END) && event.isRightClick();
+        // 檢查是否是方塊區域的左鍵點擊
+        boolean isBlockLeftClick = (slot >= BLOCKS_START && slot <= BLOCKS_END) && event.isLeftClick();
         
-        // 方塊區域右鍵不取消事件,允許拿取
-        if (!isBlockRightClick) {
+        // 方塊區域左鍵不取消事件,允許拿取
+        if (!isBlockLeftClick) {
             event.setCancelled(true);
         }
         
@@ -347,12 +380,10 @@ public class BlockColorsGUI implements InventoryHolder {
         }
         
         if (slot == SLOT_HELP) {
-            player.sendMessage("§6§l========== BlockColors 說明 ==========");
-            player.sendMessage("§e使用方法:");
-            player.sendMessage("§7- 點擊 RGB 按鈕調整顏色");
-            player.sendMessage("§7- 將方塊放入取色槽提取顏色");
-            player.sendMessage("§7- 點擊 HEX 輸入使用 HEX 色碼");
-            player.sendMessage("§7- 系統會自動顯示最相似的方塊");
+            msg.sendMessage(player, "blockcolors.gui.help-title");
+            for (Component line : msg.getComponentList("blockcolors.gui.help-content")) {
+                player.sendMessage(line);
+            }
             return;
         }
         
@@ -389,7 +420,7 @@ public class BlockColorsGUI implements InventoryHolder {
             updateColorControls();
             updateCurrentColorDisplay();
             updateMatches();
-            player.sendMessage("§a✓ 已重置為白色");
+            msg.sendMessage(player, "blockcolors.gui.messages.reset");
             return;
         }
         
@@ -449,38 +480,43 @@ public class BlockColorsGUI implements InventoryHolder {
                 Material material = match.getBlock().getMaterial();
                 
                 if (material != null) {
-                    if (event.isRightClick()) {
-                        // 右鍵 - 允許拿取方塊(事件已不取消)
-                        player.sendMessage("§a✓ 已獲得 " + match.getBlock().getDisplayName());
+                    if (event.isLeftClick()) {
+                        // 左鍵 - 允許拿取方塊(事件已不取消)
+                        msg.sendMessage(player, "blockcolors.gui.messages.obtained", java.util.Map.of("block", match.getBlock().getDisplayName()));
                         
                         // 延遲補上相同方塊
                         final int targetSlot = slot;
                         plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
-                            List<String> lore = new ArrayList<>();
-                            lore.add("§7" + match.getBlock().getDisplayName());
-                            lore.add("");
-                            lore.add("§e相似度: §f" + match.getSimilarityPercentage());
-                            lore.add(match.getSimilarityLevel());
-                            lore.add("");
-                            lore.add("§7HEX: §f" + match.getBlock().getHexColor());
-                            lore.add("§7RGB: §f(" + match.getBlock().getRed() + ", " + 
-                                     match.getBlock().getGreen() + ", " + match.getBlock().getBlue() + ")");
-                            lore.add("");
-                            lore.add("§a左鍵 §7加入調色盤");
-                            lore.add("§e右鍵 §7拿取方塊");
+                            match.setMessageManager(msg);
+                            String rgbStr = "(" + match.getBlock().getRed() + ", " + match.getBlock().getGreen() + ", " + match.getBlock().getBlue() + ")";
                             
-                            ItemStack item = GuiUtils.createItem(material, "§b" + match.getBlock().getDisplayName(), lore);
+                            List<Component> lore = new ArrayList<>();
+                            lore.add(msg.getComponent("blockcolors.gui.block-info.display-name", player, java.util.Map.of("name", match.getBlock().getDisplayName())));
+                            lore.add(Component.empty());
+                            lore.add(msg.getComponent("blockcolors.gui.block-info.similarity", player, java.util.Map.of("percentage", match.getSimilarityPercentage())));
+                            lore.add(Component.text("  ").append(msg.getComponent("blockcolors.similarity." + getSimilarityKey(match.getSimilarity()), player)));
+                            lore.add(Component.empty());
+                            lore.add(msg.getComponent("blockcolors.gui.block-info.hex", player, java.util.Map.of("hex", match.getBlock().getHexColor())));
+                            lore.add(msg.getComponent("blockcolors.gui.block-info.rgb", player, java.util.Map.of("rgb", rgbStr)));
+                            lore.add(Component.empty());
+                            lore.add(msg.getComponent("blockcolors.gui.block-info.right-click", player));
+                            lore.add(msg.getComponent("blockcolors.gui.block-info.left-click", player));
+                            
+                            Component title = msg.getComponent("blockcolors.gui.block-info.title", player, java.util.Map.of("name", match.getBlock().getDisplayName()));
+                            ItemStack item = GuiUtils.createItem(material, title, lore);
                             inventory.setItem(targetSlot, item);
                         }, 1L);
                     } else {
-                        // 左鍵 - 加入調色盤
+                        // 右鍵 - 加入調色盤
                         PlayerPalette palette = feature.getPlayerPalette(player.getUniqueId());
                         if (palette.addBlock(material)) {
-                            player.sendMessage("§a✓ 已加入 " + match.getBlock().getDisplayName() + " 到調色盤");
+                            msg.sendMessage(player, "blockcolors.gui.messages.added-palette", java.util.Map.of("block", match.getBlock().getDisplayName()));
+                            // 立即儲存調色盤
+                            feature.savePlayerPalette(player.getUniqueId());
                         } else if (palette.isFull()) {
-                            player.sendMessage("§c調色盤已滿!");
+                            msg.sendMessage(player, "blockcolors.gui.messages.palette-full");
                         } else {
-                            player.sendMessage("§c此方塊已在調色盤中");
+                            msg.sendMessage(player, "blockcolors.gui.messages.already-in-palette");
                         }
                     }
                 }
@@ -524,8 +560,9 @@ public class BlockColorsGUI implements InventoryHolder {
                     updateCurrentColorDisplay();
                     updateMatches();
                     
-                    player.sendMessage("§a✓ 已從 " + blockToPlace.getType().name() + " 提取顏色");
-                    player.sendMessage("§7顏色: §f" + ColorConverter.rgbToHex(currentRed, currentGreen, currentBlue));
+                    String hex = ColorConverter.rgbToHex(currentRed, currentGreen, currentBlue);
+                    msg.sendMessage(player, "blockcolors.gui.messages.color-extracted", java.util.Map.of("block", blockToPlace.getType().name()));
+                    msg.sendMessage(player, "blockcolors.gui.messages.color-value", java.util.Map.of("hex", hex));
                 }
                 return;
             } else {
@@ -543,9 +580,9 @@ public class BlockColorsGUI implements InventoryHolder {
                 ItemStack slotItem = inventory.getItem(SLOT_COLOR_PICKER);
                 if (slotItem == null || slotItem.getType() == Material.AIR) {
                     inventory.setItem(SLOT_COLOR_PICKER, GuiUtils.createItem(
-                        Material.GLASS, "§e方塊取色槽",
-                        "§7將方塊放入此槽以提取顏色",
-                        "§7再次點擊可移除方塊"
+                        Material.GLASS, 
+                        msg.getComponent("blockcolors.gui.color-picker", player),
+                        msg.getComponentList("blockcolors.gui.color-picker-lore")
                     ));
                 }
             }, 1L);
@@ -583,6 +620,17 @@ public class BlockColorsGUI implements InventoryHolder {
      */
     public void open() {
         player.openInventory(inventory);
+    }
+
+    /**
+     * Get similarity level key for message lookup
+     */
+    private String getSimilarityKey(double similarity) {
+        if (similarity >= 95) return "perfect";
+        if (similarity >= 85) return "very-similar";
+        if (similarity >= 70) return "quite-similar";
+        if (similarity >= 50) return "similar";
+        return "not-similar";
     }
 
     @Override

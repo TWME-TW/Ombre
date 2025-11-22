@@ -1,15 +1,21 @@
 package dev.twme.ombre.blockcolors.util;
 
-import dev.twme.ombre.blockcolors.data.BlockColorData;
-import org.bukkit.Material;
-import org.bukkit.plugin.java.JavaPlugin;
-
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.logging.Logger;
 
+import org.bukkit.Material;
+
+import dev.twme.ombre.blockcolors.data.BlockColorData;
+
 /**
- * Material 映射工具
- * 負責將 API 的 texture_name 映射到 Minecraft Material
+ * Material Mapping Utility
+ * Maps API texture_name to Minecraft Material
  */
 public class MaterialMapper {
     private static Logger logger;
@@ -19,11 +25,11 @@ public class MaterialMapper {
     }
 
     /**
-     * 智能映射 texture_name 到 Material
-     * 策略：從完整名稱開始，逐步移除最後一個 "_狀態" 直到找到匹配的 Material
+     * Intelligently map texture_name to Material
+     * Strategy: Start from full name, progressively remove last "_state" until matching Material is found
      * 
-     * @param textureName API 提供的材質名稱
-     * @return 對應的 Material，若無法映射則返回 null
+     * @param textureName Texture name provided by API
+     * @return Corresponding Material, or null if mapping fails
      */
     public static Material mapTextureName(String textureName) {
         if (textureName == null || textureName.isEmpty()) {
@@ -32,7 +38,7 @@ public class MaterialMapper {
         
         String[] parts = textureName.split("_");
         
-        // 從完整名稱開始嘗試
+        // Try starting from full name
         for (int i = parts.length; i > 0; i--) {
             String materialName = String.join("_", 
                 Arrays.copyOfRange(parts, 0, i)).toUpperCase();
@@ -40,12 +46,12 @@ public class MaterialMapper {
             try {
                 Material material = Material.valueOf(materialName);
                 
-                // 驗證是方塊而非物品
+                // Verify it's a block, not an item
                 if (material.isBlock()) {
                     return material;
                 }
             } catch (IllegalArgumentException ignored) {
-                // 繼續嘗試下一個組合
+                // Continue trying next combination
             }
         }
         
@@ -53,11 +59,11 @@ public class MaterialMapper {
     }
 
     /**
-     * 批量映射並記錄無法映射的材質
+     * Batch map and log unmappable textures
      * 
-     * @param blocks 方塊顏色資料集合
-     * @param logUnmapped 是否記錄無法映射的材質
-     * @return 映射結果 (textureName -> Material)
+     * @param blocks Collection of block color data
+     * @param logUnmapped Whether to log unmappable textures
+     * @return Mapping result (textureName -> Material)
      */
     public static Map<String, Material> mapAllTextures(
         Collection<BlockColorData> blocks,
@@ -71,7 +77,7 @@ public class MaterialMapper {
             
             if (material != null) {
                 mapping.put(block.getTextureName(), material);
-                // 同時更新 BlockColorData 的 material 欄位
+                // Also update the material field in BlockColorData
                 block.setMaterial(material);
             } else if (logUnmapped) {
                 unmapped.add(block.getTextureName());
@@ -80,7 +86,7 @@ public class MaterialMapper {
         
         if (logUnmapped && !unmapped.isEmpty() && logger != null) {
             logger.warning(
-                "無法映射以下 " + unmapped.size() + " 個材質: " + 
+                "Unable to map " + unmapped.size() + " textures: " + 
                 String.join(", ", unmapped)
             );
         }
@@ -89,20 +95,20 @@ public class MaterialMapper {
     }
 
     /**
-     * 驗證 Material 是否有效且為方塊
+     * Verify if Material is valid and is a block
      * 
-     * @param material 要驗證的材質
-     * @return 是否有效
+     * @param material Material to verify
+     * @return Whether it's valid
      */
     public static boolean isValidBlockMaterial(Material material) {
         return material != null && material.isBlock();
     }
 
     /**
-     * 取得映射統計資訊
+     * Get mapping statistics
      * 
-     * @param blocks 方塊顏色資料集合
-     * @return 統計字串
+     * @param blocks Collection of block color data
+     * @return Statistics string
      */
     public static String getMappingStats(Collection<BlockColorData> blocks) {
         int total = blocks.size();
@@ -111,7 +117,7 @@ public class MaterialMapper {
             .filter(Objects::nonNull)
             .count();
         
-        return String.format("已映射 %d/%d 個方塊 (%.1f%%)", 
+        return String.format("Mapped %d/%d blocks (%.1f%%)", 
             mapped, total, (mapped * 100.0 / total));
     }
 }

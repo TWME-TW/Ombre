@@ -4,6 +4,7 @@ import java.util.concurrent.CompletableFuture;
 
 import dev.twme.ombre.Ombre;
 import dev.twme.ombre.blockpalettes.api.BlockPalettesAPI;
+import dev.twme.ombre.blockpalettes.api.PaletteData;
 import dev.twme.ombre.blockpalettes.cache.FavoritesManager;
 import dev.twme.ombre.blockpalettes.cache.PaletteCache;
 import dev.twme.ombre.blockpalettes.cache.TermsTracker;
@@ -36,45 +37,47 @@ public class BlockPalettesFeature {
             try {
                 // 檢查是否啟用
                 if (!plugin.getConfig().getBoolean("block-palettes.enabled", true)) {
-                    plugin.getLogger().info("Block Palettes 功能已停用");
+                    plugin.getLogger().info("Block Palettes feature is disabled");
                     return false;
                 }
                 
+                // 設定 PaletteData 的 MessageManager 用於國際化
+                PaletteData.setMessageManager(plugin.getMessageManager());
+                
                 // 初始化條款追蹤器
                 termsTracker = new TermsTracker(plugin);
-                plugin.getLogger().info("條款追蹤器已初始化");
+                plugin.getLogger().info("Terms tracker initialized");
                 
                 // 初始化 API 客戶端
                 api = new BlockPalettesAPI(plugin);
-                plugin.getLogger().info("API 客戶端已初始化");
+                plugin.getLogger().info("API client initialized");
                 
                 // 初始化快取
                 cache = new PaletteCache(plugin, api);
-                plugin.getLogger().info("快取系統已初始化");
+                plugin.getLogger().info("Cache system initialized");
                 
                 // 初始化收藏管理器
                 favoritesManager = new FavoritesManager(plugin);
                 favoritesManager.loadFromFile();
-                plugin.getLogger().info("收藏管理器已初始化");
+                plugin.getLogger().info("Favorites manager initialized");
                 
                 // 初始化指令處理器
                 commandHandler = new BlockPalettesCommand(plugin, this);
-                plugin.getLogger().info("指令處理器已初始化");
+                plugin.getLogger().info("Command handler initialized");
                 
                 // 註冊搜尋輸入聊天監聽器
                 org.bukkit.Bukkit.getPluginManager().registerEvents(
                     new dev.twme.ombre.blockpalettes.gui.SearchInputGUI.ChatListener(), 
                     plugin
                 );
-                plugin.getLogger().info("搜尋輸入監聽器已註冊");
+                plugin.getLogger().info("Search input listener registered");
                 
                 enabled = true;
-                plugin.getLogger().info("Block Palettes 功能初始化完成");
+                plugin.getLogger().info("Block Palettes feature initialization complete");
                 return true;
                 
             } catch (Exception e) {
-                plugin.getLogger().severe("Block Palettes 功能初始化失敗: " + e.getMessage());
-                e.printStackTrace();
+                plugin.getLogger().severe("Block Palettes feature initialization failed: " + e.getMessage());
                 return false;
             }
         });
@@ -97,9 +100,9 @@ public class BlockPalettesFeature {
                 cache.cleanup();
             }
             
-            plugin.getLogger().info("Block Palettes 功能已關閉");
+            plugin.getLogger().info("Block Palettes feature shutdown");
         } catch (Exception e) {
-            plugin.getLogger().severe("Block Palettes 功能關閉時發生錯誤: " + e.getMessage());
+            plugin.getLogger().severe("Error during Block Palettes feature shutdown: " + e.getMessage());
         }
     }
     

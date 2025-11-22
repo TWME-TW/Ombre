@@ -20,9 +20,9 @@ import org.bukkit.inventory.meta.ItemMeta;
 import dev.twme.ombre.Ombre;
 import dev.twme.ombre.blockpalettes.BlockPalettesFeature;
 import dev.twme.ombre.blockpalettes.api.PaletteFilter;
+import dev.twme.ombre.i18n.MessageManager;
 import io.papermc.paper.event.player.AsyncChatEvent;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 
 /**
@@ -37,6 +37,7 @@ public class SearchInputGUI implements Listener {
     private final PaletteFilter filter;
     private final Runnable onSearchApplied;
     private final Inventory inventory;
+    private final MessageManager messageManager;
     
     // 全域追蹤等待輸入的玩家
     private static final Map<UUID, SearchInputGUI> waitingForInput = new HashMap<>();
@@ -48,8 +49,9 @@ public class SearchInputGUI implements Listener {
         this.player = player;
         this.filter = filter;
         this.onSearchApplied = onSearchApplied;
+        this.messageManager = plugin.getMessageManager();
         this.inventory = Bukkit.createInventory(null, 27, 
-            Component.text("方塊搜尋").color(NamedTextColor.DARK_PURPLE));
+            messageManager.getComponent("blockpalettes.gui.search-input.title", player));
         
         setupItems();
     }
@@ -60,27 +62,28 @@ public class SearchInputGUI implements Listener {
     private void setupItems() {
         // 搜尋資訊 (格子 13)
         ItemStack infoItem = createItem(Material.WRITABLE_BOOK,
-            Component.text("搜尋方塊").color(NamedTextColor.YELLOW),
+            messageManager.getComponent("blockpalettes.gui.search-input.info.title", player),
             List.of(
-                Component.text("在聊天輸入方塊名稱").color(NamedTextColor.GRAY),
+                messageManager.getComponent("blockpalettes.gui.search-input.info.description", player),
                 Component.empty(),
-                Component.text("範例:").color(NamedTextColor.WHITE),
-                Component.text("  • oak_planks").color(NamedTextColor.GRAY),
-                Component.text("  • stone").color(NamedTextColor.GRAY),
-                Component.text("  • brick").color(NamedTextColor.GRAY),
+                messageManager.getComponent("blockpalettes.gui.search-input.info.example-title", player),
+                messageManager.getComponent("blockpalettes.gui.search-input.info.example-1", player),
+                messageManager.getComponent("blockpalettes.gui.search-input.info.example-2", player),
+                messageManager.getComponent("blockpalettes.gui.search-input.info.example-3", player),
                 Component.empty(),
-                Component.text("▸ 點擊開始搜尋").color(NamedTextColor.YELLOW)
+                messageManager.getComponent("blockpalettes.gui.search-input.info.click", player)
             )
         );
         inventory.setItem(13, infoItem);
         
         // 當前搜尋 (格子 11)
-        String currentSearch = filter.getBlockSearch().isEmpty() ? "無" : filter.getBlockSearch();
+        String currentSearch = filter.getBlockSearch().isEmpty() ? 
+            messageManager.getMessage("blockpalettes.gui.search-input.current.none", player) : 
+            filter.getBlockSearch();
         ItemStack currentItem = createItem(Material.PAPER,
-            Component.text("當前搜尋").color(NamedTextColor.YELLOW),
+            messageManager.getComponent("blockpalettes.gui.search-input.current.title", player),
             List.of(
-                Component.text("搜尋內容: ").color(NamedTextColor.GRAY)
-                    .append(Component.text(currentSearch).color(NamedTextColor.WHITE))
+                messageManager.getComponent("blockpalettes.gui.search-input.current.content", player, "search", currentSearch)
             )
         );
         inventory.setItem(11, currentItem);
@@ -88,9 +91,9 @@ public class SearchInputGUI implements Listener {
         // 清除搜尋 (格子 15)
         if (!filter.getBlockSearch().isEmpty()) {
             ItemStack clearItem = createItem(Material.BARRIER,
-                Component.text("清除搜尋").color(NamedTextColor.RED),
+                messageManager.getComponent("blockpalettes.gui.search-input.clear.title", player),
                 List.of(
-                    Component.text("▸ 點擊清除當前搜尋").color(NamedTextColor.YELLOW)
+                    messageManager.getComponent("blockpalettes.gui.search-input.clear.click", player)
                 )
             );
             inventory.setItem(15, clearItem);
@@ -98,9 +101,9 @@ public class SearchInputGUI implements Listener {
         
         // 返回 (格子 22)
         ItemStack backItem = createItem(Material.ARROW,
-            Component.text("返回").color(NamedTextColor.YELLOW),
+            messageManager.getComponent("blockpalettes.gui.search-input.back", player),
             List.of(
-                Component.text("▸ 點擊返回列表").color(NamedTextColor.YELLOW)
+                messageManager.getComponent("blockpalettes.gui.search-input.back-lore", player)
             )
         );
         inventory.setItem(22, backItem);
@@ -191,18 +194,15 @@ public class SearchInputGUI implements Listener {
         player.closeInventory();
         waitingForInput.put(player.getUniqueId(), this);
         
-        player.sendMessage(Component.text("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━").color(NamedTextColor.DARK_GRAY));
+        player.sendMessage(messageManager.getComponent("blockpalettes.gui.search-input.prompt.separator", player));
         player.sendMessage(Component.empty());
-        player.sendMessage(Component.text("  請在聊天輸入方塊名稱").color(NamedTextColor.YELLOW));
+        player.sendMessage(messageManager.getComponent("blockpalettes.gui.search-input.prompt.title", player));
         player.sendMessage(Component.empty());
-        player.sendMessage(Component.text("  範例: ").color(NamedTextColor.GRAY)
-            .append(Component.text("oak_planks, stone, brick").color(NamedTextColor.WHITE)));
+        player.sendMessage(messageManager.getComponent("blockpalettes.gui.search-input.prompt.example", player));
         player.sendMessage(Component.empty());
-        player.sendMessage(Component.text("  輸入 ").color(NamedTextColor.GRAY)
-            .append(Component.text("cancel").color(NamedTextColor.RED))
-            .append(Component.text(" 取消搜尋").color(NamedTextColor.GRAY)));
+        player.sendMessage(messageManager.getComponent("blockpalettes.gui.search-input.prompt.cancel", player));
         player.sendMessage(Component.empty());
-        player.sendMessage(Component.text("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━").color(NamedTextColor.DARK_GRAY));
+        player.sendMessage(messageManager.getComponent("blockpalettes.gui.search-input.prompt.separator", player));
         
         player.playSound(player.getLocation(), Sound.BLOCK_NOTE_BLOCK_PLING, 1.0f, 1.5f);
     }
@@ -241,8 +241,7 @@ public class SearchInputGUI implements Listener {
     private void handleChatInput(Player player, String input) {
         // 取消搜尋
         if (input.equalsIgnoreCase("cancel")) {
-            player.sendMessage(Component.text("✘ ").color(NamedTextColor.RED)
-                .append(Component.text("已取消搜尋").color(NamedTextColor.GRAY)));
+            player.sendMessage(messageManager.getComponent("blockpalettes.gui.search-input.messages.cancelled", player));
             player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 1.0f, 1.0f);
             
             Bukkit.getScheduler().runTaskLater(plugin, () -> {
@@ -255,8 +254,7 @@ public class SearchInputGUI implements Listener {
         
         // 驗證輸入
         if (input.isEmpty()) {
-            player.sendMessage(Component.text("✘ ").color(NamedTextColor.RED)
-                .append(Component.text("搜尋內容不能為空").color(NamedTextColor.GRAY)));
+            player.sendMessage(messageManager.getComponent("blockpalettes.gui.search-input.messages.empty", player));
             player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_NO, 1.0f, 1.0f);
             
             Bukkit.getScheduler().runTaskLater(plugin, () -> {
@@ -269,9 +267,7 @@ public class SearchInputGUI implements Listener {
         filter.setBlockSearch(input.toLowerCase());
         filter.setPage(1);
         
-        player.sendMessage(Component.text("✓ ").color(NamedTextColor.GREEN)
-            .append(Component.text("搜尋: ").color(NamedTextColor.GRAY))
-            .append(Component.text(input).color(NamedTextColor.WHITE)));
+        player.sendMessage(messageManager.getComponent("blockpalettes.gui.search-input.messages.applied", player, "search", input));
         player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1.0f, 1.5f);
         
         // 返回並重新載入

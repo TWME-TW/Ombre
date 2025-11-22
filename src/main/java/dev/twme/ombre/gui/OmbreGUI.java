@@ -17,9 +17,9 @@ import org.bukkit.inventory.meta.ItemMeta;
 import dev.twme.ombre.Ombre;
 import dev.twme.ombre.algorithm.GradientAlgorithm;
 import dev.twme.ombre.data.GradientConfig;
+import dev.twme.ombre.i18n.MessageManager;
 import dev.twme.ombre.manager.ConfigManager;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 
 /**
  * 漸層製作 GUI
@@ -32,6 +32,8 @@ public class OmbreGUI implements InventoryHolder {
     private final Inventory inventory;
     private final GradientAlgorithm algorithm;
     private final ConfigManager configManager;
+    private final MessageManager messageManager;
+    private final net.kyori.adventure.text.minimessage.MiniMessage miniMessage;
     
     // 輸入區域的方塊（前4行）
     private final Map<Integer, String> inputBlocks; // slot -> blockDataString
@@ -66,8 +68,10 @@ public class OmbreGUI implements InventoryHolder {
     public OmbreGUI(Ombre plugin, Player player, GradientConfig config, String previousGUI) {
         this.plugin = plugin;
         this.player = player;
+        this.messageManager = plugin.getMessageManager();
+        this.miniMessage = net.kyori.adventure.text.minimessage.MiniMessage.miniMessage();
         this.inventory = Bukkit.createInventory(this, ROWS * COLS, 
-            Component.text("漸層製作").color(NamedTextColor.DARK_PURPLE));
+            messageManager.getComponent("gui.ombre.title", player));
         this.algorithm = new GradientAlgorithm(plugin, plugin.getColorService(), 
             plugin.getBlockFilterManager(), INPUT_ROWS, COLS);
         this.configManager = plugin.getConfigManager();
@@ -109,35 +113,41 @@ public class OmbreGUI implements InventoryHolder {
         updateNameButton();
         
         // 儲存按鈕
-        inventory.setItem(BUTTON_SAVE, createItem(Material.BOOK, "§a儲存", 
-            "§7儲存當前漸層配置"));
+        inventory.setItem(BUTTON_SAVE, createItem(Material.BOOK, 
+            messageManager.getMessage("gui.ombre.buttons.save", player), 
+            messageManager.getMessage("gui.ombre.lore.save", player)));
         
         // 發布按鈕
-        inventory.setItem(BUTTON_PUBLISH, createItem(Material.WRITABLE_BOOK, "§b發布", 
-            "§7發布到共享庫"));
+        inventory.setItem(BUTTON_PUBLISH, createItem(Material.WRITABLE_BOOK, 
+            messageManager.getMessage("gui.ombre.buttons.publish", player), 
+            messageManager.getMessage("gui.ombre.lore.publish", player)));
         
         // 收藏按鈕
-        inventory.setItem(BUTTON_FAVORITE, createItem(Material.NETHER_STAR, "§6收藏", 
-            "§7加入我的最愛"));
+        inventory.setItem(BUTTON_FAVORITE, createItem(Material.NETHER_STAR, 
+            messageManager.getMessage("gui.ombre.buttons.favorite", player), 
+            messageManager.getMessage("gui.ombre.lore.favorite", player)));
         
         // 刪除按鈕
-        inventory.setItem(BUTTON_DELETE, createItem(Material.RED_WOOL, "§c刪除", 
-            "§7刪除當前配置"));
+        inventory.setItem(BUTTON_DELETE, createItem(Material.RED_WOOL, 
+            messageManager.getMessage("gui.ombre.buttons.delete", player), 
+            messageManager.getMessage("gui.ombre.lore.delete", player)));
         
         // 清除按鈕
-        inventory.setItem(BUTTON_CLEAR, createItem(Material.BARRIER, "§c清除調色板", 
-            "§7清除當前所有方塊"));
+        inventory.setItem(BUTTON_CLEAR, createItem(Material.BARRIER, 
+            messageManager.getMessage("gui.ombre.buttons.clear", player), 
+            messageManager.getMessage("gui.ombre.lore.clear", player)));
         
         // 返回按鈕（如果有前一個 GUI）
         if (previousGUI != null) {
             String guiName = switch (previousGUI) {
-                case "library" -> "共享庫";
-                case "favorites" -> "我的最愛";
-                case "my" -> "我的漸層";
-                default -> "上一頁";
+                case "library" -> messageManager.getMessage("gui.library.title", player);
+                case "favorites" -> messageManager.getMessage("gui.favorites.title", player);
+                case "my" -> messageManager.getMessage("gui.my-gradients.title", player);
+                default -> messageManager.getMessage("gui.ombre.buttons.back", player);
             };
-            inventory.setItem(BUTTON_BACK, createItem(Material.RED_WOOL, "§c返回", 
-                "§7返回到 " + guiName));
+            inventory.setItem(BUTTON_BACK, createItem(Material.RED_WOOL, 
+                messageManager.getMessage("gui.ombre.buttons.back", player), 
+                messageManager.getMessage("gui.ombre.lore.back", player, "gui_name", guiName)));
         }
     }
     
@@ -148,10 +158,12 @@ public class OmbreGUI implements InventoryHolder {
         ItemStack item = new ItemStack(material);
         ItemMeta meta = item.getItemMeta();
         if (meta != null) {
-            meta.displayName(Component.text(name));
+            // 使用 MiniMessage 解析名稱
+            meta.displayName(miniMessage.deserialize(name));
             if (lore.length > 0) {
+                // 使用 MiniMessage 解析 Lore
                 meta.lore(Arrays.stream(lore)
-                    .map(Component::text)
+                    .map(miniMessage::deserialize)
                     .toList());
             }
             item.setItemMeta(meta);
@@ -225,7 +237,7 @@ public class OmbreGUI implements InventoryHolder {
                 String blockDataString = item.getType().createBlockData().getAsString();
                 inputBlocks.put(slot, blockDataString);
             } catch (Exception e) {
-                plugin.getLogger().warning("無法獲取方塊數據: " + item.getType());
+                plugin.getLogger().warning("Failed to get block data: " + item.getType());
             }
         }
     }
@@ -266,7 +278,7 @@ public class OmbreGUI implements InventoryHolder {
                 inventory.setItem(slot, new ItemStack(material));
             } catch (Exception e) {
                 // 某些方塊狀態無法作為物品顯示，使用 FINE 級別記錄
-                plugin.getLogger().fine("無法設置方塊: " + blockDataString);
+                plugin.getLogger().fine("Failed to set block: " + blockDataString);
             }
         }
     }
@@ -300,12 +312,11 @@ public class OmbreGUI implements InventoryHolder {
         
         // 如果已有名稱，顯示當前名稱
         if (gradientName != null && !gradientName.isEmpty()) {
-            player.sendMessage(Component.text("目前名稱: ").color(NamedTextColor.GRAY)
-                .append(Component.text(gradientName).color(NamedTextColor.YELLOW)));
+            messageManager.sendMessage(player, "messages.naming.current", "name", gradientName);
         }
         
-        player.sendMessage(Component.text("請在聊天欄輸入漸層名稱（最多32字元）").color(NamedTextColor.YELLOW));
-        player.sendMessage(Component.text("輸入 'cancel' 取消命名").color(NamedTextColor.GRAY));
+        messageManager.sendMessage(player, "messages.naming.prompt");
+        messageManager.sendMessage(player, "messages.naming.cancel");
         
         // 註冊到名稱輸入監聽器
         plugin.getGuiManager().getNameInputListener().startWaitingForInput(player, this);
@@ -316,7 +327,7 @@ public class OmbreGUI implements InventoryHolder {
      */
     private void handleSaveButton() {
         if (inputBlocks.isEmpty()) {
-            player.sendMessage(Component.text("沒有可儲存的漸層配置").color(NamedTextColor.RED));
+            messageManager.sendMessage(player, "messages.gradient.no-config");
             return;
         }
         
@@ -347,10 +358,9 @@ public class OmbreGUI implements InventoryHolder {
         // 儲存配置
         if (configManager.saveGradient(config)) {
             currentConfig = config;
-            player.sendMessage(Component.text("漸層配置已儲存為: " + config.getDisplayName())
-                .color(NamedTextColor.GREEN));
+            messageManager.sendMessage(player, "messages.gradient.saved", "name", config.getDisplayName());
         } else {
-            player.sendMessage(Component.text("儲存失敗").color(NamedTextColor.RED));
+            messageManager.sendMessage(player, "messages.gradient.save-failed");
         }
     }
     
@@ -359,19 +369,19 @@ public class OmbreGUI implements InventoryHolder {
      */
     private void handlePublishButton() {
         if (currentConfig == null) {
-            player.sendMessage(Component.text("請先儲存配置").color(NamedTextColor.RED));
+            messageManager.sendMessage(player, "messages.gradient.publish-need-save");
             return;
         }
         
         if (!player.hasPermission("ombre.publish")) {
-            player.sendMessage(Component.text("你沒有發布權限").color(NamedTextColor.RED));
+            messageManager.sendMessage(player, "messages.gradient.publish-no-permission");
             return;
         }
         
         if (configManager.publishGradient(currentConfig.getId(), player.getUniqueId())) {
-            player.sendMessage(Component.text("配置已發布到共享庫").color(NamedTextColor.GREEN));
+            messageManager.sendMessage(player, "messages.gradient.published");
         } else {
-            player.sendMessage(Component.text("發布失敗").color(NamedTextColor.RED));
+            messageManager.sendMessage(player, "messages.gradient.publish-failed");
         }
     }
     
@@ -380,16 +390,16 @@ public class OmbreGUI implements InventoryHolder {
      */
     private void handleFavoriteButton() {
         if (currentConfig == null) {
-            player.sendMessage(Component.text("請先儲存配置").color(NamedTextColor.RED));
+            messageManager.sendMessage(player, "messages.favorite.need-save");
             return;
         }
         
         if (configManager.isFavorited(player, currentConfig.getId())) {
             configManager.removeFavorite(player.getUniqueId(), currentConfig.getId());
-            player.sendMessage(Component.text("已從我的最愛移除").color(NamedTextColor.YELLOW));
+            messageManager.sendMessage(player, "messages.favorite.removed");
         } else {
             configManager.addFavorite(player.getUniqueId(), currentConfig.getId());
-            player.sendMessage(Component.text("已加入我的最愛").color(NamedTextColor.GREEN));
+            messageManager.sendMessage(player, "messages.favorite.added");
         }
         
         // 更新按鈕外觀
@@ -401,16 +411,16 @@ public class OmbreGUI implements InventoryHolder {
      */
     private void handleDeleteButton() {
         if (currentConfig == null) {
-            player.sendMessage(Component.text("沒有可刪除的配置").color(NamedTextColor.RED));
+            messageManager.sendMessage(player, "messages.gradient.delete-no-config");
             return;
         }
         
         if (configManager.deleteGradient(currentConfig.getId(), player)) {
-            player.sendMessage(Component.text("配置已刪除").color(NamedTextColor.GREEN));
+            messageManager.sendMessage(player, "messages.gradient.deleted");
             currentConfig = null;
             clearInputArea();
         } else {
-            player.sendMessage(Component.text("刪除失敗（可能沒有權限）").color(NamedTextColor.RED));
+            messageManager.sendMessage(player, "messages.gradient.delete-failed");
         }
     }
     
@@ -419,12 +429,12 @@ public class OmbreGUI implements InventoryHolder {
      */
     private void handleClearButton() {
         if (inputBlocks.isEmpty()) {
-            player.sendMessage(Component.text("調色板已經是空的").color(NamedTextColor.YELLOW));
+            messageManager.sendMessage(player, "messages.gradient.clear-empty");
             return;
         }
         
         clearInputArea();
-        player.sendMessage(Component.text("調色板已清除").color(NamedTextColor.GREEN));
+        messageManager.sendMessage(player, "messages.gradient.cleared");
     }
     
     /**
@@ -481,7 +491,7 @@ public class OmbreGUI implements InventoryHolder {
                     inputBlocks.put(slot, blockDataString);
                 }
             } catch (Exception e) {
-                plugin.getLogger().warning("無法載入方塊: " + blockDataString);
+                plugin.getLogger().warning("Failed to load block: " + blockDataString);
             }
         }
         
@@ -539,13 +549,15 @@ public class OmbreGUI implements InventoryHolder {
     private void updateNameButton() {
         ItemStack nameButton;
         if (gradientName != null && !gradientName.isEmpty()) {
-            nameButton = createItem(Material.NAME_TAG, "§6命名",
-                "§7目前名稱: §e" + gradientName,
-                "§7點擊修改名稱");
+            nameButton = createItem(Material.NAME_TAG, 
+                messageManager.getMessage("gui.ombre.buttons.name", player),
+                messageManager.getMessage("gui.ombre.lore.name-current", player, "name", gradientName),
+                messageManager.getMessage("gui.ombre.lore.name-click", player));
         } else {
-            nameButton = createItem(Material.NAME_TAG, "§6命名",
-                "§7為漸層設定自訂名稱",
-                "§7未設定時將使用預設格式");
+            nameButton = createItem(Material.NAME_TAG, 
+                messageManager.getMessage("gui.ombre.buttons.name", player),
+                messageManager.getMessage("gui.ombre.lore.name-set", player),
+                messageManager.getMessage("gui.ombre.lore.name-default", player));
         }
         inventory.setItem(BUTTON_NAME, nameButton);
     }

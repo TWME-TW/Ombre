@@ -1,0 +1,739 @@
+# English Language File for Ombre Plugin
+# Language: English (United States)
+# Author: TWME
+# Version: 1.0.0
+# Format: MiniMessage (https://docs.adventure.kyori.net/minimessage/format.html)
+
+meta:
+  locale: "en_US"
+  name: "English (US)"
+  author: "TWME"
+  version: "1.0.0"
+
+# General messages
+general:
+  prefix: "<gold>[Ombre]</gold>"
+  no-permission: "<red>You don't have permission to use this feature</red>"
+  player-only: "<red>This command can only be executed by players</red>"
+  unknown-command: "<red>Unknown command</red>"
+  reload-success: "<green>Configuration reloaded successfully</green>"
+  config-error: "<red>Configuration file error: <error></red>"
+
+# Command related
+commands:
+  ombre:
+    description: "Ombre gradient creation tool"
+    unknown-subcommand: "<red>Unknown subcommand. Use /ombre help for assistance</red>"
+    admin:
+      no-permission: "<red>You do not have admin permission</red>"
+      usage: "<yellow>Usage: /ombre admin delete <player|configId></yellow>"
+      delete-config-success: "<green>Successfully deleted configuration ID: <configId></green>"
+      config-not-found: "<red>Configuration not found with ID: <configId></red>"
+      delete-success: "<green>Deleted <count> configuration(s) for player <player></green>"
+      player-not-found: "<red>Player not found: <player></red>"
+    help:
+      title: "<gold><bold>=== Ombre Command Help ===</bold></gold>"
+      main: "<yellow>/ombre</yellow> <gray>- Open gradient creation GUI</gray>"
+      library: "<yellow>/ombre library</yellow> <gray>- Open shared library</gray>"
+      favorites: "<yellow>/ombre favorites</yellow> <gray>- Open favorites</gray>"
+      my: "<yellow>/ombre my</yellow> <gray>- View my gradient configurations</gray>"
+      palette: "<yellow>/ombre palette</yellow> <gray>- Manage palettes</gray>"
+      exclusion: "<yellow>/ombre exclusion</yellow> <gray>- Manage block exclusions</gray>"
+      stats: "<yellow>/ombre stats</yellow> <gray>- View statistics</gray>"
+      admin: "<red>/ombre admin</red> <gray>- Admin commands</gray>"
+      reload: "<red>/ombre reload</red> <gray>- Reload configuration</gray>"
+  
+  blockcolors:
+    description: "BlockColors.app color matching tool"
+    reload-success: "<green>BlockColors reloaded successfully!</green>"
+    reload-fail: "<red>BlockColors reload failed, check console</red>"
+    not-initialized: "<red>BlockColors feature not initialized yet, please try again later</red>"
+    cache-cleared: "<green>Cache cleared! Run /bca reload to reload</green>"
+  
+  blockpalettes:
+    description: "Block Palettes palette browser"
+    disabled: "<red>Block Palettes feature is currently disabled</red>"
+    reload-success: "<green>✓ Block Palettes cache reloaded</green>"
+
+# GUI related
+gui:
+  ombre:
+    title: "Gradient Creator"
+    buttons:
+      name: "<yellow>Name</yellow>"
+      save: "<green>Save</green>"
+      publish: "<aqua>Publish</aqua>"
+      favorite: "<gold>Favorite</gold>"
+      delete: "<red>Delete</red>"
+      clear: "<red>Clear Palette</red>"
+      back: "<red>Back</red>"
+    lore:
+      save: "<gray>Save current gradient configuration</gray>"
+      publish: "<gray>Publish to shared library</gray>"
+      favorite: "<gray>Add to favorites</gray>"
+      delete: "<gray>Delete current configuration</gray>"
+      clear: "<gray>Clear all current blocks</gray>"
+      back: "<gray>Return to <gui_name></gray>"
+      name-current: "<gray>Current name: <yellow><name></yellow></gray>"
+      name-click: "<gray>Click to modify name</gray>"
+      name-set: "<gray>Set custom name for gradient</gray>"
+      name-default: "<gray>Default format will be used if not set</gray>"
+  
+  library:
+    title: "Shared Library"
+    empty: "<gray>No published configurations</gray>"
+    page-info:
+      title: "<gold>Shared Library</gold>"
+      lore:
+        - "<gray>Total: <count> configurations</gray>"
+        - "<gray>Page <page> / <total></gray>"
+    buttons:
+      prev-page: "<green>Previous Page</green>"
+      prev-page-lore: "<gray>Page <page></gray>"
+      next-page: "<green>Next Page</green>"
+      next-page-lore: "<gray>Page <page></gray>"
+      back: "Close"
+      sort-time: "Sort by Time"
+      sort-time-lore:
+        0: "<green>✓ Current sort</green>"
+        1: "<gray>Click to switch</gray>"
+      sort-popular: "Sort by Popularity"
+      sort-popular-lore:
+        0: "<green>✓ Current sort</green>"
+        1: "<gray>Click to switch</gray>"
+      sort-creator: "Sort by Creator"
+      sort-creator-lore:
+        0: "<green>✓ Current sort</green>"
+        1: "<gray>Click to switch</gray>"
+      filter: "Filter"
+      filter-lore:
+        - "<yellow>Current: <filter></yellow>"
+        - ""
+        - "<gray>Click to cycle filter mode:</gray>"
+        - "<gray>• All configurations</gray>"
+        - "<gray>• My favorites</gray>"
+        - "<gray>• My creations</gray>"
+        - "<gray>• Weekly hot</gray>"
+    config:
+      display-name: "<aqua><name></aqua>"
+      creator: "<gray>Creator: <creator></gray>"
+      time: "<gray>Created: <time></gray>"
+      favorite-count: "<favorite_icon> Favorites: <count>"
+      favorite-count-favorited: "<yellow><favorite_icon> Favorites: <count></yellow>"
+      favorite-count-not-favorited: "<gray><favorite_icon> Favorites: <count></gray>"
+      load-count: "<gray>Loads: <count></gray>"
+      action:
+        left-click: "<green>Left-click: Load configuration</green>"
+        right-click-favorite: "<yellow>Right-click: Add to favorites</yellow>"
+        right-click-unfavorite: "<yellow>Right-click: Remove from favorites</yellow>"
+    messages:
+      loaded: "<green>Loaded configuration: <name></green>"
+      favorited: "<green>Added to favorites</green>"
+      unfavorited: "<yellow>Removed from favorites</yellow>"
+    sort:
+      recent: "<yellow>Recent</yellow>"
+      popular: "<yellow>Popular</yellow>"
+      oldest: "<yellow>Oldest</yellow>"
+    filter:
+      all: "All"
+      favorites: "My Favorites"
+      my-creations: "My Creations"
+      weekly-hot: "Weekly Hot"
+  
+  favorites:
+    title: "Favorites"
+    empty: "<gray>You haven't favorited any configurations yet</gray>"
+    add-hint: "<gray>Browse the shared library to favorite configurations!</gray>"
+    page-info: "<gold>My Favorites</gold>"
+    page-lore:
+      - "<gray>Total: <count> favorites</gray>"
+      - "<gray>Page <page> / <total></gray>"
+    button:
+      prev-page: "<green>Previous Page</green>"
+      prev-page-lore: "<gray>Page <page></gray>"
+      next-page: "<green>Next Page</green>"
+      next-page-lore: "<gray>Page <page></gray>"
+      back: "<red>Back</red>"
+      sort-time: "<yellow>Sort by Time</yellow>"
+      sort-popular: "<yellow>Sort by Popularity</yellow>"
+      sort-creator: "<yellow>Sort by Creator</yellow>"
+      clear-all: "<red>Clear All Favorites</red>"
+      clear-all-lore:
+        - "<dark_red>Warning: This action cannot be undone!</dark_red>"
+        - "<gray>Click again to confirm</gray>"
+    config:
+      display-name: "<gold><bold><name></bold></gold>"
+      creator: "<gray>Creator: <creator></gray>"
+      time: "<gray>Time: <time></gray>"
+      favorited: "<yellow>⭐ Favorited (<count> favorites)</yellow>"
+      load-count: "<green>Loaded: <count> times</green>"
+      action:
+        left-click: "<dark_gray>Left click to load</dark_gray>"
+        right-click: "<dark_gray>Right click to unfavorite</dark_gray>"
+    messages:
+      loaded: "<green>Loaded configuration: <name></green>"
+      removed: "<yellow>Removed from favorites</yellow>"
+      clear-confirm: "<red>Are you sure you want to clear all favorites?</red>"
+      clear-warning: "<yellow>This will remove <count> favorites and cannot be undone!</yellow>"
+      clear-hint: "<gray>Use /ombre favorites clear confirm to confirm</gray>"
+      cleared: "<green>Cleared <count> favorites</green>"
+  
+  my-gradients:
+    title: "My Gradients"
+    empty: "<gray>You haven't saved any gradient configurations yet</gray>"
+    page-info:
+      title: "My Gradient Configurations"
+      total: "<gray>Total: <count> configurations</gray>"
+      page: "<gray>Page <current> / <total></gray>"
+    button:
+      prev-page: "<green>Previous Page</green>"
+      prev-page-lore: "<gray>Page <page></gray>"
+      next-page: "<green>Next Page</green>"
+      next-page-lore: "<gray>Page <page></gray>"
+      sort: "<aqua>Sort: <mode></aqua>"
+      sort-hint: "<yellow>Click to toggle sort mode</yellow>"
+      back: "<red>Back</red>"
+      back-lore: "<gray>Close this interface</gray>"
+    sort:
+      time: "By Time"
+      time-desc: "Newest first"
+      name: "By Name"
+      name-desc: "Alphabetical order"
+      popularity: "By Popularity"
+      popularity-desc: "Most favorited first"
+    config:
+      display-name: "<aqua><name></aqua>"
+      default-name: "Configuration #<number>"
+      creator: "<gray>Creator: <creator></gray>"
+      blocks: "<gray>Blocks: <count></gray>"
+      favorites: "<yellow>Favorites: <count></yellow>"
+      published: "<green>Published</green>"
+      not-published: "<red>Not published</red>"
+      loads: "<gray>Loads: <count></gray>"
+      action:
+        left-click: "<yellow>Left-click</yellow> <gray>Load configuration</gray>"
+        shift-left-click: "<yellow>Shift+Left-click</yellow> <gray>Edit configuration</gray>"
+        right-click-publish: "<yellow>Right-click</yellow> <gray>Publish to shared library</gray>"
+        right-click-unpublish: "<yellow>Right-click</yellow> <gray>Unpublish</gray>"
+        shift-right-click: "<yellow>Shift+Right-click</yellow> <gray>Delete configuration</gray>"
+    messages:
+      loaded: "<green>Loaded configuration: <name></green>"
+      edit-mode: "<yellow>Entering edit mode</yellow>"
+      published: "<green>Published to shared library</green>"
+      unpublished: "<yellow>Unpublished</yellow>"
+      deleted: "<red>Configuration deleted</red>"
+      delete-failed: "<red>Delete failed</red>"
+      sort-changed: "<yellow>Sort mode: <mode></yellow>"
+
+# Messages
+messages:
+  gradient:
+    saved: "<green>Gradient configuration saved as: <name></green>"
+    save-failed: "<red>Save failed</red>"
+    published: "<green>Configuration published to shared library</green>"
+    publish-failed: "<red>Publish failed</red>"
+    publish-no-permission: "<red>You don't have permission to publish</red>"
+    publish-need-save: "<red>Please save configuration first</red>"
+    deleted: "<green>Configuration deleted</green>"
+    delete-failed: "<red>Delete failed (may lack permission)</red>"
+    delete-no-config: "<red>No configuration to delete</red>"
+    no-config: "<red>No gradient configuration to save</red>"
+    cleared: "<green>Palette cleared</green>"
+    clear-empty: "<yellow>Palette is already empty</yellow>"
+  
+  favorite:
+    added: "<green>Added to favorites</green>"
+    removed: "<yellow>Removed from favorites</yellow>"
+    need-save: "<red>Please save configuration first</red>"
+  
+  naming:
+    current: "<gray>Current name: </gray><yellow><name></yellow>"
+    prompt: "<yellow>Enter gradient name in chat (max 32 characters)</yellow>"
+    cancel: "<gray>Type 'cancel' to cancel naming</gray>"
+    cancelled: "<yellow>Naming cancelled</yellow>"
+    too-long: "<red>Name too long (max 32 characters)</red>"
+    duplicate: "<red>This name already exists</red>"
+    invalid: "<red>Invalid name</red>"
+    name-input:
+      cancelled: "<yellow>Naming cancelled</yellow>"
+      empty: "<red>Name cannot be empty! Please enter again or type 'cancel' to cancel</red>"
+      too-long: "<red>Name is too long! Please enter a name with no more than 32 characters or type 'cancel' to cancel</red>"
+      success: "<green>Gradient has been named: <yellow><name></yellow></green>"
+  
+  palette:
+    list-title: "<gold>=== Available Palettes ===</gold>"
+    none: "<gray>No palettes available</gray>"
+    entry-enabled: "<green>[✓] <name> - <description></green>"
+    entry-disabled: "<gray>[  ] <name> - <description></gray>"
+    enabled: "<green>Enabled palette: <palette></green>"
+    disabled: "<green>Disabled palette: <palette></green>"
+    reset: "<green>Reset palette settings (will use all blocks)</green>"
+    not-found: "<red>Palette not found: <palette></red>"
+    usage: "<yellow>Use /ombre palette enable/disable <id> to enable/disable palette</yellow>"
+    usage-reset: "<yellow>Use /ombre palette reset to reset palette settings</yellow>"
+    exclusion:
+      technical:
+        name: "Technical Blocks"
+        description: "Command blocks, barriers, and other technical blocks"
+      unplaceable:
+        name: "Unplaceable Blocks"
+        description: "Special blocks that cannot be placed as items (frosted ice, fire, etc.)"
+      fluids:
+        name: "Fluid Blocks"
+        description: "Water, lava, and other fluids"
+      decorative:
+        name: "Decorative Blocks"
+        description: "Torches, ladders, doors, and other decorative blocks"
+      plants:
+        name: "Plant Blocks"
+        description: "Flowers, grass, saplings, and other plants"
+      redstone:
+        name: "Redstone Blocks"
+        description: "Redstone components"
+    type:
+      wool:
+        name: "Wool"
+        description: "16 colors of wool blocks"
+      concrete:
+        name: "Concrete"
+        description: "16 colors of concrete blocks"
+      terracotta:
+        name: "Terracotta"
+        description: "16 colors of terracotta blocks"
+      stained-glass:
+        name: "Stained Glass"
+        description: "16 colors of stained glass"
+      natural-stone:
+        name: "Natural Stone"
+        description: "Various natural stone blocks"
+      wood:
+        name: "Wood"
+        description: "Various wood blocks"
+  
+  exclusion:
+    list-title: "<gold>=== Block Exclusion List ===</gold>"
+    none: "<gray>No exclusion lists available</gray>"
+    entry-enabled: "<green>[✓] <name> - <description></green>"
+    entry-disabled: "<gray>[  ] <name> - <description></gray>"
+    enabled: "<green>Enabled exclusion list: <exclusion></green>"
+    disabled: "<green>Disabled exclusion list: <exclusion></green>"
+    not-found: "<red>Exclusion list not found: <exclusion></red>"
+    usage: "<yellow>Use /ombre exclusion enable/disable <id> to enable/disable exclusion list</yellow>"
+  
+  stats:
+    title: "<gold>=== Your Statistics ===</gold>"
+    gradient-count: "<yellow>Created: <count></yellow>"
+  
+  cache:
+    title: "<gold><bold>===== BlockColors Cache Information =====</bold></gold>"
+    total-blocks: "<yellow>Total blocks: <white><count></white></yellow>"
+    last-update: "<yellow>Last update: <white><date></white></yellow>"
+    version: "<yellow>Cache version: <white><version></white></yellow>"
+    stats-title: "<gold><bold>===== Color Matching Cache Statistics =====</bold></gold>"
+    hit-rate: "<yellow>Hit rate: <white><rate>%</white></yellow>"
+    requests: "<yellow>Total requests: <white><count></white></yellow>"
+    hits: "<yellow>Cache hits: <white><count></white></yellow>"
+    misses: "<yellow>Cache misses: <white><count></white></yellow>"
+
+# Terms of Service
+terms:
+  blockcolors:
+    title: "<gold><bold>===========================================</bold></gold>"
+    subtitle: "<gold><bold>  BlockColors.app Terms of Service</bold></gold>"
+    separator: "<gold><bold>===========================================</bold></gold>"
+    line1: "<yellow>This feature is based on data from BlockColors.app.</yellow>"
+    line2: "<yellow>Before using this feature, please review and agree to the website's terms:</yellow>"
+    website: "<aqua><underlined>https://blockcolors.app/</underlined></aqua>"
+    data-source: "<yellow>Data source: <aqua><underlined>https://blockcolors.app/</underlined></aqua></yellow>"
+    author: "<yellow>Website author: <white>mcndt</white> <gray>(<aqua><underlined>https://mcndt.dev/</underlined></aqua>)</gray></yellow>"
+    accept: "<green>Type <white>'accept'</white> to indicate you have read and agree to the terms</green>"
+    decline: "<red>Type <white>'decline'</white> to decline and close</red>"
+    timeout: "<gray>(Will automatically close if no response within 60 seconds)</gray>"
+    timeout-message: "<red>Response timeout, please re-execute command</red>"
+    accepted: "<green>You have accepted the terms, you can now use BlockColors features</green>"
+    declined: "<red>You have declined the terms</red>"
+    accepted-reminder: "<gray>Please run <yellow>/bca</yellow> again to open the BlockColors feature.</gray>"
+    declined-reminder: "<gray>If you change your mind, run <yellow>/bca</yellow> again and accept the terms.</gray>"
+  
+  blockpalettes:
+    separator: "<gold>━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</gold>"
+    title: "<gold><bold>Block Palettes Terms of Service & Privacy Policy</bold></gold>"
+    description:
+      line1: "<gray>This feature uses the public API provided by Block Palettes website</gray>"
+      line2: "<gray>to browse community-created block palettes.</gray>"
+    before-continue: "<yellow>Before using, you need to agree to the following terms:</yellow>"
+    terms:
+      number: "<white>1. <aqua><bold>Block Palettes Terms of Service</bold></aqua></white>"
+      click: "<aqua><underlined>   [Click to open Terms of Service]</underlined></aqua>"
+      url: "<dark_gray>   <url></dark_gray>"
+    privacy:
+      number: "<white>2. <light_purple><bold>Block Palettes Privacy Policy</bold></light_purple></white>"
+      click: "<light_purple><underlined>   [Click to open Privacy Policy]</underlined></light_purple>"
+      url: "<dark_gray>   <url></dark_gray>"
+    disclaimer: "<gray><italic>These terms are set by the Block Palettes website and are not affiliated with this server.</italic></gray>"
+    choice-separator: "<gray>━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</gray>"
+    choice-prompt: "<yellow><bold>Please enter your choice in chat:</bold></yellow>"
+    choice:
+      accept: "<green><bold>  ✓ </bold></green><white>Type <green><bold>agree</bold></green> - <gray>Agree to terms and continue</gray></white>"
+      decline: "<red><bold>  ✗ </bold></red><white>Type <red><bold>decline</bold></red> - <gray>Decline terms and close</gray></white>"
+    response:
+      accepted:
+        title: "<green><bold>✓ Agreed to Block Palettes Terms of Service & Privacy Policy</bold></green>"
+        message: "<gray>Thank you for agreeing, you can now use the Block Palettes feature!</gray>"
+      declined:
+        title: "<red><bold>✗ You have declined the Block Palettes Terms</bold></red>"
+        message1: "<gray>You need to agree to the terms to use the Block Palettes browsing feature</gray>"
+        message2: "<gray>However, you can still use other server features</gray>"
+      invalid:
+        title: "<red><bold>⚠ Invalid input</bold></red>"
+        message: "<gray>Please type <green><bold>agree</bold></green> or <red><bold>decline</bold></red></gray>"
+
+# Error messages
+errors:
+  file:
+    load-failed: "<red>Failed to load file: <file></red>"
+    save-failed: "<red>Failed to save file: <file></red>"
+    create-failed: "<red>Failed to create file: <file></red>"
+  
+  api:
+    connection-failed: "<red>Failed to connect to API</red>"
+    timeout: "<red>API request timeout</red>"
+    invalid-response: "<red>Invalid API response</red>"
+    rate-limited: "<red>Too many requests, please try again later</red>"
+  
+  color:
+    generation-failed: "<red>Color file generation failed</red>"
+    invalid-hex: "<red>Invalid HEX color code</red>"
+    invalid-rgb: "<red>RGB values must be between 0-255</red>"
+  
+  cache:
+    corrupted: "<red>Cache file corrupted, rebuilding...</red>"
+    rebuild-failed: "<red>Cache rebuild failed</red>"
+  
+  config:
+    missing-key: "<red>Configuration missing required key: <key></red>"
+    invalid-value: "<red>Invalid configuration value: <key> = <value></red>"
+
+# Item descriptions
+items:
+  config:
+    creator: "<gray>Creator: <creator></gray>"
+    blocks: "<gray>Blocks: <count></gray>"
+    favorites: "<yellow>Favorites: <count></yellow>"
+    published: "<green>Published</green>"
+    not-published: "<gray>Not published</gray>"
+    created: "<gray>Created: <date></gray>"
+  
+  color-match:
+    similarity: "<gray>Similarity: <percentage>%</gray>"
+    click-to-get: "<yellow>Click to get block</yellow>"
+    shift-add-palette: "<yellow>Shift+Click to add to palette</yellow>"
+
+# Block color similarity levels
+blockcolors:
+  similarity:
+    perfect: "<green>Perfect match</green>"
+    very-similar: "<green>Very similar</green>"
+    quite-similar: "<yellow>Quite similar</yellow>"
+    similar: "<gold>Similar</gold>"
+    not-similar: "<red>Not very similar</red>"
+  
+  gui:
+    title: "BlockColors.app"
+    color-picker: "<yellow>Block Color Picker</yellow>"
+    color-picker-lore:
+      - "<gray>Place a block here to extract color</gray>"
+      - "<gray>Click again to remove the block</gray>"
+    rgb-adjust: "RGB Adjustment"
+    r-plus: "<red>R +<amount></red>"
+    r-minus: "<red>R -<amount></red>"
+    g-plus: "<green>G +<amount></green>"
+    g-minus: "<green>G -<amount></green>"
+    b-plus: "<blue>B +<amount></blue>"
+    b-minus: "<blue>B -<amount></blue>"
+    current-value: "<gray>Current: <value></gray>"
+    hex-input: "<yellow>HEX Input</yellow>"
+    hex-input-lore: 
+      - "<gray>Click to input HEX color code</gray>"
+      - "<gray>Current: <hex></gray>"
+    reset: "<white>Reset</white>"
+    reset-lore: "<gray>Reset to white (255, 255, 255)</gray>"
+    current-color: "<yellow>Current Color</yellow>"
+    current-color-lore:
+      - "<gray>HEX: <hex></gray>"
+      - "<gray>RGB: <rgb></gray>"
+    filter-all: "<yellow>All Blocks</yellow>"
+    filter-building: "<yellow>Building Blocks</yellow>"
+    filter-decoration: "<yellow>Decoration Blocks</yellow>"
+    filter-current: "<green>✓ Current Filter</green>"
+    filter-hint: "<gray>Click to switch</gray>"
+    my-palette: "<light_purple>My Palette</light_purple>"
+    my-palette-lore: "<gray>View and manage saved blocks</gray>"
+    back: "<red>Back</red>"
+    back-lore: "<gray>Return to main menu</gray>"
+    close: "<red>Close</red>"
+    help: "<yellow>Help</yellow>"
+    help-lore:
+      - "<gray>• Place block in first slot of second row to pick color</gray>"
+      - "<gray>• Use RGB buttons to fine-tune color</gray>"
+      - "<gray>• Click HEX Input for precise color codes</gray>"
+      - "<gray>• Toggle category filters to find blocks</gray>"
+      - "<gray>• Left-click to take block, right-click to add to palette</gray>"
+    help-title: "<gold><bold>========== BlockColors Help ==========</bold></gold>"
+    help-content:
+      - "<yellow>How to use:</yellow>"
+      - "<gray>- Click RGB buttons to adjust color</gray>"
+      - "<gray>- Place block in color picker to extract color</gray>"
+      - "<gray>- Click HEX input to use HEX color code</gray>"
+      - "<gray>- System automatically shows the most similar blocks</gray>"
+    prev-page: "<yellow>◀ Previous Page</yellow>"
+    next-page: "<yellow>Next Page ▶</yellow>"
+    page-info: "<gray>Page <current>/<total></gray>"
+    block-info:
+      title: "<aqua><name></aqua>"
+      display-name: "<gray><name></gray>"
+      similarity: "<yellow>Similarity: <percentage></yellow>"
+      hex: "<gray>HEX: <hex></gray>"
+      rgb: "<gray>RGB: <rgb></gray>"
+      left-click: "<green>Left Click</green> <gray>Take block</gray>"
+      right-click: "<yellow>Right Click</yellow> <gray>Add to palette</gray>"
+    messages:
+      reset: "<green>✓ Reset to white</green>"
+      obtained: "<green>✓ Obtained <block></green>"
+      added-palette: "<green>✓ Added <block> to palette</green>"
+      palette-full: "<red>Palette is full!</red>"
+      already-in-palette: "<red>This block is already in the palette</red>"
+      color-extracted: "<green>✓ Extracted color from <block></green>"
+      color-value: "<gray>Color: <hex></gray>"
+    palette:
+      title: "<light_purple>My Palette</light_purple>"
+      back: "<yellow>Back</yellow>"
+      back-lore: "<gray>Return to BlockColors main interface</gray>"
+      close: "<red>Close</red>"
+      clear: "<red>Clear Palette</red>"
+      clear-lore:
+        - "<gray>Click to remove all stored blocks</gray>"
+        - "<red>Warning: This action cannot be undone!</red>"
+      help: "<yellow>Help</yellow>"
+      help-lore:
+        - "<gray>Click to view palette tips</gray>"
+      help-title: "<gold><bold>========== Palette Help ==========</bold></gold>"
+      help-lines:
+        - "<yellow>Tips:</yellow>"
+        - "<gray>- Click a block to remove it from the palette</gray>"
+        - "<gray>- Use the clear button to remove every block</gray>"
+        - "<gray>- You can store up to <max> blocks</gray>"
+      empty-slot-title: "<gray>Empty Slot</gray>"
+      empty-slot-lore: "<gray>Click a block in the main view to add it</gray>"
+      item-name: "<aqua><name></aqua>"
+      block-info:
+        display-name: "<gray><name></gray>"
+        hex: "<gray>HEX: <hex></gray>"
+        rgb: "<gray>RGB: <rgb></gray>"
+        remove: "<red>Left Click</red> <gray>Remove</gray>"
+        take: "<yellow>Right Click</yellow> <gray>Take block</gray>"
+      messages:
+        clear-empty: "<red>Palette is already empty</red>"
+        clear-success: "<green>✓ Palette cleared</green>"
+        remove-success: "<green>✓ Removed <block></green>"
+        remove-failed: "<red>Failed to remove block</red>"
+    hex-input-gui:
+      instructions:
+        - "<yellow>Please enter a HEX color (e.g., #FF5733 or FF5733)</yellow>"
+        - "<gray>Click the result slot when you're done</gray>"
+      open-failed: "<red>Failed to open HEX input interface</red>"
+      input-required: "<red>Please enter a HEX color first</red>"
+      invalid-format: "<red>Invalid HEX color format</red>"
+      format-hint: "<gray>Use the format: #RRGGBB or RRGGBB</gray>"
+      parse-failed: "<red>Could not parse HEX color</red>"
+      set-success: "<green>✓ Color set to <hex></green>"
+      rgb-value: "<gray>RGB: (<r>, <g>, <b>)</gray>"
+  
+  button:
+    previous-page: "<yellow>Previous Page</yellow>"
+    next-page: "<yellow>Next Page</yellow>"
+    page-info: "<gray>Page <current> / <total></gray>"
+    close: "<red>Close</red>"
+    back: "<yellow>Back</yellow>"
+
+# Time format
+time:
+  seconds: "<count> second(s)"
+  minutes: "<count> minute(s)"
+  hours: "<count> hour(s)"
+  days: "<count> day(s)"
+  weeks: "<count> week(s)"
+  months: "<count> month(s)"
+  years: "<count> year(s)"
+  ago: "<time> ago"
+  just-now: "Just now"
+
+# Number format
+numbers:
+  thousand: "K"
+  million: "M"
+  billion: "B"
+
+# Block category names
+categories:
+  all: "All Blocks"
+  building: "Building Blocks"
+  decoration: "Decoration Blocks"
+  natural: "Natural Blocks"
+  functional: "Functional Blocks"
+
+# Palette names
+palettes:
+  concrete: "Concrete"
+  terracotta: "Terracotta"
+  wool: "Wool"
+  stained-glass: "Stained Glass"
+  wood: "Wood"
+
+# Exclusion list names
+exclusions:
+  transparent: "Transparent Blocks"
+  plants: "Plant Blocks"
+  technical: "Technical Blocks"
+
+# Block Palettes feature
+blockpalettes:
+  command:
+    player-only: "<red>This command can only be executed by players</red>"
+    feature-disabled: "<red>Block Palettes feature is currently disabled</red>"
+    unknown-subcommand: "<red>Unknown subcommand: <subcommand></red>"
+    use-help: "<gray>Use /bp help to view help</gray>"
+    no-permission: "<red>You don't have permission to execute this command</red>"
+    reload-success: "<green>✓ Block Palettes cache reloaded</green>"
+    player-not-found: "<red>Player not found: <player></red>"
+    cache:
+      header: "<gold>━━━━ Cache Statistics ━━━━</gold>"
+      list-size: "<gray>List cache count: </gray><white><count></white>"
+      detail-size: "<gray>Detail cache count: </gray><white><count></white>"
+      footer: "<gold>━━━━━━━━━━━━━━━━</gold>"
+    terms:
+      header: "<gold>━━━━ Terms Information ━━━━</gold>"
+      version: "<gray>Current version: </gray><white><version></white>"
+      agreed-count: "<gray>Agreed users: </gray><white><count></white>"
+      footer: "<gold>━━━━━━━━━━━━━━━━</gold>"
+      reset-usage: "<red>Usage: /bp terms reset <player></red>"
+      reset-success: "<green>✓ Reset player <player>'s terms agreement status</green>"
+    favorites:
+      empty: "<yellow>You haven't favorited any palettes yet</yellow>"
+      hint: "<gray>Use /bp to browse and favorite palettes you like</gray>"
+    help:
+      header: "<gold>━━━━ Block Palettes Help ━━━━</gold>"
+      main: "<yellow>/bp</yellow><gray> - Open palette browser interface</gray>"
+      favorites: "<yellow>/bp favorites</yellow><gray> - View favorited palettes</gray>"
+      reload: "<yellow>/bp reload</yellow><gray> - Reload cache (requires permission)</gray>"
+      cache: "<yellow>/bp cache</yellow><gray> - View cache statistics (requires permission)</gray>"
+      terms: "<yellow>/bp terms</yellow><gray> - View terms information</gray>"
+      footer: "<gold>━━━━━━━━━━━━━━━━━━━━━━</gold>"
+  gui:
+    list:
+      title: "<gold><bold>Block Palettes</bold></gold>"
+      control:
+        none: "None"
+        search:
+          title: "<yellow>Search Block: <search></yellow>"
+          current: "<gray>Current search: </gray><white><search></white>"
+          click: "<yellow>▸ Click to open search</yellow>"
+        sort:
+          title: "<yellow>Sort: <mode></yellow>"
+          current: "<gray>Current sort: </gray><white><mode></white>"
+          click: "<yellow>▸ Click to toggle sort</yellow>"
+        color:
+          title: "<yellow>Color Filter: <color></yellow>"
+          current: "<gray>Current color: </gray><white><color></white>"
+          click: "<yellow>▸ Click to open color menu</yellow>"
+        block:
+          title: "<yellow>Block Filter: <block></yellow>"
+          current: "<gray>Current block: </gray><white><block></white>"
+          click: "<yellow>▸ Click to open popular blocks</yellow>"
+        refresh:
+          title: "<green>Refresh</green>"
+          description: "<gray>Reload latest data</gray>"
+          click: "<yellow>▸ Click to refresh</yellow>"
+        close:
+          title: "<red>Close</red>"
+          click: "<yellow>▸ Click to close interface</yellow>"
+      page:
+        prev: "<yellow>Previous Page</yellow>"
+        next: "<yellow>Next Page</yellow>"
+        number: "<gray>Page <page></gray>"
+        first: "<gray>Already on first page</gray>"
+        last: "<gray>Already on last page</gray>"
+      stats:
+        title: "<yellow>Statistics</yellow>"
+        current-page: "<gray>Current page: </gray><white><page></white>"
+        total: "<gray>Total palettes: </gray><white><total></white>"
+        favorites: "<gray>My favorites: </gray><gold><count></gold>"
+      loading:
+        title: "<yellow>Loading...</yellow>"
+        description: "<gray>Loading data from Block Palettes</gray>"
+      error:
+        title: "<red>Load Failed</red>"
+        retry: "<yellow>▸ Click to retry</yellow>"
+        load-failed: "Load failed: <error>"
+      no-results:
+        title: "<gray>No palettes match the criteria</gray>"
+        hint: "<gray>Try adjusting search criteria</gray>"
+      palette:
+        info:
+          title: "<aqua>Information</aqua>"
+          id: "<gold>Palette #<id></gold>"
+          author: "<gray>Author: </gray><white><author></white>"
+          time: "<gray>Time: </gray><white><time></white>"
+          likes: "<gray>Likes: </gray><yellow>❤ <likes></yellow>"
+          click: "<yellow>▸ Click to copy block list</yellow>"
+        favorite:
+          title: "<yellow>Favorite</yellow>"
+          favorited: "<gold>Favorited</gold>"
+          id: "<gray>Palette #<id></gray>"
+          description: "<gray>Add this palette to favorites</gray>"
+          already: "<gray>This palette is already in favorites</gray>"
+          add-click: "<yellow>▸ Click to add to favorites</yellow>"
+          remove-click: "<red>▸ Click to remove from favorites</red>"
+      copy:
+        separator: "<gray>━━━━━━━━━━━━━━━━━━━━━━</gray>"
+        title: "<gold><bold>Palette #<id></bold></gold>"
+        author: "<gray>Author: </gray><white><author></white>"
+        time: "<gray>Time: </gray><white><time></white>"
+        likes: "<gray>Likes: </gray><yellow>❤ <likes></yellow>"
+        success: "<green>✓ Block list copied</green>"
+      sort-mode:
+        recent: "Most Recent"
+        popular: "Most Popular"
+        oldest: "Oldest"
+        trending: "Trending"
+      messages:
+        removed: "<yellow>✓ Removed Palette #<id> from favorites</yellow>"
+        added: "<green>✓ Added Palette #<id> to favorites</green>"
+        full: "<red>✗ Favorites full (limit 100)</red>"
+    color-filter:
+      title: "<gold><bold>Color Filter</bold></gold>"
+      back: "<yellow>Back</yellow>"
+      back-lore: "<yellow>▸ Click to return to list</yellow>"
+      selected: "<green>✓ Currently selected</green>"
+      click-to-select: "<yellow>▸ Click to select</yellow>"
+      filter-hint: "<gray>Filter <color> palettes</gray>"
+      applied: "<green>✓ Applied color filter: <color></green>"
+      color:
+        all: "All"
+        red: "Red"
+        orange: "Orange"
+        yellow: "Yellow"
+        green: "Green"
+        blue: "Blue"
+        purple: "Purple"
+        black: "Black"
+        white: "White"
+  palette:
+    unknown-author: "Unknown Author"
+  time:
+    unknown: "Unknown time"
+    minutes-ago: "<count> minutes ago"
+    hours-ago: "<count> hours ago"
+    days-ago: "<count> days ago"
+    months-ago: "<count> months ago"
+    years-ago: "<count> years ago"

@@ -134,9 +134,9 @@ public class FavoritesManager {
             }
             
             gson.toJson(saveData, writer);
-            plugin.getLogger().fine("收藏資料已儲存");
+            plugin.getLogger().fine("Favorites data saved");
         } catch (IOException e) {
-            plugin.getLogger().warning("儲存收藏資料失敗: " + e.getMessage());
+            plugin.getLogger().warning("Failed to save favorites data: " + e.getMessage());
         }
     }
     
@@ -145,7 +145,7 @@ public class FavoritesManager {
      */
     public void loadFromFile() {
         if (!dataFile.exists()) {
-            plugin.getLogger().info("收藏資料檔案不存在，將建立新的");
+            plugin.getLogger().info("Favorites data file does not exist, will create new one");
             return;
         }
         
@@ -164,18 +164,18 @@ public class FavoritesManager {
                             UUID uuid = UUID.fromString(entry.getKey());
                             playerFavorites.put(uuid, entry.getValue());
                         } catch (IllegalArgumentException e) {
-                            plugin.getLogger().warning("無效的 UUID: " + entry.getKey());
+                            plugin.getLogger().warning("Invalid UUID: " + entry.getKey());
                         }
                     }
-                    plugin.getLogger().info("已載入 " + playerFavorites.size() + " 位玩家的收藏資料");
+                    plugin.getLogger().info("Loaded favorites data for " + playerFavorites.size() + " players");
                 }
                 return;
             } catch (Exception e) {
                 // 新格式載入失敗，嘗試舊格式
-                plugin.getLogger().info("偵測到舊版收藏資料格式，正在進行遷移...");
+                plugin.getLogger().info("Detected old format favorites data, migrating...");
             }
         } catch (IOException e) {
-            plugin.getLogger().warning("載入收藏資料失敗: " + e.getMessage());
+            plugin.getLogger().warning("Failed to load favorites data: " + e.getMessage());
             return;
         }
         
@@ -197,22 +197,22 @@ public class FavoritesManager {
                         playerFavorites.put(uuid, new HashMap<>());
                         migratedCount++;
                         
-                        plugin.getLogger().info("已為玩家 " + uuid + " 遷移 " + entry.getValue().size() + " 個收藏 ID");
-                        plugin.getLogger().warning("注意: 舊收藏資料已清除，請重新收藏調色板以快取完整資料");
+                        plugin.getLogger().info("Migrated " + entry.getValue().size() + " favorite IDs for player " + uuid);
+                        plugin.getLogger().warning("Note: Old favorites data cleared, please re-favorite palettes to cache full data");
                     } catch (IllegalArgumentException e) {
-                        plugin.getLogger().warning("無效的 UUID: " + entry.getKey());
+                        plugin.getLogger().warning("Invalid UUID: " + entry.getKey());
                     }
                 }
                 
-                plugin.getLogger().info("已遷移 " + migratedCount + " 位玩家的收藏資料");
+                plugin.getLogger().info("Migrated favorites data for " + migratedCount + " players");
                 
                 // 儲存為新格式
                 saveToFile();
-                plugin.getLogger().info("已將收藏資料轉換為新格式");
+                plugin.getLogger().info("Converted favorites data to new format");
             }
         } catch (Exception e) {
-            plugin.getLogger().warning("載入舊格式收藏資料失敗: " + e.getMessage());
-            plugin.getLogger().warning("建議刪除 favorites.json 並重新收藏調色板");
+            plugin.getLogger().warning("Failed to load old format favorites data: " + e.getMessage());
+            plugin.getLogger().warning("Recommend deleting favorites.json and re-favoriting palettes");
         }
     }
 }

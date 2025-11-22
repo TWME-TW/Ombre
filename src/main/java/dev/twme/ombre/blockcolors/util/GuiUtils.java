@@ -2,17 +2,23 @@ package dev.twme.ombre.blockcolors.util;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.MiniMessage;
+
 /**
  * GUI 工具類別
  * 提供建立 GUI 物品的輔助方法
  */
 public class GuiUtils {
+    
+    private static final MiniMessage miniMessage = MiniMessage.miniMessage();
 
     /**
      * 建立 GUI 物品
@@ -27,9 +33,14 @@ public class GuiUtils {
         ItemMeta meta = item.getItemMeta();
         
         if (meta != null) {
-            meta.setDisplayName(displayName);
+            // 使用 MiniMessage 解析顯示名稱
+            meta.displayName(miniMessage.deserialize(displayName));
             if (lore.length > 0) {
-                meta.setLore(Arrays.asList(lore));
+                // 使用 MiniMessage 解析 lore
+                List<Component> loreComponents = Arrays.stream(lore)
+                    .map(miniMessage::deserialize)
+                    .collect(Collectors.toList());
+                meta.lore(loreComponents);
             }
             // 隱藏所有標籤
             meta.addItemFlags(ItemFlag.values());
@@ -47,9 +58,62 @@ public class GuiUtils {
         ItemMeta meta = item.getItemMeta();
         
         if (meta != null) {
-            meta.setDisplayName(displayName);
+            // 使用 MiniMessage 解析顯示名稱
+            meta.displayName(miniMessage.deserialize(displayName));
             if (lore != null && !lore.isEmpty()) {
-                meta.setLore(lore);
+                // 使用 MiniMessage 解析 lore
+                List<Component> loreComponents = lore.stream()
+                    .map(miniMessage::deserialize)
+                    .collect(Collectors.toList());
+                meta.lore(loreComponents);
+            }
+            meta.addItemFlags(ItemFlag.values());
+            item.setItemMeta(meta);
+        }
+        
+        return item;
+    }
+
+    /**
+     * 建立 GUI 物品 (使用 Component)
+     * 
+     * @param material 材質
+     * @param displayName 顯示名稱 Component
+     * @param lore 描述文字 Components
+     * @return ItemStack
+     */
+    public static ItemStack createItem(Material material, Component displayName, Component... lore) {
+        ItemStack item = new ItemStack(material);
+        ItemMeta meta = item.getItemMeta();
+        
+        if (meta != null) {
+            meta.displayName(displayName);
+            if (lore.length > 0) {
+                meta.lore(Arrays.asList(lore));
+            }
+            meta.addItemFlags(ItemFlag.values());
+            item.setItemMeta(meta);
+        }
+        
+        return item;
+    }
+
+    /**
+     * 建立 GUI 物品 (使用 Component 和 List)
+     * 
+     * @param material 材質
+     * @param displayName 顯示名稱 Component
+     * @param lore 描述文字 Component List
+     * @return ItemStack
+     */
+    public static ItemStack createItem(Material material, Component displayName, List<Component> lore) {
+        ItemStack item = new ItemStack(material);
+        ItemMeta meta = item.getItemMeta();
+        
+        if (meta != null) {
+            meta.displayName(displayName);
+            if (lore != null && !lore.isEmpty()) {
+                meta.lore(lore);
             }
             meta.addItemFlags(ItemFlag.values());
             item.setItemMeta(meta);
@@ -84,6 +148,32 @@ public class GuiUtils {
      */
     public static ItemStack createColoredPane(int rgb, String displayName, String... lore) {
         // 根據 RGB 值選擇最接近的羊毛顏色
+        Material paneMaterial = getClosestGlassPane(rgb);
+        return createItem(paneMaterial, displayName, lore);
+    }
+
+    /**
+     * 建立玻璃片（用於顯示顏色，使用 Component）
+     * 
+     * @param rgb RGB 顏色值
+     * @param displayName 顯示名稱 Component
+     * @param lore 描述文字 Components
+     * @return ItemStack
+     */
+    public static ItemStack createColoredPane(int rgb, Component displayName, Component... lore) {
+        Material paneMaterial = getClosestGlassPane(rgb);
+        return createItem(paneMaterial, displayName, lore);
+    }
+
+    /**
+     * 建立玻璃片（用於顯示顏色，使用 Component List）
+     * 
+     * @param rgb RGB 顏色值
+     * @param displayName 顯示名稱 Component
+     * @param lore 描述文字 Component List
+     * @return ItemStack
+     */
+    public static ItemStack createColoredPane(int rgb, Component displayName, List<Component> lore) {
         Material paneMaterial = getClosestGlassPane(rgb);
         return createItem(paneMaterial, displayName, lore);
     }

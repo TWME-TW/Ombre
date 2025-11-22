@@ -10,63 +10,70 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
-import org.bukkit.plugin.java.JavaPlugin;
 
 import com.google.common.cache.CacheStats;
 
+import dev.twme.ombre.Ombre;
 import dev.twme.ombre.blockcolors.BlockColorsFeature;
 import dev.twme.ombre.blockcolors.ColorMatcher;
-import dev.twme.ombre.blockcolors.TermsTracker;
 import dev.twme.ombre.blockcolors.gui.BlockColorsGUI;
+import dev.twme.ombre.i18n.MessageManager;
+import net.kyori.adventure.text.Component;
 
 /**
  * BlockColors 指令處理器
  * 處理 /blockcolorsapp (/bca) 指令
  */
 public class BlockColorsCommand implements CommandExecutor, TabCompleter {
-    private final JavaPlugin plugin;
+    private final Ombre plugin;
     private final BlockColorsFeature feature;
+    private final MessageManager msg;
 
-    public BlockColorsCommand(JavaPlugin plugin, BlockColorsFeature feature) {
+    public BlockColorsCommand(Ombre plugin, BlockColorsFeature feature) {
         this.plugin = plugin;
         this.feature = feature;
+        this.msg = plugin.getMessageManager();
     }
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        // 檢查功能是否已初始化
+        // Check if feature is initialized
         if (!feature.isInitialized()) {
-            sender.sendMessage("§cBlockColors 功能尚未初始化完成，請稍後再試");
+            if (sender instanceof Player) {
+                sender.sendMessage(msg.getMessage("commands.blockcolors.not-initialized", (Player) sender));
+            } else {
+                sender.sendMessage(msg.getMessage("commands.blockcolors.not-initialized"));
+            }
             return true;
         }
 
-        // 主指令 - 開啟 GUI（僅玩家）
+        // Main command - open GUI (players only)
         if (args.length == 0) {
             if (!(sender instanceof Player)) {
-                sender.sendMessage("§c此指令只能由玩家執行");
+                sender.sendMessage(msg.getMessage("general.player-only"));
                 return true;
             }
 
             Player player = (Player) sender;
             
-            // 檢查權限
+            // Check permission
             if (!player.hasPermission("ombre.blockcolorsapp.use")) {
-                player.sendMessage("§c你沒有權限使用此功能");
+                msg.sendMessage(player, "general.no-permission");
                 return true;
             }
 
-            // 檢查是否已接受條款
+            // Check if player has accepted terms
             if (!feature.getTermsTracker().hasAcceptedTerms(player.getUniqueId())) {
                 showTermsOfUse(player);
                 return true;
             }
 
-            // 開啟 BlockColors GUI
+            // Open BlockColors GUI
             openBlockColorsGUI(player);
             return true;
         }
 
-        // 子指令
+        // Subcommands
         String subCommand = args[0].toLowerCase();
 
         switch (subCommand) {
@@ -80,39 +87,56 @@ public class BlockColorsCommand implements CommandExecutor, TabCompleter {
                 return handleClearCache(sender);
 
             default:
-                sender.sendMessage("§c未知的子指令: " + subCommand);
-                sender.sendMessage("§e用法: /bca [reload|cache|clear-cache]");
+                if (sender instanceof Player) {
+                    sender.sendMessage(msg.getMessage("general.unknown-command", (Player) sender));
+                } else {
+                    sender.sendMessage(msg.getMessage("general.unknown-command"));
+                }
+                sender.sendMessage("<yellow>Usage: /bca [reload|cache|clear-cache]</yellow>");
                 return true;
         }
     }
 
     /**
-     * 顯示使用條款
+     * Show terms of use
      */
     private void showTermsOfUse(Player player) {
-        // 關閉任何開啟的 GUI
+        // Close any open GUI
         player.closeInventory();
         
-        // 顯示條款內容
-        String[] termsText = TermsTracker.getTermsText();
-        for (String line : termsText) {
-            player.sendMessage(line);
-        }
+        // Display terms content using Components for proper MiniMessage parsing
+        MessageManager msg = plugin.getMessageManager();
+        player.sendMessage(msg.getComponent("terms.blockcolors.title"));
+        player.sendMessage(msg.getComponent("terms.blockcolors.subtitle"));
+        player.sendMessage(msg.getComponent("terms.blockcolors.separator"));
+        player.sendMessage(Component.empty());
+        player.sendMessage(msg.getComponent("terms.blockcolors.line1"));
+        player.sendMessage(Component.empty());
+        player.sendMessage(msg.getComponent("terms.blockcolors.line2"));
+        player.sendMessage(msg.getComponent("terms.blockcolors.website"));
+        player.sendMessage(Component.empty());
+        player.sendMessage(msg.getComponent("terms.blockcolors.data-source"));
+        player.sendMessage(msg.getComponent("terms.blockcolors.author"));
+        player.sendMessage(Component.empty());
+        player.sendMessage(msg.getComponent("terms.blockcolors.accept"));
+        player.sendMessage(msg.getComponent("terms.blockcolors.decline"));
+        player.sendMessage(Component.empty());
+        player.sendMessage(msg.getComponent("terms.blockcolors.timeout"));
         
-        // 標記玩家正在等待回應
+        // Mark player as pending terms acceptance
         feature.markPendingTermsAcceptance(player.getUniqueId());
         
-        // 60秒後自動清理
+        // Auto-cleanup after 60 seconds
         plugin.getServer().getScheduler().runTaskLater(plugin, () -> {
             if (feature.isPendingTermsAcceptance(player.getUniqueId())) {
-                player.sendMessage("§c回應超時，請重新執行指令");
+                msg.sendMessage(player, "terms.blockcolors.timeout-message");
                 feature.removePendingTermsAcceptance(player.getUniqueId());
             }
-        }, 20L * 60);  // 60秒
+        }, 20L * 60);  // 60 seconds
     }
 
     /**
-     * 開啟 BlockColors GUI
+     * Open BlockColors GUI
      */
     private void openBlockColorsGUI(Player player) {
         BlockColorsGUI gui = new BlockColorsGUI(feature, player);
@@ -120,21 +144,33 @@ public class BlockColorsCommand implements CommandExecutor, TabCompleter {
     }
 
     /**
-     * 處理 reload 子指令
+     * Handle reload subcommand
      */
     private boolean handleReload(CommandSender sender) {
         if (!sender.hasPermission("ombre.blockcolorsapp.reload")) {
-            sender.sendMessage("§c你沒有權限執行此指令");
+            if (sender instanceof Player) {
+                sender.sendMessage(msg.getMessage("general.no-permission", (Player) sender));
+            } else {
+                sender.sendMessage(msg.getMessage("general.no-permission"));
+            }
             return true;
         }
 
-        sender.sendMessage("§e正在重新載入 BlockColors...");
+        sender.sendMessage("<yellow>Reloading BlockColors...</yellow>");
         
         feature.reload().thenAccept(success -> {
             if (success) {
-                sender.sendMessage("§aBlockColors 重新載入成功！");
+                if (sender instanceof Player) {
+                    sender.sendMessage(msg.getMessage("commands.blockcolors.reload-success", (Player) sender));
+                } else {
+                    sender.sendMessage(msg.getMessage("commands.blockcolors.reload-success"));
+                }
             } else {
-                sender.sendMessage("§cBlockColors 重新載入失敗，請查看控制台");
+                if (sender instanceof Player) {
+                    sender.sendMessage(msg.getMessage("commands.blockcolors.reload-fail", (Player) sender));
+                } else {
+                    sender.sendMessage(msg.getMessage("commands.blockcolors.reload-fail"));
+                }
             }
         });
 
@@ -142,52 +178,87 @@ public class BlockColorsCommand implements CommandExecutor, TabCompleter {
     }
 
     /**
-     * 處理 cache 子指令 - 顯示快取資訊
+     * Handle cache subcommand - display cache information
      */
     private boolean handleCacheInfo(CommandSender sender) {
         if (!sender.hasPermission("ombre.blockcolorsapp.admin")) {
-            sender.sendMessage("§c你沒有權限執行此指令");
+            if (sender instanceof Player) {
+                sender.sendMessage(msg.getMessage("general.no-permission", (Player) sender));
+            } else {
+                sender.sendMessage(msg.getMessage("general.no-permission"));
+            }
             return true;
         }
 
-        sender.sendMessage("§6§l===== BlockColors 快取資訊 =====");
-        sender.sendMessage("§e總方塊數: §f" + feature.getCache().getTotalBlocks());
+        Player player = sender instanceof Player ? (Player) sender : null;
         
-        long lastUpdate = feature.getCache().getLastUpdateTime();
-        String dateStr = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(lastUpdate));
-        sender.sendMessage("§e最後更新: §f" + dateStr);
+        if (player != null) {
+            sender.sendMessage(msg.getMessage("messages.cache.title", player));
+            sender.sendMessage(msg.getMessage("messages.cache.total-blocks", player, "count", feature.getCache().getTotalBlocks()));
+            
+            long lastUpdate = feature.getCache().getLastUpdateTime();
+            String dateStr = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(lastUpdate));
+            sender.sendMessage(msg.getMessage("messages.cache.last-update", player, "date", dateStr));
+            
+            sender.sendMessage(msg.getMessage("messages.cache.version", player, "version", feature.getCache().getCacheVersion()));
+        } else {
+            // Console: use English hardcoded
+            sender.sendMessage("§6=== Cache Information ===");
+            sender.sendMessage("§7Total Blocks: §f" + feature.getCache().getTotalBlocks());
+            
+            long lastUpdate = feature.getCache().getLastUpdateTime();
+            String dateStr = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(lastUpdate));
+            sender.sendMessage("§7Last Update: §f" + dateStr);
+            
+            sender.sendMessage("§7Cache Version: §f" + feature.getCache().getCacheVersion());
+        }
         
-        sender.sendMessage("§e快取版本: §f" + feature.getCache().getCacheVersion());
-        
-        // 顯示匹配快取統計
+        // Display color matching cache statistics
         CacheStats stats = ColorMatcher.getCacheStats();
         if (stats != null) {
             sender.sendMessage("");
-            sender.sendMessage("§6§l===== 顏色匹配快取統計 =====");
-            sender.sendMessage(String.format("§e命中率: §f%.2f%%", stats.hitRate() * 100));
-            sender.sendMessage("§e請求總數: §f" + stats.requestCount());
-            sender.sendMessage("§e命中次數: §f" + stats.hitCount());
-            sender.sendMessage("§e未命中次數: §f" + stats.missCount());
+            if (player != null) {
+                sender.sendMessage(msg.getMessage("messages.cache.stats-title", player));
+                sender.sendMessage(msg.getMessage("messages.cache.hit-rate", player, "rate", String.format("%.2f", stats.hitRate() * 100)));
+                sender.sendMessage(msg.getMessage("messages.cache.requests", player, "count", stats.requestCount()));
+                sender.sendMessage(msg.getMessage("messages.cache.hits", player, "count", stats.hitCount()));
+                sender.sendMessage(msg.getMessage("messages.cache.misses", player, "count", stats.missCount()));
+            } else {
+                // Console: use English hardcoded
+                sender.sendMessage("§6=== Cache Statistics ===");
+                sender.sendMessage("§7Hit Rate: §f" + String.format("%.2f", stats.hitRate() * 100) + "%");
+                sender.sendMessage("§7Requests: §f" + stats.requestCount());
+                sender.sendMessage("§7Hits: §f" + stats.hitCount());
+                sender.sendMessage("§7Misses: §f" + stats.missCount());
+            }
         }
 
         return true;
     }
 
     /**
-     * 處理 clear-cache 子指令
+     * Handle clear-cache subcommand
      */
     private boolean handleClearCache(CommandSender sender) {
         if (!sender.hasPermission("ombre.blockcolorsapp.admin")) {
-            sender.sendMessage("§c你沒有權限執行此指令");
+            if (sender instanceof Player) {
+                sender.sendMessage(msg.getMessage("general.no-permission", (Player) sender));
+            } else {
+                sender.sendMessage(msg.getMessage("general.no-permission"));
+            }
             return true;
         }
 
-        sender.sendMessage("§e正在清除快取...");
+        sender.sendMessage("<yellow>Clearing cache...</yellow>");
         
         feature.getCache().clearCache();
         ColorMatcher.clearCache();
         
-        sender.sendMessage("§a快取已清除！請執行 /bca reload 重新載入");
+        if (sender instanceof Player) {
+            sender.sendMessage(msg.getMessage("commands.blockcolors.cache-cleared", (Player) sender));
+        } else {
+            sender.sendMessage(msg.getMessage("commands.blockcolors.cache-cleared"));
+        }
 
         return true;
     }

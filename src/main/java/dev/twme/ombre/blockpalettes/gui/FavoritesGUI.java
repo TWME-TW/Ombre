@@ -17,6 +17,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import dev.twme.ombre.Ombre;
 import dev.twme.ombre.blockpalettes.BlockPalettesFeature;
 import dev.twme.ombre.blockpalettes.api.PaletteData;
+import dev.twme.ombre.i18n.MessageManager;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -31,6 +32,7 @@ public class FavoritesGUI implements Listener {
     private final BlockPalettesFeature feature;
     private final Player player;
     private final Inventory inventory;
+    private final MessageManager messageManager;
     private List<PaletteData> favorites;
     private int page;
     private String sortMode; // "newest", "oldest", "likes"
@@ -39,15 +41,14 @@ public class FavoritesGUI implements Listener {
         this.plugin = plugin;
         this.feature = feature;
         this.player = player;
+        this.messageManager = plugin.getMessageManager();
         this.page = 1;
         this.sortMode = "newest";
         this.favorites = new ArrayList<>();
         
         // 建立 54 格箱子 (6x9)
         this.inventory = Bukkit.createInventory(null, 54,
-            Component.text("我的收藏")
-                .color(NamedTextColor.GOLD)
-                .decoration(TextDecoration.BOLD, true)
+            messageManager.getComponent("blockpalettes.gui.favorites.title", player)
         );
         
         setupControlItems();
@@ -60,41 +61,40 @@ public class FavoritesGUI implements Listener {
     private void setupControlItems() {
         // 排序切換 (格子 0)
         ItemStack sortItem = createItem(Material.CLOCK,
-            Component.text("排序: " + getSortDisplayName()).color(NamedTextColor.YELLOW),
+            messageManager.getComponent("blockpalettes.gui.favorites.sort.title", player, "mode", getSortDisplayName()),
             List.of(
-                Component.text("當前排序: ").color(NamedTextColor.GRAY)
-                    .append(Component.text(getSortDisplayName()).color(NamedTextColor.WHITE)),
+                messageManager.getComponent("blockpalettes.gui.favorites.sort.current", player, "mode", getSortDisplayName()),
                 Component.empty(),
-                Component.text("▸ 左鍵切換排序").color(NamedTextColor.YELLOW)
+                messageManager.getComponent("blockpalettes.gui.favorites.sort.click", player)
             )
         );
         inventory.setItem(0, sortItem);
         
         // 清空收藏 (格子 1)
         ItemStack clearItem = createItem(Material.TNT,
-            Component.text("清空收藏").color(NamedTextColor.RED),
+            messageManager.getComponent("blockpalettes.gui.favorites.clear.title", player),
             List.of(
-                Component.text("刪除所有收藏的調色板").color(NamedTextColor.GRAY),
+                messageManager.getComponent("blockpalettes.gui.favorites.clear.description", player),
                 Component.empty(),
-                Component.text("⚠ Shift + 左鍵確認清空").color(NamedTextColor.RED)
+                messageManager.getComponent("blockpalettes.gui.favorites.clear.confirm", player)
             )
         );
         inventory.setItem(1, clearItem);
         
         // 返回主選單 (格子 52)
         ItemStack backItem = createItem(Material.ARROW,
-            Component.text("返回主選單").color(NamedTextColor.YELLOW),
+            messageManager.getComponent("blockpalettes.gui.favorites.back", player),
             List.of(
-                Component.text("▸ 點擊返回").color(NamedTextColor.YELLOW)
+                messageManager.getComponent("blockpalettes.gui.favorites.back-lore", player)
             )
         );
         inventory.setItem(52, backItem);
         
         // 關閉 (格子 53)
         ItemStack closeItem = createItem(Material.RED_DYE,
-            Component.text("關閉").color(NamedTextColor.RED),
+            messageManager.getComponent("blockpalettes.gui.favorites.close", player),
             List.of(
-                Component.text("▸ 點擊關閉介面").color(NamedTextColor.YELLOW)
+                messageManager.getComponent("blockpalettes.gui.favorites.close-lore", player)
             )
         );
         inventory.setItem(53, closeItem);
@@ -189,29 +189,23 @@ public class FavoritesGUI implements Listener {
      */
     private ItemStack createInfoButton(PaletteData palette) {
         List<Component> lore = new ArrayList<>();
-        lore.add(Component.text("Palette #" + palette.getId()).color(NamedTextColor.GOLD));
+        lore.add(messageManager.getComponent("blockpalettes.gui.favorites.info.palette-id", player, "id", String.valueOf(palette.getId())));
         lore.add(Component.empty());
         
         String author = palette.getAuthor();
-        if (author == null || author.isEmpty()) {
-            author = "未知";
-        }
-        lore.add(Component.text("作者: ").color(NamedTextColor.GRAY)
-            .append(Component.text(author).color(NamedTextColor.WHITE)));
+        lore.add(messageManager.getComponent("blockpalettes.gui.favorites.info.author", player, "author", author));
         
         String uploadTime = palette.getUploadTime();
         if (uploadTime != null && !uploadTime.isEmpty()) {
-            lore.add(Component.text("時間: ").color(NamedTextColor.GRAY)
-                .append(Component.text(uploadTime).color(NamedTextColor.WHITE)));
+            lore.add(messageManager.getComponent("blockpalettes.gui.favorites.info.time", "time", uploadTime));
         }
         
-        lore.add(Component.text("喜歡: ").color(NamedTextColor.GRAY)
-            .append(Component.text("❤ " + palette.getLikes()).color(NamedTextColor.YELLOW)));
+        lore.add(messageManager.getComponent("blockpalettes.gui.favorites.info.likes", player, "likes", String.valueOf(palette.getLikes())));
         lore.add(Component.empty());
-        lore.add(Component.text("▸ 點擊查看詳細資訊").color(NamedTextColor.YELLOW));
+        lore.add(messageManager.getComponent("blockpalettes.gui.favorites.info.click-hint", player));
         
         return createItem(Material.BOOK,
-            Component.text("資訊").color(NamedTextColor.AQUA)
+            messageManager.getComponent("blockpalettes.gui.favorites.info.title", player)
                 .decoration(TextDecoration.BOLD, true)
                 .decoration(TextDecoration.ITALIC, false),
             lore
@@ -223,14 +217,14 @@ public class FavoritesGUI implements Listener {
      */
     private ItemStack createRemoveButton(PaletteData palette) {
         List<Component> lore = new ArrayList<>();
-        lore.add(Component.text("Palette #" + palette.getId()).color(NamedTextColor.GRAY));
+        lore.add(messageManager.getComponent("blockpalettes.gui.favorites.remove.palette-id", player, "id", String.valueOf(palette.getId())));
         lore.add(Component.empty());
-        lore.add(Component.text("從收藏中移除此調色板").color(NamedTextColor.GRAY));
+        lore.add(messageManager.getComponent("blockpalettes.gui.favorites.remove.description", player));
         lore.add(Component.empty());
-        lore.add(Component.text("▸ 點擊移除收藏").color(NamedTextColor.RED));
+        lore.add(messageManager.getComponent("blockpalettes.gui.favorites.remove.click-hint", player));
         
         return createItem(Material.BARRIER,
-            Component.text("移除").color(NamedTextColor.RED)
+            messageManager.getComponent("blockpalettes.gui.favorites.remove.title", player)
                 .decoration(TextDecoration.BOLD, true)
                 .decoration(TextDecoration.ITALIC, false),
             lore
@@ -288,13 +282,12 @@ public class FavoritesGUI implements Listener {
      */
     private void showEmptyState() {
         ItemStack emptyItem = createItem(Material.BOOK,
-            Component.text("還沒有收藏任何調色板").color(NamedTextColor.YELLOW),
+            messageManager.getComponent("blockpalettes.gui.favorites.empty.title"),
             List.of(
-                Component.text("在調色板詳細頁面點擊").color(NamedTextColor.GRAY),
-                Component.text("金星圖示即可加入收藏！").color(NamedTextColor.GRAY),
+                messageManager.getComponent("blockpalettes.gui.favorites.empty.line1"),
+                messageManager.getComponent("blockpalettes.gui.favorites.empty.line2"),
                 Component.empty(),
-                Component.text("收藏上限: ").color(NamedTextColor.GRAY)
-                    .append(Component.text("100 個").color(NamedTextColor.WHITE))
+                messageManager.getComponent("blockpalettes.gui.favorites.empty.limit")
             )
         );
         inventory.setItem(22, emptyItem);
@@ -308,9 +301,9 @@ public class FavoritesGUI implements Listener {
      */
     private void showLoading() {
         ItemStack loading = createItem(Material.HOPPER,
-            Component.text("載入收藏中...").color(NamedTextColor.YELLOW),
+            messageManager.getComponent("blockpalettes.gui.favorites.loading.title"),
             List.of(
-                Component.text("正在載入你的收藏").color(NamedTextColor.GRAY)
+                messageManager.getComponent("blockpalettes.gui.favorites.loading.description")
             )
         );
         inventory.setItem(22, loading);
@@ -321,11 +314,11 @@ public class FavoritesGUI implements Listener {
      */
     private void showError(String message) {
         ItemStack errorItem = createItem(Material.BARRIER,
-            Component.text("載入失敗").color(NamedTextColor.RED),
+            messageManager.getComponent("blockpalettes.gui.favorites.error.title"),
             List.of(
                 Component.text(message).color(NamedTextColor.GRAY),
                 Component.empty(),
-                Component.text("▸ 點擊重試").color(NamedTextColor.YELLOW)
+                messageManager.getComponent("blockpalettes.gui.favorites.error.retry")
             )
         );
         inventory.setItem(22, errorItem);
@@ -340,28 +333,28 @@ public class FavoritesGUI implements Listener {
         // 上一頁 (格子 7)
         if (page > 1) {
             ItemStack prevItem = createItem(Material.ARROW,
-                Component.text("上一頁").color(NamedTextColor.YELLOW),
-                List.of(Component.text("第 " + (page - 1) + " 頁").color(NamedTextColor.GRAY))
+                messageManager.getComponent("blockpalettes.gui.favorites.page.prev"),
+                List.of(messageManager.getComponent("blockpalettes.gui.favorites.page.number", "page", String.valueOf(page - 1)))
             );
             inventory.setItem(7, prevItem);
         } else {
             inventory.setItem(7, createItem(Material.GRAY_DYE,
-                Component.text("上一頁").color(NamedTextColor.DARK_GRAY),
-                List.of(Component.text("已經是第一頁").color(NamedTextColor.GRAY))
+                messageManager.getComponent("blockpalettes.gui.favorites.page.prev"),
+                List.of(messageManager.getComponent("blockpalettes.gui.favorites.page.first"))
             ));
         }
         
         // 下一頁 (格子 8)
         if (page < totalPages) {
             ItemStack nextItem = createItem(Material.ARROW,
-                Component.text("下一頁").color(NamedTextColor.YELLOW),
-                List.of(Component.text("第 " + (page + 1) + " 頁").color(NamedTextColor.GRAY))
+                messageManager.getComponent("blockpalettes.gui.favorites.page.next"),
+                List.of(messageManager.getComponent("blockpalettes.gui.favorites.page.number", "page", String.valueOf(page + 1)))
             );
             inventory.setItem(8, nextItem);
         } else {
             inventory.setItem(8, createItem(Material.GRAY_DYE,
-                Component.text("下一頁").color(NamedTextColor.DARK_GRAY),
-                List.of(Component.text("已經是最後一頁").color(NamedTextColor.GRAY))
+                messageManager.getComponent("blockpalettes.gui.favorites.page.next"),
+                List.of(messageManager.getComponent("blockpalettes.gui.favorites.page.last"))
             ));
         }
     }
@@ -373,12 +366,10 @@ public class FavoritesGUI implements Listener {
         int count = feature.getFavoritesManager().getFavoriteCount(player.getUniqueId());
         
         ItemStack statsItem = createItem(Material.PAPER,
-            Component.text("收藏統計").color(NamedTextColor.YELLOW),
+            messageManager.getComponent("blockpalettes.gui.favorites.stats.title"),
             List.of(
-                Component.text("收藏數量: ").color(NamedTextColor.GRAY)
-                    .append(Component.text(count + "/100").color(NamedTextColor.WHITE)),
-                Component.text("當前排序: ").color(NamedTextColor.GRAY)
-                    .append(Component.text(getSortDisplayName()).color(NamedTextColor.WHITE))
+                messageManager.getComponent("blockpalettes.gui.favorites.stats.count", "count", count + "/100"),
+                messageManager.getComponent("blockpalettes.gui.favorites.stats.sort", "mode", getSortDisplayName())
             )
         );
         inventory.setItem(45, statsItem);
@@ -388,11 +379,7 @@ public class FavoritesGUI implements Listener {
      * 取得排序顯示名稱
      */
     private String getSortDisplayName() {
-        return switch (sortMode) {
-            case "oldest" -> "舊→新";
-            case "likes" -> "最多喜歡";
-            default -> "新→舊";
-        };
+        return messageManager.getMessage("blockpalettes.gui.favorites.sort-mode." + sortMode, player);
     }
     
     /**
@@ -582,25 +569,20 @@ public class FavoritesGUI implements Listener {
      * 顯示調色板資訊
      */
     private void showPaletteInfo(Player player, PaletteData palette) {
-        player.sendMessage(Component.text("━━━━━━━━━━━━━━━━━━━━━━").color(NamedTextColor.GRAY));
+        player.sendMessage(messageManager.getComponent("blockpalettes.gui.favorites.detail.separator"));
         player.sendMessage(
-            Component.text("Palette #" + palette.getId())
-                .color(NamedTextColor.GOLD)
-                .decoration(TextDecoration.BOLD, true)
+            messageManager.getComponent("blockpalettes.gui.favorites.detail.title", "id", String.valueOf(palette.getId()))
         );
-        player.sendMessage(Component.text("作者: ").color(NamedTextColor.GRAY)
-            .append(Component.text(palette.getAuthor()).color(NamedTextColor.WHITE)));
-        player.sendMessage(Component.text("時間: ").color(NamedTextColor.GRAY)
-            .append(Component.text(palette.getUploadTime()).color(NamedTextColor.WHITE)));
-        player.sendMessage(Component.text("喜歡: ").color(NamedTextColor.GRAY)
-            .append(Component.text("❤ " + palette.getLikes()).color(NamedTextColor.YELLOW)));
+        player.sendMessage(messageManager.getComponent("blockpalettes.gui.favorites.detail.author", "author", palette.getAuthor()));
+        player.sendMessage(messageManager.getComponent("blockpalettes.gui.favorites.detail.time", "time", palette.getUploadTime()));
+        player.sendMessage(messageManager.getComponent("blockpalettes.gui.favorites.detail.likes", "likes", String.valueOf(palette.getLikes())));
         player.sendMessage(Component.empty());
         
         for (String blockName : palette.getDisplayNames()) {
             player.sendMessage(Component.text("• " + blockName).color(NamedTextColor.WHITE));
         }
         
-        player.sendMessage(Component.text("━━━━━━━━━━━━━━━━━━━━━━").color(NamedTextColor.GRAY));
+        player.sendMessage(messageManager.getComponent("blockpalettes.gui.favorites.detail.separator"));
         player.playSound(player.getLocation(), org.bukkit.Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1.0f, 1.0f);
     }
     
@@ -609,7 +591,7 @@ public class FavoritesGUI implements Listener {
      */
     private void removeFavorite(Player player, PaletteData palette) {
         feature.getFavoritesManager().removeFavorite(player.getUniqueId(), palette.getId());
-        player.sendMessage(Component.text("✓ 已從收藏中移除 Palette #" + palette.getId()).color(NamedTextColor.YELLOW));
+        player.sendMessage(messageManager.getComponent("blockpalettes.gui.favorites.messages.removed", "id", String.valueOf(palette.getId())));
         player.playSound(player.getLocation(), org.bukkit.Sound.ENTITY_ITEM_PICKUP, 1.0f, 0.8f);
         
         // 重新載入
@@ -621,7 +603,7 @@ public class FavoritesGUI implements Listener {
      */
     private void clearAllFavorites(Player player) {
         feature.getFavoritesManager().clearFavorites(player.getUniqueId());
-        player.sendMessage(Component.text("✓ 已清空所有收藏").color(NamedTextColor.GREEN));
+        player.sendMessage(messageManager.getComponent("blockpalettes.gui.favorites.messages.cleared"));
         player.playSound(player.getLocation(), org.bukkit.Sound.ENTITY_GENERIC_EXPLODE, 1.0f, 1.0f);
         
         favorites.clear();

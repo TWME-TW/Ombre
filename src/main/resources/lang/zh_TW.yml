@@ -1,0 +1,767 @@
+# Ombre 插件繁體中文語言檔案
+# 語言: 繁體中文 (台灣)
+# 作者: TWME
+# 版本: 1.0.0
+# 格式: MiniMessage (https://docs.adventure.kyori.net/minimessage/format.html)
+
+meta:
+  locale: "zh_TW"
+  name: "繁體中文"
+  author: "TWME"
+  version: "1.0.0"
+
+# 通用訊息
+general:
+  prefix: "<gold>[Ombre]</gold>"
+  no-permission: "<red>你沒有權限使用此功能</red>"
+  player-only: "<red>此指令只能由玩家執行</red>"
+  unknown-command: "<red>未知的指令</red>"
+  reload-success: "<green>配置已重新載入</green>"
+  config-error: "<red>配置檔案錯誤: <error></red>"
+
+# 指令相關
+commands:
+  ombre:
+    description: "Ombre 漸層製作工具"
+    unknown-subcommand: "<red>未知的子指令。使用 /ombre help 查看幫助</red>"
+    admin:
+      no-permission: "<red>你沒有管理員權限</red>"
+      usage: "<yellow>用法: /ombre admin delete <玩家名稱|配置ID></yellow>"
+      delete-config-success: "<green>已成功刪除配置 ID: <configId></green>"
+      config-not-found: "<red>找不到配置 ID: <configId></red>"
+      delete-success: "<green>已刪除玩家 <player> 的 <count> 個配置</green>"
+      player-not-found: "<red>找不到玩家: <player></red>"
+    help:
+      title: "<gold><bold>=== Ombre 指令幫助 ===</bold></gold>"
+      main: "<yellow>/ombre</yellow> <gray>- 打開漸層製作 GUI</gray>"
+      library: "<yellow>/ombre library</yellow> <gray>- 打開共享庫</gray>"
+      favorites: "<yellow>/ombre favorites</yellow> <gray>- 打開我的最愛</gray>"
+      my: "<yellow>/ombre my</yellow> <gray>- 查看我的漸層配置</gray>"
+      palette: "<yellow>/ombre palette</yellow> <gray>- 管理色表</gray>"
+      exclusion: "<yellow>/ombre exclusion</yellow> <gray>- 管理方塊排除</gray>"
+      stats: "<yellow>/ombre stats</yellow> <gray>- 查看統計數據</gray>"
+      admin: "<red>/ombre admin</red> <gray>- 管理員指令</gray>"
+      reload: "<red>/ombre reload</red> <gray>- 重新載入配置</gray>"
+  
+  blockcolors:
+    description: "BlockColors.app 顏色匹配工具"
+    reload-success: "<green>BlockColors 重新載入成功！</green>"
+    reload-fail: "<red>BlockColors 重新載入失敗，請查看控制台</red>"
+    not-initialized: "<red>BlockColors 功能尚未初始化完成，請稍後再試</red>"
+    cache-cleared: "<green>快取已清除！請執行 /bca reload 重新載入</green>"
+  
+  blockpalettes:
+    description: "Block Palettes 調色板瀏覽器"
+    disabled: "<red>Block Palettes 功能目前已停用</red>"
+    reload-success: "<green>✓ 已重新載入 Block Palettes 快取</green>"
+
+# GUI 相關
+gui:
+  ombre:
+    title: "漸層製作"
+    buttons:
+      name: "<yellow>命名</yellow>"
+      save: "<green>儲存</green>"
+      publish: "<aqua>發布</aqua>"
+      favorite: "<gold>收藏</gold>"
+      delete: "<red>刪除</red>"
+      clear: "<red>清除調色板</red>"
+      back: "<red>返回</red>"
+    lore:
+      save: "<gray>儲存當前漸層配置</gray>"
+      publish: "<gray>發布到共享庫</gray>"
+      favorite: "<gray>加入我的最愛</gray>"
+      delete: "<gray>刪除當前配置</gray>"
+      clear: "<gray>清除當前所有方塊</gray>"
+      back: "<gray>返回到 <gui_name></gray>"
+      name-current: "<gray>目前名稱: <yellow><name></yellow></gray>"
+      name-click: "<gray>點擊修改名稱</gray>"
+      name-set: "<gray>為漸層設定自訂名稱</gray>"
+      name-default: "<gray>未設定時將使用預設格式</gray>"
+  
+  library:
+    title: "共享庫"
+    empty: "<gray>沒有已發布的配置</gray>"
+    page-info:
+      title: "<gold>共享庫</gold>"
+      lore:
+        - "<gray>共 <count> 個配置</gray>"
+        - "<gray>第 <page> / <total> 頁</gray>"
+    buttons:
+      prev-page: "<green>上一頁</green>"
+      prev-page-lore: "<gray>第 <page> 頁</gray>"
+      next-page: "<green>下一頁</green>"
+      next-page-lore: "<gray>第 <page> 頁</gray>"
+      back: "關閉"
+      sort-time: "按時間排序"
+      sort-time-lore:
+        0: "<green>✓ 當前排序</green>"
+        1: "<gray>點擊切換</gray>"
+      sort-popular: "按熱度排序"
+      sort-popular-lore:
+        0: "<green>✓ 當前排序</green>"
+        1: "<gray>點擊切換</gray>"
+      sort-creator: "按建立者排序"
+      sort-creator-lore:
+        0: "<green>✓ 當前排序</green>"
+        1: "<gray>點擊切換</gray>"
+      filter: "篩選"
+      filter-lore:
+        - "<yellow>當前: <filter></yellow>"
+        - ""
+        - "<gray>點擊切換篩選模式:</gray>"
+        - "<gray>• 全部配置</gray>"
+        - "<gray>• 我的最愛</gray>"
+        - "<gray>• 我的創作</gray>"
+        - "<gray>• 本週熱門</gray>"
+    config:
+      display-name: "<aqua><name></aqua>"
+      creator: "<gray>建立者: <creator></gray>"
+      time: "<gray>建立時間: <time></gray>"
+      favorite-count: "<favorite_icon> 收藏數: <count>"
+      favorite-count-favorited: "<yellow><favorite_icon> 收藏數: <count></yellow>"
+      favorite-count-not-favorited: "<gray><favorite_icon> 收藏數: <count></gray>"
+      load-count: "<gray>載入次數: <count></gray>"
+      action:
+        left-click: "<green>左鍵: 載入配置</green>"
+        right-click-favorite: "<yellow>右鍵: 加入收藏</yellow>"
+        right-click-unfavorite: "<yellow>右鍵: 取消收藏</yellow>"
+    messages:
+      loaded: "<green>已載入配置: <name></green>"
+      favorited: "<green>已加入收藏</green>"
+      unfavorited: "<yellow>已取消收藏</yellow>"
+    sort:
+      recent: "<yellow>最新</yellow>"
+      popular: "<yellow>熱門</yellow>"
+      oldest: "<yellow>最舊</yellow>"
+    filter:
+      all: "全部"
+      favorites: "我的最愛"
+      my-creations: "我的創作"
+      weekly-hot: "本週熱門"
+  
+  favorites:
+    title: "我的最愛"
+    empty: "<gray>你還沒有收藏任何配置</gray>"
+    add-hint: "<gray>瀏覽共享庫來收藏配置吧！</gray>"
+    page-info: "<gold>我的最愛</gold>"
+    page-lore:
+      - "<gray>共 <count> 個收藏</gray>"
+      - "<gray>第 <page> / <total> 頁</gray>"
+    button:
+      prev-page: "<green>上一頁</green>"
+      prev-page-lore: "<gray>第 <page> 頁</gray>"
+      next-page: "<green>下一頁</green>"
+      next-page-lore: "<gray>第 <page> 頁</gray>"
+      back: "<red>返回</red>"
+      sort-time: "<yellow>按時間排序</yellow>"
+      sort-popular: "<yellow>按熱度排序</yellow>"
+      sort-creator: "<yellow>按建立者排序</yellow>"
+      clear-all: "<red>清空所有收藏</red>"
+      clear-all-lore:
+        - "<dark_red>注意：此操作不可撤銷！</dark_red>"
+        - "<gray>再次點擊確認清空</gray>"
+    config:
+      display-name: "<gold><bold><name></bold></gold>"
+      creator: "<gray>建立者: <creator></gray>"
+      time: "<gray>時間: <time></gray>"
+      favorited: "<yellow>⭐ 已收藏 (<count> 人收藏)</yellow>"
+      load-count: "<green>載入次數: <count></green>"
+      action:
+        left-click: "<dark_gray>左鍵載入配置</dark_gray>"
+        right-click: "<dark_gray>右鍵取消收藏</dark_gray>"
+    messages:
+      loaded: "<green>已載入配置: <name></green>"
+      removed: "<yellow>已從收藏中移除</yellow>"
+      clear-confirm: "<red>確定要清空所有收藏嗎？</red>"
+      clear-warning: "<yellow>這將移除 <count> 個收藏，此操作不可撤銷！</yellow>"
+      clear-hint: "<gray>使用 /ombre favorites clear confirm 確認清空</gray>"
+      cleared: "<green>已清空 <count> 個收藏</green>"
+  
+  my-gradients:
+    title: "我的漸層"
+    empty: "<gray>你還沒有儲存任何漸層配置</gray>"
+    page-info:
+      title: "我的漸層配置"
+      total: "<gray>共 <count> 個配置</gray>"
+      page: "<gray>第 <current> / <total> 頁</gray>"
+    button:
+      prev-page: "<green>上一頁</green>"
+      prev-page-lore: "<gray>第 <page> 頁</gray>"
+      next-page: "<green>下一頁</green>"
+      next-page-lore: "<gray>第 <page> 頁</gray>"
+      sort: "<aqua>排序: <mode></aqua>"
+      sort-hint: "<yellow>點擊切換排序方式</yellow>"
+      back: "<red>返回</red>"
+      back-lore: "<gray>關閉此界面</gray>"
+    sort:
+      time: "按時間"
+      time-desc: "最新的在前面"
+      name: "按名稱"
+      name-desc: "按字母順序排序"
+      popularity: "按人氣"
+      popularity-desc: "最多收藏在前面"
+    config:
+      display-name: "<aqua><name></aqua>"
+      default-name: "配置 #<number>"
+      creator: "<gray>創建者: <creator></gray>"
+      blocks: "<gray>方塊數: <count></gray>"
+      favorites: "<yellow>收藏數: <count></yellow>"
+      published: "<green>已發布</green>"
+      not-published: "<red>未發布</red>"
+      loads: "<gray>載入次數: <count></gray>"
+      action:
+        left-click: "<yellow>左鍵</yellow> <gray>載入配置</gray>"
+        shift-left-click: "<yellow>Shift+左鍵</yellow> <gray>編輯配置</gray>"
+        right-click-publish: "<yellow>右鍵</yellow> <gray>發布到共享庫</gray>"
+        right-click-unpublish: "<yellow>右鍵</yellow> <gray>取消發布</gray>"
+        shift-right-click: "<yellow>Shift+右鍵</yellow> <gray>刪除配置</gray>"
+    messages:
+      loaded: "<green>已載入配置: <name></green>"
+      edit-mode: "<yellow>進入編輯模式</yellow>"
+      published: "<green>已發布到共享庫</green>"
+      unpublished: "<yellow>已取消發布</yellow>"
+      deleted: "<red>配置已刪除</red>"
+      delete-failed: "<red>刪除失敗</red>"
+      sort-changed: "<yellow>排序方式: <mode></yellow>"
+
+# 訊息提示
+messages:
+  gradient:
+    saved: "<green>漸層配置已儲存為: <name></green>"
+    save-failed: "<red>儲存失敗</red>"
+    published: "<green>配置已發布到共享庫</green>"
+    publish-failed: "<red>發布失敗</red>"
+    publish-no-permission: "<red>你沒有發布權限</red>"
+    publish-need-save: "<red>請先儲存配置</red>"
+    deleted: "<green>配置已刪除</green>"
+    delete-failed: "<red>刪除失敗（可能沒有權限）</red>"
+    delete-no-config: "<red>沒有可刪除的配置</red>"
+    no-config: "<red>沒有可儲存的漸層配置</red>"
+    cleared: "<green>調色板已清除</green>"
+    clear-empty: "<yellow>調色板已經是空的</yellow>"
+  
+  favorite:
+    added: "<green>已加入我的最愛</green>"
+    removed: "<yellow>已從我的最愛移除</yellow>"
+    need-save: "<red>請先儲存配置</red>"
+  
+  naming:
+    current: "<gray>目前名稱: </gray><yellow><name></yellow>"
+    prompt: "<yellow>請在聊天欄輸入漸層名稱（最多32字元）</yellow>"
+    cancel: "<gray>輸入 'cancel' 取消命名</gray>"
+    cancelled: "<yellow>已取消命名</yellow>"
+    too-long: "<red>名稱過長（最多32字元）</red>"
+    duplicate: "<red>此名稱已存在</red>"
+    invalid: "<red>名稱無效</red>"
+    name-input:
+      cancelled: "<yellow>已取消命名</yellow>"
+      empty: "<red>名稱不能為空！請重新輸入或輸入 'cancel' 取消</red>"
+      too-long: "<red>名稱太長！請輸入不超過32字元的名稱或輸入 'cancel' 取消</red>"
+      success: "<green>已將漸層命名為: <yellow><name></yellow></green>"
+  
+  palette:
+    list-title: "<gold>=== 可用的色表 ===</gold>"
+    none: "<gray>沒有可用的色表</gray>"
+    entry-enabled: "<green>[✓] <name> - <description></green>"
+    entry-disabled: "<gray>[  ] <name> - <description></gray>"
+    enabled: "<green>已啟用色表: <palette></green>"
+    disabled: "<green>已停用色表: <palette></green>"
+    reset: "<green>已重設色表設定（將使用所有方塊）</green>"
+    not-found: "<red>找不到色表: <palette></red>"
+    usage: "<yellow>使用 /ombre palette enable/disable <id> 來啟用/停用色表</yellow>"
+    usage-reset: "<yellow>使用 /ombre palette reset 來重設色表設定</yellow>"
+    exclusion:
+      technical:
+        name: "技術性方塊"
+        description: "指令方塊、屏障方塊等技術性方塊"
+      unplaceable:
+        name: "無法放置的方塊"
+        description: "無法作為物品放置的特殊方塊（冰霜冰、火焰等）"
+      fluids:
+        name: "流體方塊"
+        description: "水、岩漿等流體"
+      decorative:
+        name: "裝飾性方塊"
+        description: "火把、梯子、門等裝飾性方塊"
+      plants:
+        name: "植物方塊"
+        description: "花、草、樹苗等植物"
+      redstone:
+        name: "紅石方塊"
+        description: "紅石相關元件"
+    type:
+      wool:
+        name: "羊毛"
+        description: "16 種顏色的羊毛方塊"
+      concrete:
+        name: "混凝土"
+        description: "16 種顏色的混凝土方塊"
+      terracotta:
+        name: "陶土"
+        description: "16 種顏色的陶土方塊"
+      stained-glass:
+        name: "染色玻璃"
+        description: "16 種顏色的染色玻璃"
+      natural-stone:
+        name: "自然石頭"
+        description: "各種自然石頭方塊"
+      wood:
+        name: "木頭"
+        description: "各種木頭方塊"
+  
+  exclusion:
+    list-title: "<gold>=== 方塊排除列表 ===</gold>"
+    none: "<gray>沒有可用的排除列表</gray>"
+    entry-enabled: "<green>[✓] <name> - <description></green>"
+    entry-disabled: "<gray>[  ] <name> - <description></gray>"
+    enabled: "<green>已啟用排除列表: <exclusion></green>"
+    disabled: "<green>已停用排除列表: <exclusion></green>"
+    not-found: "<red>找不到排除列表: <exclusion></red>"
+    usage: "<yellow>使用 /ombre exclusion enable/disable <id> 來啟用/停用排除列表</yellow>"
+  
+  stats:
+    title: "<gold>=== 你的統計數據 ===</gold>"
+    gradient-count: "<yellow>創建數量: <count></yellow>"
+  
+  cache:
+    title: "<gold><bold>===== BlockColors 快取資訊 =====</bold></gold>"
+    total-blocks: "<yellow>總方塊數: <white><count></white></yellow>"
+    last-update: "<yellow>最後更新: <white><date></white></yellow>"
+    version: "<yellow>快取版本: <white><version></white></yellow>"
+    stats-title: "<gold><bold>===== 顏色匹配快取統計 =====</bold></gold>"
+    hit-rate: "<yellow>命中率: <white><rate>%</white></yellow>"
+    requests: "<yellow>請求總數: <white><count></white></yellow>"
+    hits: "<yellow>命中次數: <white><count></white></yellow>"
+    misses: "<yellow>未命中次數: <white><count></white></yellow>"
+
+# 使用條款
+terms:
+  blockcolors:
+    title: "<gold><bold>===========================================</bold></gold>"
+    subtitle: "<gold><bold>  BlockColors.app 功能使用條款</bold></gold>"
+    separator: "<gold><bold>===========================================</bold></gold>"
+    line1: "<yellow>本功能基於 BlockColors.app 網站的資料。</yellow>"
+    line2: "<yellow>在使用此功能前，請先查看並同意以下網站的使用條款：</yellow>"
+    website: "<aqua><underlined>https://blockcolors.app/</underlined></aqua>"
+    data-source: "<yellow>資料來源: <aqua><underlined>https://blockcolors.app/</underlined></aqua></yellow>"
+    author: "<yellow>網站作者: <white>mcndt</white> <gray>(<aqua><underlined>https://mcndt.dev/</underlined></aqua>)</gray></yellow>"
+    accept: "<green>輸入 <white>'accept'</white> 表示您已查看並同意使用條款</green>"
+    decline: "<red>輸入 <white>'decline'</white> 拒絕並關閉</red>"
+    timeout: "<gray>(60秒內未回應將自動關閉)</gray>"
+    timeout-message: "<red>回應超時，請重新執行指令</red>"
+    accepted: "<green>你已接受使用條款，可以開始使用 BlockColors 功能</green>"
+    declined: "<red>你已拒絕使用條款</red>"
+    accepted-reminder: "<gray>請再次輸入 <yellow>/bca</yellow> 以開啟 BlockColors 功能。</gray>"
+    declined-reminder: "<gray>若之後想使用此功能，請重新輸入 <yellow>/bca</yellow> 並接受條款。</gray>"
+  
+  blockpalettes:
+    separator: "<gold>━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</gold>"
+    title: "<gold><bold>Block Palettes 使用條款與隱私政策</bold></gold>"
+    description:
+      line1: "<gray>本功能使用 Block Palettes 網站提供的公開 API</gray>"
+      line2: "<gray>來瀏覽社群創作的方塊配色方案。</gray>"
+    before-continue: "<yellow>在使用前,您需要同意以下條款:</yellow>"
+    terms:
+      number: "<white>1. <aqua><bold>Block Palettes 使用條款</bold></aqua></white>"
+      click: "<aqua><underlined>   [點擊開啟使用條款]</underlined></aqua>"
+      url: "<dark_gray>   <url></dark_gray>"
+    privacy:
+      number: "<white>2. <light_purple><bold>Block Palettes 隱私政策</bold></light_purple></white>"
+      click: "<light_purple><underlined>   [點擊開啟隱私政策]</underlined></light_purple>"
+      url: "<dark_gray>   <url></dark_gray>"
+    disclaimer: "<gray><italic>這些條款由 Block Palettes 網站制定,與本伺服器無關。</italic></gray>"
+    choice-separator: "<gray>━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</gray>"
+    choice-prompt: "<yellow><bold>請在聊天欄輸入您的選擇:</bold></yellow>"
+    choice:
+      accept: "<green><bold>  ✓ </bold></green><white>輸入 <green><bold>agree</bold></green> - <gray>同意條款並繼續</gray></white>"
+      decline: "<red><bold>  ✗ </bold></red><white>輸入 <red><bold>decline</bold></red> - <gray>拒絕條款並關閉</gray></white>"
+    response:
+      accepted:
+        title: "<green><bold>✓ 已同意 Block Palettes 使用條款與隱私政策</bold></green>"
+        message: "<gray>感謝您的同意,現在可以使用 Block Palettes 功能了!</gray>"
+      declined:
+        title: "<red><bold>✗ 您已拒絕 Block Palettes 使用條款</bold></red>"
+        message1: "<gray>您需要同意條款才能使用 Block Palettes 瀏覽功能</gray>"
+        message2: "<gray>不過您仍然可以使用伺服器的其他功能</gray>"
+      invalid:
+        title: "<red><bold>⚠ 無效的輸入</bold></red>"
+        message: "<gray>請輸入 <green><bold>agree</bold></green> 或 <red><bold>decline</bold></red></gray>"
+
+# 錯誤訊息
+errors:
+  file:
+    load-failed: "<red>無法載入檔案: <file></red>"
+    save-failed: "<red>無法儲存檔案: <file></red>"
+    create-failed: "<red>無法建立檔案: <file></red>"
+  
+  api:
+    connection-failed: "<red>無法連接到 API</red>"
+    timeout: "<red>API 請求超時</red>"
+    invalid-response: "<red>API 回應無效</red>"
+    rate-limited: "<red>請求過於頻繁，請稍後再試</red>"
+  
+  color:
+    generation-failed: "<red>顏色檔案生成失敗</red>"
+    invalid-hex: "<red>無效的 HEX 顏色代碼</red>"
+    invalid-rgb: "<red>RGB 值必須在 0-255 之間</red>"
+  
+  cache:
+    corrupted: "<red>快取檔案損壞，正在重建...</red>"
+    rebuild-failed: "<red>快取重建失敗</red>"
+  
+  config:
+    missing-key: "<red>配置缺少必要的鍵值: <key></red>"
+    invalid-value: "<red>配置值無效: <key> = <value></red>"
+
+# 物品說明
+items:
+  config:
+    creator: "<gray>創建者: <creator></gray>"
+    blocks: "<gray>方塊數: <count></gray>"
+    favorites: "<yellow>收藏數: <count></yellow>"
+    published: "<green>已發布</green>"
+    not-published: "<gray>未發布</gray>"
+    created: "<gray>創建於: <date></gray>"
+  
+  color-match:
+    similarity: "<gray>相似度: <percentage>%</gray>"
+    click-to-get: "<yellow>點擊取得方塊</yellow>"
+    shift-add-palette: "<yellow>Shift+點擊 加入調色盤</yellow>"
+
+# 方塊顏色相似度級別
+blockcolors:
+  similarity:
+    perfect: "<green>完美匹配</green>"
+    very-similar: "<green>極度相似</green>"
+    quite-similar: "<yellow>非常相似</yellow>"
+    similar: "<gold>相似</gold>"
+    not-similar: "<red>較不相似</red>"
+  
+  gui:
+    title: "BlockColors.app"
+    color-picker: "<yellow>方塊取色槽</yellow>"
+    color-picker-lore:
+      - "<gray>將方塊放入此槽以提取顏色</gray>"
+      - "<gray>再次點擊可移除方塊</gray>"
+    rgb-adjust: "RGB 調整"
+    r-plus: "<red>R +<amount></red>"
+    r-minus: "<red>R -<amount></red>"
+    g-plus: "<green>G +<amount></green>"
+    g-minus: "<green>G -<amount></green>"
+    b-plus: "<blue>B +<amount></blue>"
+    b-minus: "<blue>B -<amount></blue>"
+    current-value: "<gray>當前: <value></gray>"
+    hex-input: "<yellow>HEX 輸入</yellow>"
+    hex-input-lore: 
+      - "<gray>點擊輸入 HEX 色碼</gray>"
+      - "<gray>當前: <hex></gray>"
+    reset: "<white>重置</white>"
+    reset-lore: "<gray>重置為白色 (255, 255, 255)</gray>"
+    current-color: "<yellow>當前顏色</yellow>"
+    current-color-lore:
+      - "<gray>HEX: <hex></gray>"
+      - "<gray>RGB: <rgb></gray>"
+    filter-all: "<yellow>全部方塊</yellow>"
+    filter-building: "<yellow>建築方塊</yellow>"
+    filter-decoration: "<yellow>裝飾方塊</yellow>"
+    filter-current: "<green>✓ 當前篩選</green>"
+    filter-hint: "<gray>點擊切換</gray>"
+    my-palette: "<light_purple>我的調色盤</light_purple>"
+    my-palette-lore: "<gray>查看和管理儲存的方塊</gray>"
+    back: "<red>返回</red>"
+    back-lore: "<gray>返回主選單</gray>"
+    close: "<red>關閉</red>"
+    help: "<yellow>幫助</yellow>"
+    help-lore:
+      - "<gray>• 放入方塊到第二行第一格取色</gray>"
+      - "<gray>• 使用 RGB 按鈕微調顏色</gray>"
+      - "<gray>• 點擊 HEX 輸入精確色碼</gray>"
+      - "<gray>• 切換類別篩選找到需要的方塊</gray>"
+      - "<gray>• 左鍵拿取方塊，右鍵加入調色盤</gray>"
+    help-title: "<gold><bold>========== BlockColors 說明 ==========</bold></gold>"
+    help-content:
+      - "<yellow>使用方法:</yellow>"
+      - "<gray>- 點擊 RGB 按鈕調整顏色</gray>"
+      - "<gray>- 將方塊放入取色槽提取顏色</gray>"
+      - "<gray>- 點擊 HEX 輸入使用 HEX 色碼</gray>"
+      - "<gray>- 系統會自動顯示最相似的方塊</gray>"
+    prev-page: "<yellow>◀ 上一頁</yellow>"
+    next-page: "<yellow>下一頁 ▶</yellow>"
+    page-info: "<gray>第 <current>/<total> 頁</gray>"
+    block-info:
+      title: "<aqua><name></aqua>"
+      display-name: "<gray><name></gray>"
+      similarity: "<yellow>相似度: <percentage></yellow>"
+      hex: "<gray>HEX: <hex></gray>"
+      rgb: "<gray>RGB: <rgb></gray>"
+      left-click: "<green>左鍵</green> <gray>拿取方塊</gray>"
+      right-click: "<yellow>右鍵</yellow> <gray>加入調色盤</gray>"
+    messages:
+      reset: "<green>✓ 已重置為白色</green>"
+      obtained: "<green>✓ 已獲得 <block></green>"
+      added-palette: "<green>✓ 已加入 <block> 到調色盤</green>"
+      palette-full: "<red>調色盤已滿!</red>"
+      already-in-palette: "<red>此方塊已在調色盤中</red>"
+      color-extracted: "<green>✓ 已從 <block> 提取顏色</green>"
+      color-value: "<gray>顏色: <hex></gray>"
+    palette:
+      title: "<light_purple>我的調色盤</light_purple>"
+      back: "<yellow>返回</yellow>"
+      back-lore: "<gray>返回 BlockColors 主介面</gray>"
+      close: "<red>關閉</red>"
+      clear: "<red>清空調色盤</red>"
+      clear-lore:
+        - "<gray>點擊以移除所有儲存的方塊</gray>"
+        - "<red>警告：此操作無法復原！</red>"
+      help: "<yellow>說明</yellow>"
+      help-lore:
+        - "<gray>點擊查看調色盤提示</gray>"
+      help-title: "<gold><bold>========== 調色盤說明 ==========</bold></gold>"
+      help-lines:
+        - "<yellow>提示:</yellow>"
+        - "<gray>- 點擊方塊可將其從調色盤移除</gray>"
+        - "<gray>- 使用清空按鈕清除所有方塊</gray>"
+        - "<gray>- 最多可儲存 <max> 個方塊</gray>"
+      empty-slot-title: "<gray>空槽位</gray>"
+      empty-slot-lore: "<gray>在主介面點擊方塊以加入</gray>"
+      item-name: "<aqua><name></aqua>"
+      block-info:
+        display-name: "<gray><name></gray>"
+        hex: "<gray>HEX: <hex></gray>"
+        rgb: "<gray>RGB: <rgb></gray>"
+        remove: "<red>左鍵</red> <gray>移除</gray>"
+        take: "<yellow>右鍵</yellow> <gray>拿取方塊</gray>"
+      messages:
+        clear-empty: "<red>調色盤已經是空的</red>"
+        clear-success: "<green>✓ 已清空調色盤</green>"
+        remove-success: "<green>✓ 已移除 <block></green>"
+        remove-failed: "<red>移除失敗</red>"
+    hex-input-gui:
+      instructions:
+        - "<yellow>請輸入 HEX 色碼 (例如: #FF5733 或 FF5733)</yellow>"
+        - "<gray>完成後點擊結果槽</gray>"
+      open-failed: "<red>無法開啟 HEX 輸入介面</red>"
+      input-required: "<red>請先輸入 HEX 色碼</red>"
+      invalid-format: "<red>無效的 HEX 色碼格式</red>"
+      format-hint: "<gray>請使用格式: #RRGGBB 或 RRGGBB</gray>"
+      parse-failed: "<red>無法解析 HEX 色碼</red>"
+      set-success: "<green>✓ 已設定顏色為 <hex></green>"
+      rgb-value: "<gray>RGB: (<r>, <g>, <b>)</gray>"
+  
+  button:
+    previous-page: "<yellow>上一頁</yellow>"
+    next-page: "<yellow>下一頁</yellow>"
+    page-info: "<gray>第 <current> / <total> 頁</gray>"
+    close: "<red>關閉</red>"
+    back: "<yellow>返回</yellow>"
+
+# 時間格式
+time:
+  seconds: "<count> 秒"
+  minutes: "<count> 分鐘"
+  hours: "<count> 小時"
+  days: "<count> 天"
+  weeks: "<count> 週"
+  months: "<count> 個月"
+  years: "<count> 年"
+  ago: "<time>前"
+  just-now: "剛剛"
+
+# 數字格式
+numbers:
+  thousand: "K"
+  million: "M"
+  billion: "B"
+
+# 方塊類別名稱
+categories:
+  all: "所有方塊"
+  building: "建築方塊"
+  decoration: "裝飾方塊"
+  natural: "自然方塊"
+  functional: "功能方塊"
+
+# 色表名稱
+palettes:
+  concrete: "混凝土"
+  terracotta: "陶土"
+  wool: "羊毛"
+  stained-glass: "染色玻璃"
+  wood: "木頭"
+
+# 排除列表名稱
+exclusions:
+  transparent: "透明方塊"
+  plants: "植物方塊"
+  technical: "技術方塊"
+
+# Block Palettes 功能
+blockpalettes:
+  command:
+    player-only: "<red>此指令只能由玩家執行</red>"
+    feature-disabled: "<red>Block Palettes 功能目前已停用</red>"
+    unknown-subcommand: "<red>未知的子指令: <subcommand></red>"
+    use-help: "<gray>使用 /bp help 查看幫助</gray>"
+    no-permission: "<red>你沒有權限執行此指令</red>"
+    reload-success: "<green>✓ 已重新載入 Block Palettes 快取</green>"
+    player-not-found: "<red>找不到玩家: <player></red>"
+    cache:
+      header: "<gold>━━━━ 快取統計 ━━━━</gold>"
+      list-size: "<gray>列表快取數量: </gray><white><count></white>"
+      detail-size: "<gray>詳細快取數量: </gray><white><count></white>"
+      footer: "<gold>━━━━━━━━━━━━━━━━</gold>"
+    terms:
+      header: "<gold>━━━━ 條款資訊 ━━━━</gold>"
+      version: "<gray>當前版本: </gray><white><version></white>"
+      agreed-count: "<gray>已同意人數: </gray><white><count></white>"
+      footer: "<gold>━━━━━━━━━━━━━━━━</gold>"
+      reset-usage: "<red>用法: /bp terms reset <玩家></red>"
+      reset-success: "<green>✓ 已重置玩家 <player> 的條款同意狀態</green>"
+    favorites:
+      empty: "<yellow>你還沒有收藏任何調色板</yellow>"
+      hint: "<gray>使用 /bp 瀏覽並收藏喜歡的調色板</gray>"
+    help:
+      header: "<gold>━━━━ Block Palettes 幫助 ━━━━</gold>"
+      main: "<yellow>/bp</yellow><gray> - 開啟調色板瀏覽介面</gray>"
+      favorites: "<yellow>/bp favorites</yellow><gray> - 查看收藏的調色板</gray>"
+      reload: "<yellow>/bp reload</yellow><gray> - 重新載入快取 (需要權限)</gray>"
+      cache: "<yellow>/bp cache</yellow><gray> - 查看快取統計 (需要權限)</gray>"
+      terms: "<yellow>/bp terms</yellow><gray> - 查看條款資訊</gray>"
+      footer: "<gold>━━━━━━━━━━━━━━━━━━━━━━</gold>"
+  gui:
+    list:
+      title: "<gold><bold>方塊調色板</bold></gold>"
+      control:
+        none: "無"
+        search:
+          title: "<yellow>搜尋方塊: <search></yellow>"
+          current: "<gray>當前搜尋: </gray><white><search></white>"
+          click: "<yellow>▸ 點擊開啟搜尋</yellow>"
+        sort:
+          title: "<yellow>排序: <mode></yellow>"
+          current: "<gray>當前排序: </gray><white><mode></white>"
+          click: "<yellow>▸ 點擊切換排序</yellow>"
+        color:
+          title: "<yellow>顏色篩選: <color></yellow>"
+          current: "<gray>當前顏色: </gray><white><color></white>"
+          click: "<yellow>▸ 點擊開啟顏色選單</yellow>"
+        block:
+          title: "<yellow>方塊篩選: <block></yellow>"
+          current: "<gray>當前方塊: </gray><white><block></white>"
+          click: "<yellow>▸ 點擊開啟熱門方塊</yellow>"
+        refresh:
+          title: "<green>重新整理</green>"
+          description: "<gray>重新載入最新資料</gray>"
+          click: "<yellow>▸ 點擊重新整理</yellow>"
+        close:
+          title: "<red>關閉</red>"
+          click: "<yellow>▸ 點擊關閉介面</yellow>"
+      page:
+        prev: "<yellow>上一頁</yellow>"
+        next: "<yellow>下一頁</yellow>"
+        number: "<gray>第 <page> 頁</gray>"
+        first: "<gray>已經是第一頁</gray>"
+        last: "<gray>已經是最後一頁</gray>"
+      stats:
+        title: "<yellow>統計資訊</yellow>"
+        current-page: "<gray>當前頁面: </gray><white><page></white>"
+        total: "<gray>調色板總數: </gray><white><total></white>"
+        favorites: "<gray>我的收藏: </gray><gold><count></gold>"
+      loading:
+        title: "<yellow>載入中...</yellow>"
+        description: "<gray>正在從方塊調色板載入資料</gray>"
+      error:
+        title: "<red>載入失敗</red>"
+        retry: "<yellow>▸ 點擊重試</yellow>"
+        load-failed: "載入失敗: <error>"
+      no-results:
+        title: "<gray>找不到符合條件的調色板</gray>"
+        hint: "<gray>試試調整搜尋條件</gray>"
+      palette:
+        info:
+          title: "<aqua>資訊</aqua>"
+          id: "<gold>Palette #<id></gold>"
+          author: "<gray>作者: </gray><white><author></white>"
+          time: "<gray>時間: </gray><white><time></white>"
+          likes: "<gray>喜歡: </gray><yellow>❤ <likes></yellow>"
+          click: "<yellow>▸ 點擊複製方塊清單</yellow>"
+        favorite:
+          title: "<yellow>收藏</yellow>"
+          favorited: "<gold>已收藏</gold>"
+          id: "<gray>Palette #<id></gray>"
+          description: "<gray>將此調色板加入收藏</gray>"
+          already: "<gray>此調色板已在收藏清單中</gray>"
+          add-click: "<yellow>▸ 點擊加入收藏</yellow>"
+          remove-click: "<red>▸ 點擊移除收藏</red>"
+      copy:
+        separator: "<gray>━━━━━━━━━━━━━━━━━━━━━━</gray>"
+        title: "<gold><bold>Palette #<id></bold></gold>"
+        author: "<gray>作者: </gray><white><author></white>"
+        time: "<gray>時間: </gray><white><time></white>"
+        likes: "<gray>喜歡: </gray><yellow>❤ <likes></yellow>"
+        success: "<green>✓ 已複製方塊清單</green>"
+      sort-mode:
+        recent: "最新發布"
+        popular: "最受歡迎"
+        oldest: "最舊發布"
+        trending: "趨勢熱門"
+      messages:
+        removed: "<yellow>✓ 已從收藏中移除 Palette #<id></yellow>"
+        added: "<green>✓ 已將 Palette #<id> 加入收藏</green>"
+        full: "<red>✗ 收藏已滿 (上限 100 個)</red>"
+    color-filter:
+      title: "<gold><bold>顏色篩選</bold></gold>"
+      back: "<yellow>返回</yellow>"
+      back-lore: "<yellow>▸ 點擊返回列表</yellow>"
+      selected: "<green>✓ 當前選擇</green>"
+      click-to-select: "<yellow>▸ 點擊選擇</yellow>"
+      filter-hint: "<gray>篩選 <color> 調色板</gray>"
+      applied: "<green>✓ 已套用顏色篩選: <color></green>"
+      color:
+        all: "全部"
+        red: "紅色"
+        orange: "橙色"
+        yellow: "黃色"
+        green: "綠色"
+        blue: "藍色"
+        purple: "紫色"
+        black: "黑色"
+        white: "白色"
+    search-input:
+      title: "<gold><bold>搜尋方塊</bold></gold>"
+      info:
+        title: "<yellow>搜尋說明</yellow>"
+        description: "<gray>輸入方塊名稱進行搜尋</gray>"
+        example-title: "<yellow>範例:</yellow>"
+        example-1: "<gray>• 石頭</gray>"
+        example-2: "<gray>• 橡木</gray>"
+        example-3: "<gray>• 羊毛</gray>"
+        click: "<yellow>▸ 點擊開始搜尋</yellow>"
+      current:
+        none: "無"
+        title: "<yellow>當前搜尋</yellow>"
+        content: "<gray>搜尋內容: </gray><white><search></white>"
+      clear:
+        title: "<red>清除搜尋</red>"
+        click: "<yellow>▸ 點擊清除</yellow>"
+      back: "<yellow>返回</yellow>"
+      back-lore: "<yellow>▸ 點擊返回列表</yellow>"
+      prompt:
+        separator: "<gold>━━━━━━━━━━━━━━━━━━━━━━</gold>"
+        title: "<yellow>請在聊天欄輸入要搜尋的方塊名稱</yellow>"
+        example: "<gray>範例: stone、oak、wool</gray>"
+        cancel: "<gray>輸入 'cancel' 取消</gray>"
+      messages:
+        cancelled: "<yellow>已取消搜尋</yellow>"
+        empty: "<red>搜尋內容不能為空！</red>"
+        applied: "<green>✓ 正在搜尋: <search></green>"
+  palette:
+    unknown-author: "未知作者"
+  time:
+    unknown: "未知時間"
+    minutes-ago: "<count> 分鐘前"
+    hours-ago: "<count> 小時前"
+    days-ago: "<count> 天前"
+    months-ago: "<count> 個月前"
+    years-ago: "<count> 年前"

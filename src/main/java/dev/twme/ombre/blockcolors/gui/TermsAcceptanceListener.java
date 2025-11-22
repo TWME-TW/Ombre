@@ -6,18 +6,23 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 
+import dev.twme.ombre.Ombre;
 import dev.twme.ombre.blockcolors.BlockColorsFeature;
+import dev.twme.ombre.i18n.MessageManager;
 
 /**
  * 監聽玩家聊天以處理條款接受
  */
 public class TermsAcceptanceListener implements Listener {
     private final BlockColorsFeature feature;
+    private final MessageManager msg;
 
     public TermsAcceptanceListener(BlockColorsFeature feature) {
         this.feature = feature;
+        this.msg = ((Ombre) feature.getPlugin()).getMessageManager();
     }
 
+    @SuppressWarnings("deprecation")
     @EventHandler(priority = EventPriority.LOWEST)
     public void onPlayerChat(AsyncPlayerChatEvent event) {
         Player player = event.getPlayer();
@@ -35,16 +40,16 @@ public class TermsAcceptanceListener implements Listener {
             feature.getTermsTracker().acceptTerms(player.getUniqueId());
             feature.removePendingTermsAcceptance(player.getUniqueId());
             
-            player.sendMessage("§a✓ 感謝您的同意！");
-            player.sendMessage("§7請再次執行 §e/bca §7開啟功能");
+            msg.sendMessage(player, "terms.blockcolors.accepted");
+            msg.sendMessage(player, "terms.blockcolors.accepted-reminder");
             
         } else if (message.equals("decline")) {
             // 拒絕條款
             event.setCancelled(true);
             feature.removePendingTermsAcceptance(player.getUniqueId());
             
-            player.sendMessage("§c您已拒絕使用條款");
-            player.sendMessage("§7若要使用此功能，請重新執行 §e/bca §7並接受條款");
+            msg.sendMessage(player, "terms.blockcolors.declined");
+            msg.sendMessage(player, "terms.blockcolors.declined-reminder");
         }
     }
 }
