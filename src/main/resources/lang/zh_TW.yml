@@ -458,6 +458,8 @@ blockcolors:
       - "<gray>當前: <hex></gray>"
     reset: "<white>重置</white>"
     reset-lore: "<gray>重置為白色 (255, 255, 255)</gray>"
+    random: "<light_purple>隨機顏色</light_purple>"
+    random-lore: "<gray>產生隨機顏色</gray>"
     current-color: "<yellow>當前顏色</yellow>"
     current-color-lore:
       - "<gray>HEX: <hex></gray>"
@@ -499,6 +501,7 @@ blockcolors:
       right-click: "<yellow>右鍵</yellow> <gray>加入調色盤</gray>"
     messages:
       reset: "<green>✓ 已重置為白色</green>"
+      randomized: "<green>✓ 隨機產生顏色: <hex></green>"
       obtained: "<green>✓ 已獲得 <block></green>"
       added-palette: "<green>✓ 已加入 <block> 到調色盤</green>"
       palette-full: "<red>調色盤已滿!</red>"
