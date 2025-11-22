@@ -8,6 +8,7 @@ import org.bukkit.Material;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.LeatherArmorMeta;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
@@ -176,6 +177,42 @@ public class GuiUtils {
     public static ItemStack createColoredPane(int rgb, Component displayName, List<Component> lore) {
         Material paneMaterial = getClosestGlassPane(rgb);
         return createItem(paneMaterial, displayName, lore);
+    }
+
+    /**
+     * 建立染色皮革（用於顯示顏色）
+     * 
+     * @param rgb RGB 顏色值
+     * @param displayName 顯示名稱 Component
+     * @param lore 描述文字 Component List
+     * @return ItemStack
+     */
+    public static ItemStack createColoredLeather(int rgb, Component displayName, List<Component> lore) {
+        ItemStack item = new ItemStack(Material.LEATHER_CHESTPLATE);
+        ItemMeta meta = item.getItemMeta();
+        
+        if (meta instanceof LeatherArmorMeta) {
+            LeatherArmorMeta leatherMeta = (LeatherArmorMeta) meta;
+            
+            // 設置顏色
+            int red = (rgb >> 16) & 0xFF;
+            int green = (rgb >> 8) & 0xFF;
+            int blue = rgb & 0xFF;
+            leatherMeta.setColor(org.bukkit.Color.fromRGB(red, green, blue));
+            
+            // 設置名稱和 lore
+            leatherMeta.displayName(displayName);
+            if (lore != null && !lore.isEmpty()) {
+                leatherMeta.lore(lore);
+            }
+            
+            // 隱藏所有標籤
+            leatherMeta.addItemFlags(ItemFlag.values());
+            
+            item.setItemMeta(leatherMeta);
+        }
+        
+        return item;
     }
 
     /**

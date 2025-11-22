@@ -226,7 +226,7 @@ public class BlockColorsGUI implements InventoryHolder {
         placeholders.put("hex", hex);
         placeholders.put("rgb", rgbStr);
         
-        inventory.setItem(SLOT_CURRENT_COLOR, GuiUtils.createColoredPane(
+        inventory.setItem(SLOT_CURRENT_COLOR, GuiUtils.createColoredLeather(
             rgb,
             msg.getComponent("blockcolors.gui.current-color", player),
             msg.getComponentList("blockcolors.gui.current-color-lore", player, placeholders)
