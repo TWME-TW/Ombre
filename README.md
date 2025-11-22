@@ -136,58 +136,6 @@ The plugin uses sophisticated algorithms to calculate smooth color transitions b
 `/bp help` - Display help information
 - Permission: `ombre.blockpalettes.use`
 
-### Configuration
-
-The main configuration file is `config.yml`:
-
-```yaml
-# Plugin Settings
-settings:
-  max-gradients-per-player: -1  # Maximum gradients per player (-1 = unlimited)
-  
-  gradient:
-    min-blocks: 2                # Minimum blocks required for gradient
-    ignore-transparent: false    # Ignore transparent blocks
-    ignore-same-color: true      # Ignore blocks with same color
-    block-selection-mode: all    # Block selection mode: all/colorful/natural
-  
-  prevent-pickup-when-full: true # Prevent block pickup when inventory is full
-  language: en_US                # Default language
-
-# BlockColors Feature
-blockcolors:
-  cache:
-    expiry-time: 604800000       # Cache expiry (7 days in milliseconds)
-    auto-update-on-startup: true
-  
-  api:
-    url: "https://blockcolors.app/assets/color_data.json"
-    timeout: 15
-    retry-count: 3
-  
-  matching:
-    default-results: 18          # Number of results to display
-    min-similarity: 30           # Minimum similarity threshold (0-100)
-    use-delta-e-2000: true       # Use Delta E 2000 algorithm
-  
-  gui:
-    rgb-step: 10                 # RGB adjustment step
-    blocks-per-page: 18          # Blocks per page
-    max-palette-size: 18         # Maximum palette size
-
-# Block Palettes Feature
-block-palettes:
-  enabled: true                  # Enable Block Palettes feature
-  cache-duration: 300            # Cache duration in seconds
-  palettes-per-page: 20          # Palettes per page
-  api-timeout: 10000             # API timeout in milliseconds
-  default-sort: "recent"         # Default sort: recent/popular/oldest/trending
-  enable-favorites: true
-  max-favorites: 100             # Maximum favorites per player
-```
-
-Each feature has its own configuration section for fine-tuned control.
-
 ### How It Works
 
 #### Gradient Algorithm
@@ -459,58 +407,6 @@ Ombre 是一個全面性的 Minecraft 伺服器端插件，提供先進的顏色
 
 `/bp help` - 顯示幫助資訊
 - 權限：`ombre.blockpalettes.use`
-
-### 配置
-
-主要配置檔案為 `config.yml`：
-
-```yaml
-# 插件設定
-settings:
-  max-gradients-per-player: -1  # 每位玩家最大漸層數量（-1 = 無限）
-  
-  gradient:
-    min-blocks: 2                # 漸層所需最少方塊數量
-    ignore-transparent: false    # 忽略透明方塊
-    ignore-same-color: true      # 忽略相同顏色的方塊
-    block-selection-mode: all    # 方塊選擇模式：all/colorful/natural
-  
-  prevent-pickup-when-full: true # 背包滿時防止拾取方塊
-  language: en_US                # 預設語言
-
-# BlockColors 功能
-blockcolors:
-  cache:
-    expiry-time: 604800000       # 快取過期時間（7 天，單位毫秒）
-    auto-update-on-startup: true
-  
-  api:
-    url: "https://blockcolors.app/assets/color_data.json"
-    timeout: 15
-    retry-count: 3
-  
-  matching:
-    default-results: 18          # 顯示的結果數量
-    min-similarity: 30           # 最小相似度門檻（0-100）
-    use-delta-e-2000: true       # 使用 Delta E 2000 演算法
-  
-  gui:
-    rgb-step: 10                 # RGB 調整步長
-    blocks-per-page: 18          # 每頁方塊數量
-    max-palette-size: 18         # 最大調色板大小
-
-# Block Palettes 功能
-block-palettes:
-  enabled: true                  # 啟用 Block Palettes 功能
-  cache-duration: 300            # 快取持續時間（秒）
-  palettes-per-page: 20          # 每頁調色板數量
-  api-timeout: 10000             # API 逾時時間（毫秒）
-  default-sort: "recent"         # 預設排序：recent/popular/oldest/trending
-  enable-favorites: true
-  max-favorites: 100             # 每位玩家最大收藏數量
-```
-
-每個功能都有自己的配置區段以進行精細控制。
 
 ### 運作原理
 
