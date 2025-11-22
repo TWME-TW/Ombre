@@ -1,7 +1,7 @@
 name: Ombre
 version: '1.0.0'
 main: dev.twme.ombre.Ombre
-api-version: '1.21'
+api-version: '1.13'
 authors: [ TWME-TW ]
 description: Allows players to create colored gradient block effects through an interactive GUI
 website: https://github.com/TWME-TW/Ombre
