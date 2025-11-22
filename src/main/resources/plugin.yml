@@ -1,5 +1,5 @@
 name: Ombre
-version: '1.0.0'
+version: '${project.version}'
 main: dev.twme.ombre.Ombre
 api-version: '1.13'
 authors: [ TWME-TW ]
